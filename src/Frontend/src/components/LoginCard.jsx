@@ -3,7 +3,7 @@ import HeaderLogin from "./Header/HeaderLogin";
 function LoginCard() {
   return (
 
-    <main className="w-full flex justify-center flex-col gap-20">
+    <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50">
       <HeaderLogin />
 
       <div className="flex justify-center">
@@ -54,11 +54,11 @@ function LoginCard() {
           <div className="my-6 h-px w-full bg-slate-100" />
           <button type="button" className="w-full rounded-lg border border-emerald-700 py-3 text-sm font-semibold text-emerald-800 hover:scale-105 hover:transition hover:duration-30">Voltar à loja</button>
 
-          <footer className="relative z-10 py-6 text-center text-xs text-slate-400">
-            © 2024 QuimicStore. Todos os direitos reservados.
-          </footer>
         </div>
       </div>
+          <footer className="bg-gray-200 relative z-10 py-6 text-center text-xs text-slate-600">
+            © 2024 QuimicStore. Todos os direitos reservados.
+          </footer>
     </main>
   );
 }

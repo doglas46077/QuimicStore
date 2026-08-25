@@ -5,11 +5,13 @@ import Layers from "./components/Layers";
 function App() {
     return (
         <>
-    <Layers/>
-      
+        <div className="bg-olive-50">
+       <Layers/>
+
        <SectionCatalogo/>
        
        <LoginCard/>
+        </div>
     </>
   )
 }
