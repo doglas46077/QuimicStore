@@ -1,16 +1,15 @@
-import HeaderLogin from "./components/Header/HeaderLogin";
+import LoginCard from "./components/LoginCard"
 import SectionCatalogo from "./components/SectionCatalogo";
 import Layers from "./components/Layers";
 
 function App() {
     return (
         <>
+    <Layers/>
       
        <SectionCatalogo/>
        
-      <HeaderLogin/>
-    
-    <Layers/>
+       <LoginCard/>
     </>
   )
 }
