@@ -4,9 +4,13 @@ import { Widget } from 'reicon-react';
 import { Droplet } from 'reicon-react';
 import { Leaf } from 'reicon-react';
 import { Wand3 } from 'reicon-react';
+import Footer from "./FooterCatalogo"
+import HeaderCatalogo from './Header/HeaderCatalogo';
 
-export default function Section() {
+export default function SectionCatalogo() {
     return (
+        <>
+        <HeaderCatalogo />
         <div className="flex flex-col gap-5 items-center mt-4  min-h-screen bg-olive-100">
             <header className="flex flex-col justify-center items-baseline bg-green-900  rounded-xl w-[80%] h-30">
                 <div className="flex flex-col ml-8 gap-1 font-sans">
@@ -194,5 +198,7 @@ export default function Section() {
             </section>
         
         </div>
+        <Footer/>
+        </>
     )
 }

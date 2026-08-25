@@ -1,5 +1,13 @@
-function Cardslinks() {
+import Banner from "./BannerLayers"
+import Comunicados from "./ComunicadosLayers"
+import Sidebar from "./SidebarLayers"
+
+function Layers() {
     return (
+        <main className="flex">
+        <Sidebar/>
+    <div className="flex-col">
+    <Banner/>
         <section className="mt-6">
             <h2 className="text-base font-bold text-[#434e5b]">Links Rápidos</h2>
             <p className="text-sm text-gray-500">Acesse os principais links rapidamente</p>
@@ -46,7 +54,10 @@ function Cardslinks() {
 
             </div>
         </section>
+        <Comunicados/>
+        </div>
+        </main>
     )
 }
 
-export default Cardslinks
+export default Layers
