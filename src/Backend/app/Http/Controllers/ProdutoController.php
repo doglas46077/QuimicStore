@@ -64,5 +64,74 @@ class ProdutoController extends Controller
             "status" => true,
             "mensagem" => "Produto encontrado com sucesso" . $resultados
         ]);
-    }
+
+// ! ================================================================================================================
+// ! Função de Manutenção dos Produtos criado por Gabriel
+// ! ================================================================================================================
+
+$produto->update($validatedData);
+
 }
+
+
+// função responsável por conseguir alterar as informações do produto
+
+public function update(Request $request) {
+
+
+// altera o produto achado pelo ID
+
+$produto = Produto::find($id);
+
+// Verifica se o produto já foi ou não registrado no BD
+
+if(!$produto) {
+    return response()->json([
+        "mensagem"=> "Produto não encontrado"
+    ], 404);
+}
+ 
+// Valida se os produtos ja foram ou não registrados e fica disponível para os atualizar
+
+$validatedData = $request->validate([
+    'nome_produto'       => 'required|string|max:120',
+    'descricao'          => 'nullable|string|max:500',
+    'valor_produto'      => 'required|numeric',
+    'quantidade_estoque' => 'required|integer',
+    'id_categorias'      => 'nullable|exists:categorias,id_categoria',
+]);
+
+// O comando update faz a atualização no BD
+
+$produto->update($validatedData);
+
+// Envia a mensagem de atualização
+
+return response()->json([
+    "mensagem"=>"Produto atualizado com sucesso!",
+    "produto"=>$produto,
+], 201);
+
+  }
+
+//   Função para deletar um produto pelo ID dele
+public function destroy($id){
+    $produto = Produto::find($id);
+
+    if(!$produto) {
+        return response()->json([
+            "mensagem" => "produto não encontrado"
+        ], 404);
+    }
+
+// O comando update faz a remoção no BD
+    $produto->delete();
+
+    return response()->json([
+        "mensagem"=> "Produto foi removido com sucesso!",
+    ], 201);
+}
+
+}
+
+    

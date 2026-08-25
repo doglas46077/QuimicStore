@@ -25,4 +25,8 @@ class CompradorController extends Controller
   ],201);
 
     }
+
+    public function delete($id) {
+      
+    }
 }
