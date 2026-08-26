@@ -42,6 +42,7 @@ function Layers() {
                     </div>
                 </div>
 
+                <button>
                 <div className="w-48 overflow-hidden rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200">
                     <div className="flex h-20 items-center justify-center bg-slate-100">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4oOhMadrxyexifZta8jUVhYZz--jGt3E9U57Tws2hvw&s=10" alt="" className="h-12 w-12 object-contain" /></div>
@@ -50,6 +51,7 @@ function Layers() {
                         <p className="text-xs text-gray-500">fiec.com.br</p>
                     </div>
                 </div>
+                </button>
 
 
             </div>
