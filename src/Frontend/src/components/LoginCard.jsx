@@ -43,16 +43,20 @@ function LoginCard() {
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
             <button
               type="submit"
-              className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-30">
+              className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300">
               Entrar
             </button>
           </form>
 
-          <button className="text-sm text-emerald-700 underline w-full text-center hover:scale-105 hover:transition hover:duration-30 ">
+          <button className="text-sm text-emerald-700 underline w-full text-center hover:transition hover:duration-100 hover:text-blue-800">
             Esqueci minha senha
           </button>
           <div className="my-6 h-px w-full bg-slate-100" />
-          <button type="button" className="w-full rounded-lg border border-emerald-700 py-3 text-sm font-semibold text-emerald-800 hover:scale-105 hover:transition hover:duration-30">Voltar à loja</button>
+          <button 
+            type="button" 
+            className="w-full rounded-lg border border-emerald-700 py-3 text-sm font-semibold text-emerald-800 hover:scale-105 hover:transition hover:duration-300 hover:bg-emerald-800 hover:text-white">
+            Voltar à loja
+          </button>
 
         </div>
       </div>

@@ -5,7 +5,7 @@ import Layers from "./components/Layers";
 function App() {
     return (
         <>
-        <div className="bg-olive-50">
+        <div className="bg-olive-50 font-bold">
        <Layers/>
 
        <SectionCatalogo/>
