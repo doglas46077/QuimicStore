@@ -6,7 +6,7 @@ function LoginCard() {
     <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50">
       <HeaderLogin />
 
-      <div className="flex justify-center">
+      <div className="flex flex-1 justify-center">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 text-2xl font-bold">
