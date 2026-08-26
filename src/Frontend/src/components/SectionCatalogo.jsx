@@ -5,13 +5,13 @@ import { Droplet } from 'reicon-react';
 import { Leaf } from 'reicon-react';
 import { Wand3 } from 'reicon-react';
 import Footer from "./FooterCatalogo"
-import HeaderCatalogo from './Header/HeaderCatalogo';
+import HeaderLogin from './Header/HeaderLogin';
 
 export default function SectionCatalogo() {
     return (
         <>
-        <HeaderCatalogo />
-        <div className="flex flex-col gap-5 items-center mt-4  min-h-screen bg-olive-100">
+        <HeaderLogin />
+        <div className="flex flex-col gap-5 items-center mt-4  min-h-screen bg-olive-50">
             <header className="flex flex-col justify-center items-baseline bg-green-900  rounded-xl w-[80%] h-30">
                 <div className="flex flex-col ml-8 gap-1 font-sans">
                     <p className="flex justify-baseline text-green-400">FÁBRICA ESCOLA - FIEC</p>
@@ -23,7 +23,7 @@ export default function SectionCatalogo() {
             </header>
             
             <section className="flex bg-white rounded-xl w-[80%] h-10 items-center shadow">
-                <button className="flex w-10 h-10 items-center justify-center"><Search4 size={24} /></button>
+                <button className="flex w-10 h-10 items-center justify-center hover:text-green-600" type='submit'><Search4 size={24} /></button>
                 <input className="focus:outline-none focus:ring-0" type="text" placeholder="Buscar Produto..."/>
             </section>
 

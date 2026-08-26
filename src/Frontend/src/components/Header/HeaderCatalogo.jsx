@@ -3,7 +3,7 @@ import { User } from 'reicon-react';
 
 export default function HeaderCatalogo() {
     return(
-        <div className='flex bg-green-950'>
+        <div className='flex items-center justify-between bg-emerald-950 h-12 text-white'>
             <img src="logo.png" alt="" />
             <div className="flex gap-9 border-r-9 border-green-950 items-center">
                 <p className="flex justify-center text-center">Olá, usuario</p>

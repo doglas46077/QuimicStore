@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('avaliacoes', function (Blueprint $table) {
             $table->id('id_avaliacao');
             $table->foreignId('id_produto')->constrained('produtos', 'id_produto')->onDelete('cascade');
-            $table->foreignId('id_comprador')->constrained('compradores', 'id_comprador')->onDelete('cascade');
+            $table->foreignId('id_login')->constrained('logins', 'id_login')->onDelete('cascade');
             $table->tinyInteger('nota');
             $table->string('comentario', 500)->nullable();
             $table->enum('status_moderacao', ['pendente', 'aprovado', 'reprovado'])->default('pendente');
