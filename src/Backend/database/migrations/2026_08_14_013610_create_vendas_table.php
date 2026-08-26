@@ -17,7 +17,7 @@ return new class extends Migration
         $table->enum('forma_pagamento', ['pix', 'dinheiro']);
         $table->enum('status', ['processando', 'confirmado', 'aguardando_retirada', 'cancelado'])->default('processando');
         $table->dateTime('data_atualizacao_status')->nullable();
-        $table->foreignId('id_comprador')->constrained('compradores', 'id_comprador');
+        $table->foreignId('id_login')->constrained('logins', 'id_login');
         $table->foreignId('id_login_estagiario')->nullable()->constrained('logins', 'id_login');
         $table->timestamps();
         });
