@@ -7,7 +7,7 @@ function HeaderLogin() {
       </div>
       
       <div className="flex items-center gap-4">
-        <span className="text-sm text-white/90">Olá, Vitor</span>
+        <span className="text-sm text-white/90">Olá, Usuário</span>
  
         <div aria-disabled="true" className="pointer-events-none relative">
           <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth="2">

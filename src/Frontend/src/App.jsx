@@ -1,6 +1,7 @@
 import LoginCard from "./components/LoginCard"
 import SectionCatalogo from "./components/SectionCatalogo";
 import Layers from "./components/Layers";
+import SectionPedidoStatus from "./components/SectionPedidoStatus";
 
 function App() {
     return (
@@ -11,6 +12,8 @@ function App() {
        <SectionCatalogo/>
        
        <LoginCard/>
+
+       <SectionPedidoStatus/>
         </div>
     </>
   )

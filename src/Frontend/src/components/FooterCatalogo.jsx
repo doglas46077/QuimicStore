@@ -3,7 +3,7 @@ import { CartLarge5 } from 'reicon-react';
 import { ClipboardList } from 'reicon-react';
 import { Gear } from 'reicon-react';
 
-export default function Footer() {
+export default function FooterCatalogo() {
     return (
         <footer className="h-20 bg-white mt-10">
             <div className="flex h-full justify-center items-center gap-[20%]">
