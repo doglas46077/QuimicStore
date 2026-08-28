@@ -30,6 +30,6 @@ Route::get('/buscar-produtos', [ProdutoController::class, 'buscar']);
 Route::prefix('produtos')->controller(ProdutoController::class)->group(function () {
 Route::get('/', 'index');
 Route::post('/', 'store');
-Route::put('/{$id}', 'update');
-Route::delete('/${id}', 'destroy');
+Route::put('/{id}', 'update');
+Route::delete('/{id}', 'destroy');
 });

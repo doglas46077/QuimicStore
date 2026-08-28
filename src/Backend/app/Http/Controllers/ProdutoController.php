@@ -15,7 +15,8 @@ class ProdutoController extends Controller
     {
         $validatedData = $request->validate([
             'nome_produto'       => 'required|string|max:120',
-            'descricao'          => 'nullable|string|max:500',
+            'descricao'          => 'nullable|string|max:255',
+            'imagem'             => 'nullable|string|max:1000',
             'valor_produto'      => 'required|numeric',
             'quantidade_estoque' => 'required|integer',
             'id_categorias'      => 'nullable|exists:categorias,id_categoria',
@@ -96,6 +97,7 @@ if(!$produto) {
 $validatedData = $request->validate([
     'nome_produto'       => 'required|string|max:120',
     'descricao'          => 'nullable|string|max:500',
+    'imagem'             => 'nullable|string|max:1000',
     'valor_produto'      => 'required|numeric',
     'quantidade_estoque' => 'required|integer',
     'id_categorias'      => 'nullable|exists:categorias,id_categoria',
