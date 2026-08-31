@@ -1,29 +1,11 @@
-import { CartLarge5 } from 'reicon-react';
-import { User } from 'reicon-react';
-
-function Header() {
+function HeaderLogin() {
   return (
     <header className="flex items-center justify-between gap-6 bg-emerald-950 px-6 py-3">
       <div className="flex items-center gap-2 text-lg font-bold">
         <span className="text-white">Quimic</span>
         <span className="text-amber-400">Store</span>
       </div>
-
-      <img src="logo.png" alt="" />
-            <div className="flex gap-9 border-r-9 border-green-950 items-center">
-                <p className="flex justify-center text-center">Olá, usuario</p>
-                <div className="flex gap-4 items-center">
-                    <CartLarge5 size={34} />
-                    <div className="flex justify-center bg-green-200 rounded-full w-10 h-10 items-center text-black">
-                        <User size={30} />
-                    </div>
-
-                    <img src="perfil.jpg" alt="" className="rounded-full"/>
-                </div>
-            </div>
- 
       
- 
       <div className="flex items-center gap-4">
         <span className="text-sm text-white/90">Olá, Vitor</span>
  
@@ -51,4 +33,4 @@ function Header() {
     </header>
   );
 }
-export default Header;
+export default HeaderLogin;
