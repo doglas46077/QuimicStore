@@ -1,5 +1,13 @@
-function Cardslinks() {
+import Banner from "./BannerLayers"
+import Comunicados from "./ComunicadosLayers"
+import Sidebar from "./SidebarLayers"
+
+function Layers() {
     return (
+        <main className="flex">
+        <Sidebar/>
+    <div className="flex-col">
+    <Banner/>
         <section className="mt-6">
             <h2 className="text-base font-bold text-[#434e5b]">Links Rápidos</h2>
             <p className="text-sm text-gray-500">Acesse os principais links rapidamente</p>
@@ -34,6 +42,7 @@ function Cardslinks() {
                     </div>
                 </div>
 
+                <button>
                 <div className="w-48 overflow-hidden rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200">
                     <div className="flex h-20 items-center justify-center bg-slate-100">
                         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4oOhMadrxyexifZta8jUVhYZz--jGt3E9U57Tws2hvw&s=10" alt="" className="h-12 w-12 object-contain" /></div>
@@ -42,11 +51,15 @@ function Cardslinks() {
                         <p className="text-xs text-gray-500">fiec.com.br</p>
                     </div>
                 </div>
+                </button>
 
 
             </div>
         </section>
+        <Comunicados/>
+        </div>
+        </main>
     )
 }
 
-export default Cardslinks
+export default Layers
