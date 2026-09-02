@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\VendaController;
 
-Route::post('/produtos', [ProdutoController::class, 'store']);
 Route::post('/avaliacao', [AvaliacaoController::class, 'store']);
 Route::post('/comprador', [CompradorController::class, 'store']);
 Route::post('/categoria', [CategoriaController::class, 'store']);
@@ -25,3 +24,12 @@ Route::post('/login', [LoginController::class, 'login']);
 
 
 Route::get('/buscar-produtos', [ProdutoController::class, 'buscar']);
+
+// Route::profix organiza aos caminhos deixando mais limpo
+
+Route::prefix('produtos')->controller(ProdutoController::class)->group(function () {
+Route::get('/', 'index');
+Route::post('/', 'store');
+Route::put('/{id}', 'update');
+Route::delete('/{id}', 'destroy');
+});

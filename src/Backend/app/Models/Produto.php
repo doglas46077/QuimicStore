@@ -29,4 +29,5 @@ class Produto extends Model
     {
         return $this->hasMany(Avaliacao::class, 'id_produtos', 'id_produto');
     }
+
 }
