@@ -1,27 +1,60 @@
 <?php
 
-use App\Http\Controllers\AvaliacaoController;
-use App\Http\Controllers\CategoriaController;
-use App\Http\Controllers\CompradorController;
-use App\Http\Controllers\LayersController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\PagamentoController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProdutoController;
-use App\Http\Controllers\VendaController;
 
-Route::post('/produtos', [ProdutoController::class, 'store']);
-Route::post('/avaliacao', [AvaliacaoController::class, 'store']);
-Route::post('/comprador', [CompradorController::class, 'store']);
-Route::post('/categoria', [CategoriaController::class, 'store']);
-Route::post('/pagamento', [PagamentoController::class, 'store']);
-Route::post('/venda', [VendaController::class, 'store']);
-Route::post('/layers/auth', [LayersController::class, 'autenticar']);
-
-Route::post('/login', [LoginController::class, 'login']);
-// Route::post('/login') => Crie uma porta do tipo Post que é acessada no navegador. Exemplo: [seusite.com/api/login]
-// LoginController::class => Chama quem está dentro da classe 'loginController' que no caso é o 'login'
-// 'login' => Chama a função, ativando-a
+// ==========================================================================
+// ROTA DE LOGIN
+// ==========================================================================
+Route::prefix('/login')->group(function () {
+    Route::post('/', [LoginController::class, 'validarLogin']);
+});
 
 
-Route::get('/buscar-produtos', [ProdutoController::class, 'buscar']);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // use App\Http\Controllers\AvaliacaoController;
+    // use App\Http\Controllers\CategoriaController;
+    // use App\Http\Controllers\CompradorController;
+    // use App\Http\Controllers\LayersController;
+    // use App\Http\Controllers\PagamentoController;
+    // use App\Http\Controllers\ProdutoController;
+    // use App\Http\Controllers\VendaController;
+
+
+    // Route::post('/produtos', [ProdutoController::class, 'store']);
+    // Route::post('/avaliacao', [AvaliacaoController::class, 'store']);
+    // Route::post('/comprador', [CompradorController::class, 'store']);
+    // Route::post('/categoria', [CategoriaController::class, 'store']);
+    // Route::post('/pagamento', [PagamentoController::class, 'store']);
+    // Route::post('/venda', [VendaController::class, 'store']);
+    // Route::post('/layers/auth', [LayersController::class, 'autenticar']);
+    
+    // Route::post('/login', [LoginController::class, 'login']);
+    // // Route::post('/login') => Crie uma porta do tipo Post que é acessada no navegador. Exemplo: [seusite.com/api/login]
+    // // LoginController::class => Chama quem está dentro da classe 'loginController' que no caso é o 'login'
+    // // 'login' => Chama a função, ativando-a
+    
+    
+    // Route::get('/buscar-produtos', [ProdutoController::class, 'buscar']);

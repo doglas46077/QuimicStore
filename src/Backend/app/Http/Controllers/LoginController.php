@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Login;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +23,7 @@ class LoginController extends Controller
     // public => A função pública pode ser utilizada em outras partes do sistema (outros arquivos)
     // $request => É o envelope com os dados que o front end mandou
     // Request => Vem antes para avisar ao php que a variavel é do tipo de requisição web
-    public function login(Request $request) {
+    public function validarLogin(Request $request) {
         
         
 
@@ -35,10 +35,10 @@ class LoginController extends Controller
         ]);
 
 
-        // Login:: => Chama o model, os dois pontos, serve para "importar" o model, sem precisar criar ele antes
+        // usuario => Chama o model, os dois pontos, serve para "importar" o model, sem precisar criar ele antes
         // where('email', $request->email) => Buscar onde a coluna email, seja igual ao e-mail que veio do envolope $request
         // Firts => Pega apenas o primeiro registro que encontrar
-        $usuario = Login::where('email', $request->email)->first();
+        $usuario = Usuario::where('email', $request->email)->first();
 
         
         
@@ -54,8 +54,10 @@ class LoginController extends Controller
             'Usuário' => [
                 'nome' => $usuario->nome,
                 'email' => $usuario->email,
-                'tipo' => $usuario->tipo // Front vai usar isto para saber se é estagiario ou professor
+                'nivel_acesso' => $usuario->nivel_acesso
             ]
         ]);
     }
 }
+
+
