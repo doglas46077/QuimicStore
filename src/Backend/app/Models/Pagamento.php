@@ -7,18 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Pagamento extends Model
 {
     protected $table = 'pagamentos';
-    protected $primaryKey = 'id_pagamento';
 
     protected $fillable = [
-        'id_venda',
-        'status_pagamento',
-        'comprovante',
-        'data_confirmacao',
-        'descricao'
+        'pedido_id',
+        'metodo',
+        'status',
+        'valor_pago',
+        'data_pagamento'
     ];
 
 
-    public function venda(){
-        return $this->belongsTo(Venda::class, 'vendas', 'id_venda');
+    public function pedido(){
+        return $this->belongsTo(Pedido::class, 'pedido_id');
     }
 }

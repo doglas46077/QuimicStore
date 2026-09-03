@@ -7,20 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Categoria extends Model
 {
     protected $table = 'categorias';
-    protected $primaryKey = 'id_categoria';
 
     protected $fillable = [
         'nome',
-        'id_categoria_pai',
+        'descricao'
     ];
 
-    public function subcategoria()
+    public function produtos()
     {
-        return $this->hasMany(Categoria::class, 'id_categoria_pai', 'id_categoria');
+        // Nao precisa coloca o id_categoria, pois, como se trata apenas da própria categoria, o laravel ja consegue identificar
+        return $this->hasMany(Produto::class, 'categoria_id');
     }
 
-    public function categoriaPai()
-    {
-        return $this->hasMany(Categoria::class, 'id_categoria_pai', 'id_categoria');
-    }
 }
