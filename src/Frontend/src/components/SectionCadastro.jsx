@@ -1,9 +1,8 @@
 import HeaderLogin from "./Header/HeaderLogin";
 
-function LoginCard() {
-  return (
-
-    <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50">
+function SectionCadastro () {
+    return (
+        <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50">
       <HeaderLogin />
 
       <div className="flex flex-1 justify-center">
@@ -21,6 +20,17 @@ function LoginCard() {
             Acesso restrito para professores e administradores da instituição.
           </div>
           <form className="mt-6">
+             <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
+              Digite seu Nome
+            </label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              placeholder="Digite seu nome"
+              required
+              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
               E-mail
             </label>
@@ -32,7 +42,7 @@ function LoginCard() {
               required
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
             <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
-              Senha
+              Crie sua Senha
             </label>
             <input
               type="password"
@@ -41,16 +51,23 @@ function LoginCard() {
               placeholder="Digite sua senha"
               required
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+               <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
+              Confirme sua Senha
+            </label>
+            <input
+              type="password"
+              id="senha"
+              name="senha"
+              placeholder="Confirme sua senha"
+              required
+              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
             <button
               type="submit"
               className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300">
-              Entrar
+              Cadastrar
             </button>
           </form>
 
-          <button className="text-sm text-emerald-700 underline w-full text-center hover:transition hover:duration-100 hover:text-blue-800">
-            Esqueci minha senha
-          </button>
           <div className="my-6 h-px w-full bg-slate-100" />
           <button 
             type="button" 
@@ -67,4 +84,4 @@ function LoginCard() {
   );
 }
 
-export default LoginCard;
+export default SectionCadastro

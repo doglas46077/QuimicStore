@@ -1,6 +1,6 @@
 import HeaderLogin from "./Header/HeaderLogin"
 
-function PrincipalCarrinho() {
+function SectionCarrinho() {
     return(
         <>
         <HeaderLogin/>
@@ -11,4 +11,4 @@ function PrincipalCarrinho() {
     )
 }
 
-export default PrincipalCarrinho
+export default SectionCarrinho

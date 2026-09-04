@@ -1,8 +1,8 @@
-import HeaderPedido from "./Header/HeaderPedido";
 import FooterCatalogo from "./FooterCatalogo";
 import { ClipboardList } from 'reicon-react';
 import { Calendar } from 'reicon-react';
 import { AngleRight } from 'reicon-react';
+import HeaderLogin from "./Header/HeaderLogin";
 
 
 
@@ -11,7 +11,7 @@ import { AngleRight } from 'reicon-react';
 export default function SectionPedidoStatus() {
     return (
         <div className="">
-            <HeaderPedido/>
+            <HeaderLogin/>
 
             <div className="flex flex-col gap-6 mt-6 items-center">
                 <div className="flex gap-5 w-[90%]">

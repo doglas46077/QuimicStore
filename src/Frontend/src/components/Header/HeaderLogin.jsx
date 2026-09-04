@@ -9,16 +9,7 @@ function HeaderLogin() {
       <div className="flex items-center gap-4">
         <span className="text-sm text-white/90">Olá, Usuário</span>
  
-        <div aria-disabled="true" className="pointer-events-none relative">
-          <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-          </svg>
-          <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-400 text-[10px] font-semibold text-emerald-950">
-            0
-          </span>
-        </div>
+       
  
         <div
           aria-disabled="true"
