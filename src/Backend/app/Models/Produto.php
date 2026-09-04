@@ -17,7 +17,14 @@ class Produto extends Model
         'ativo'
     ];
 
-    public function categoria() {
-        return $this->belongsTo(Categoria::class, 'categoria_id');
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'id_categorias', 'id_categoria');
     }
+
+    public function avaliacoes()
+    {
+        return $this->hasMany(Avaliacao::class, 'id_produtos', 'id_produto');
+    }
+
 }
