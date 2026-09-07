@@ -3,37 +3,6 @@
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
-// ==========================================================================
-// ROTA DE LOGIN
-// ==========================================================================
-Route::prefix('/login')->group(function () {
-    Route::post('/', [LoginController::class, 'validarLogin']);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //     // use App\Http\Controllers\AvaliacaoController;
 //     // use App\Http\Controllers\CategoriaController;
 //     // use App\Http\Controllers\CompradorController;
