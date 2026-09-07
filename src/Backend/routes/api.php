@@ -4,12 +4,34 @@ use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
-// ROTA DE LOGIN
+// ! CADASTRO
+// ==========================================================================
+
+Route::prefix('/cadastro')->group(function () {
+    // CREATE
+    Route::post('/', [LoginController::class, 'cadastrar']);
+    });
+    
+// ==========================================================================
+//  ! LOGIN
 // ==========================================================================
 Route::prefix('/login')->group(function () {
-    Route::post('/', [LoginController::class, 'validarLogin']);
-    Route::post('/', [LoginController::class, 'cadastrar']);
+    Route::post('/', [LoginController::class, 'login']);
+
+    // READ
+    Route::get('/', [LoginController::class, 'users']);
+    Route::get('/{id}', [LoginController::class, 'user']);
+    
+    // UPDATE
+    Route::put('/{id}', [LoginController::class, 'updateLogin']);
+    
+    // DELETE
+    Route::delete('/{id}', [LoginController::class, 'destroy']);
+
 });
+
+
+
 
 
 
