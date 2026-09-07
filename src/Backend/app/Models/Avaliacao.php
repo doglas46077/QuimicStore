@@ -7,24 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 class Avaliacao extends Model
 {
     protected $table = 'avaliacoes';
-    protected $primaryKey = 'id_avaliacao';
 
     protected $fillable = [
-        'id_produto',
-        'id_comprador',
-        'nota',
+        'produto_id',
+        'usuario_id',
+        'nota', 
         'comentario',
-        'status_moderacao',
-        'data_avaliacao',
     ];
 
-    public function comprador()
+    public function usuario()
     {
-        return $this->belongsTo(Comprador::class, 'id_comprador', 'id_comprador');
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
     public function produto()
     {
-        return $this->belongsTo(Produto::class, 'id_produto', 'id_produto');
+        return $this->belongsTo(Produto::class, 'produto_id');
     }
 }

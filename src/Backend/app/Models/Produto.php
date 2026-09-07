@@ -7,17 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Produto extends Model
 {
     protected $table = 'produtos';
-    protected $primaryKey = 'id_produto';
 
     protected $fillable = [
-        'nome_produto',
+        'categoria_id',
+        'nome',
         'descricao',
-        'imagem',
-        'valor_produto',
-        'quantidade_estoque',
-        'disponivel',
-        'prazo_producao',
-        'id_categorias',
+        'preco',
+        'estoque',
+        'ativo'
     ];
 
     public function categoria()
