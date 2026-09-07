@@ -3,6 +3,58 @@
 use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
+// ==========================================================================
+// ROTA DE LOGIN
+// ==========================================================================
+Route::prefix('/login')->group(function () {
+    Route::post('/', [LoginController::class, 'validarLogin']);
+    Route::post('/', [LoginController::class, 'cadastrar']);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //     // use App\Http\Controllers\AvaliacaoController;
 //     // use App\Http\Controllers\CategoriaController;
 //     // use App\Http\Controllers\CompradorController;
