@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ProdutosController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
@@ -30,6 +31,24 @@ Route::prefix('/login')->group(function () {
 
 });
 
+// ==========================================================================
+//  ! PRODUTOS
+// ==========================================================================
+
+Route::prefix('/produtos')->group(function() {
+    // CREATE
+    Route::post('/', [ProdutosController::class, 'cadastrarProduto']);
+
+    // READ
+    Route::get('/', [ProdutosController::class, 'buscarProdutos']);
+    Route::get('/{id}', [ProdutosController::class, 'buscarProduto']);
+
+    // UPDATE
+    Route::put('/{id}', [ProdutosController::class, 'update']);
+
+    // DELETE
+    Route::delete('/{id}', [ProdutosController::class, 'destroy']);
+});
 
 
 
