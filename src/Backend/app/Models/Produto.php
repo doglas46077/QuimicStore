@@ -14,7 +14,15 @@ class Produto extends Model
         'descricao',
         'preco',
         'estoque',
-        'ativo'
+        'ativo',
+        'imagem'
+    ];
+
+    protected $casts = [
+        // O casts usa uma convenção diferente no model do que no controller. Usa-se somente o :2 pois refere-se a duas casas decimais após a virgula.
+        
+        'preco' => 'decimal:2',
+        'ativo' => 'boolean',
     ];
 
     public function categoria()
