@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
-use function Laravel\Prompts\table;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -23,6 +22,7 @@ class LoginController extends Controller
 
         $email = $request->input('email');
         $senha = $request->input('senha');
+        $nome = Str::before($email, '@');
 
         if(Usuario::where('email', $email)->first()) {
             return response()->json([
@@ -33,7 +33,7 @@ class LoginController extends Controller
         $senhaCriptografadaComHash = Hash::make($senha);
 
         $novoUsuario = Usuario::create([
-            'nome' => $email,
+            'nome' => $nome,
             'email' => $email,
             'senha' => $senhaCriptografadaComHash,
             'nivel_acesso' => 'cliente'
