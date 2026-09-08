@@ -2,7 +2,6 @@ import LoginCard from "./components/LoginCard"
 import SectionCatalogo from "./components/SectionCatalogo";
 import Layers from "./components/Layers";
 import SectionPedidoStatus from "./components/SectionPedidoStatus";
-import SectionCarrinho from "./components/SectionCarrinho";
 import SectionCadastro from "./components/SectionCadastro";
 
 function App() {
@@ -20,7 +19,6 @@ function App() {
 
        <SectionPedidoStatus/>
 
-       <SectionCarrinho/>
         </div>
     </>
   )
