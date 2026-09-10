@@ -58,6 +58,12 @@ Route::prefix('/produtos')->group(function() {
 Route::prefix('/pedidos')->group(function() {
     // CREATE
     Route::post('/', [PedidosController::class, 'criarPedido']);
+    
+    // READ
+    Route::get('/', [PedidosController::class, 'buscarTodosPedidos']);
+    // Route::get('/{id}', [PedidosController::class, 'buscarPedido']);
+    Route::get('/{id}', [PedidosController::class, 'buscarPedidoPorUsuario']);
+
 });
 
 

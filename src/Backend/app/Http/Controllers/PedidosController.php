@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\itemPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
+
+use function PHPUnit\Framework\isEmpty;
 
 class PedidosController extends Controller
 {
@@ -69,4 +73,53 @@ class PedidosController extends Controller
             "dados" => $pedido->load('itens')
         ], 201);
     }
+
+
+// =================================================================================================
+// Buscar todos os pedidos de todos os usuários
+// =================================================================================================
+    public function buscarTodosPedidos() {
+        $pedidos = Pedido::all();
+
+        return response()->json([
+            "mensagem" => "Todos os pedidos de todos os usuários registrados ao sistema",
+            "dados" => $pedidos
+        ]);
+    }
+
+// =================================================================================================
+// Buscar pedidos especificos
+// =================================================================================================
+    public function buscarPedido(int $id) {
+        $pedido = Pedido::findOrFail($id); 
+
+        return response()->json([
+            "mensagem" => "Pedido encontrado com sucesso",
+            "dados" => $pedido
+        ]);
+    }
+
+
+// =================================================================================================
+// Buscar pedido de usuário 
+// =================================================================================================
+    public function buscarPedidoPorUsuario(int $id) {
+        $pedidos = Pedido::where('usuario_id', $id)->get();
+
+        // foreach($pedidos as $pedido) {
+        //     $pedido->usuario_id;
+
+        //     if(empty($usuario)) {
+        //         return response()->json([
+        //             "mensagem" => 'Usuário ainda não tem um pedido'
+        //         ], 404);
+        //     }
+        // }
+
+        return response()->json([
+            "mensagem" => 'O usuario ' . $id . ' tem estes itens no carrinho:',
+            "dados" => $pedidos
+        ]);
+    }
+
 }
