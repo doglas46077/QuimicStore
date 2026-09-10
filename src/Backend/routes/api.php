@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,8 +51,13 @@ Route::prefix('/produtos')->group(function() {
     Route::delete('/{id}', [ProdutosController::class, 'destroy']);
 });
 
+// ==========================================================================
+//  ! PEDIDOS
+// ==========================================================================
 
-
+Route::prefix('/pedidos')->group(function() {
+    Route::post('/', [PedidosController::class, 'pedido']);
+});
 
 
 
