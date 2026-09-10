@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class PedidosController extends Controller
 {
-    public function pedido(Request $request) {
+    public function criarPedido(Request $request) {
         $pedidoArmazenado = $request->validate([
             // Aprendi esta forma de array com IA 
             // array ('itens') que é uma requisição obrigatória e que tenha no mínimo 1 produto dentro do array de itens

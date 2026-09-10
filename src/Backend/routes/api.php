@@ -56,7 +56,8 @@ Route::prefix('/produtos')->group(function() {
 // ==========================================================================
 
 Route::prefix('/pedidos')->group(function() {
-    Route::post('/', [PedidosController::class, 'pedido']);
+    // CREATE
+    Route::post('/', [PedidosController::class, 'criarPedido']);
 });
 
 
