@@ -105,16 +105,12 @@ class PedidosController extends Controller
 // =================================================================================================
     public function buscarPedidoPorUsuario(int $id) {
         $pedidos = Pedido::where('usuario_id', $id)->get();
-
-        // foreach($pedidos as $pedido) {
-        //     $pedido->usuario_id;
-
-        //     if(empty($usuario)) {
-        //         return response()->json([
-        //             "mensagem" => 'Usuário ainda não tem um pedido'
-        //         ], 404);
-        //     }
-        // }
+        
+        if(count($pedidos) === 0) {
+            return response()->json([
+                "mensagem" => 'Usuário ainda não tem um pedido'
+            ], 404);
+        }
 
         return response()->json([
             "mensagem" => 'O usuario ' . $id . ' tem estes itens no carrinho:',
@@ -123,3 +119,4 @@ class PedidosController extends Controller
     }
 
 }
+
