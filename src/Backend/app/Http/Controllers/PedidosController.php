@@ -79,7 +79,7 @@ class PedidosController extends Controller
 // Buscar todos os pedidos de todos os usuários
 // =================================================================================================
     public function buscarTodosPedidos() {
-        $pedidos = Pedido::all();
+        $pedidos = Pedido::with('usuario', 'itens.produto')->get();
 
         return response()->json([
             "mensagem" => "Todos os pedidos de todos os usuários registrados ao sistema",
@@ -87,24 +87,13 @@ class PedidosController extends Controller
         ]);
     }
 
-// =================================================================================================
-// Buscar pedidos especificos
-// =================================================================================================
-    public function buscarPedido(int $id) {
-        $pedido = Pedido::findOrFail($id); 
-
-        return response()->json([
-            "mensagem" => "Pedido encontrado com sucesso",
-            "dados" => $pedido
-        ]);
-    }
 
 
 // =================================================================================================
-// Buscar pedido de usuário 
+// BUSCAR PEDIDO POR USUÁRIO 
 // =================================================================================================
     public function buscarPedidoPorUsuario(int $id) {
-        $pedidos = Pedido::where('usuario_id', $id)->get();
+        $pedidos = Pedido::with('usuario', 'itens.produto')->where('usuario_id', $id)->get();
         
         if(count($pedidos) === 0) {
             return response()->json([
