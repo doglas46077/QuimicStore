@@ -4,6 +4,7 @@ import Layers from "./components/Layers";
 import SectionPedidoStatus from "./components/SectionPedidoStatus";
 import SectionCadastro from "./components/SectionCadastro";
 import { Routes, Route } from "react-router-dom";
+import SectionCarrinho from "./components/PrincipalCarrinho";
 
 function App() {
     return (
@@ -23,6 +24,8 @@ function App() {
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={ <LoginCard/>}/>
         </Routes>
+
+        <SectionCarrinho />
 
         </div>
     </>
