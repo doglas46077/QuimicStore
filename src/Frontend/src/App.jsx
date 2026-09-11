@@ -9,7 +9,6 @@ function App() {
     return (
         <>
         <div className="bg-olive-50 font-bold">
-{/*
        <Layers/>
 
        <SectionCatalogo/>
@@ -17,7 +16,7 @@ function App() {
        
        
        <SectionPedidoStatus/>
-       */}
+
        
 
        <Routes>
