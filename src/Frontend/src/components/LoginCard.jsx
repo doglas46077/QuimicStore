@@ -1,6 +1,8 @@
 import HeaderLogin from "./Header/HeaderLogin";
+import { useNavigate } from "react-router-dom";
 
 function LoginCard() {
+ const navigate = useNavigate()
   return (
 
     <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
@@ -47,7 +49,7 @@ function LoginCard() {
 
             <button
               type="submit"
-              className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300">
+              className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300 ">
               Entrar
             </button>
           </form>
@@ -62,7 +64,8 @@ function LoginCard() {
           
           <div className="mt-8 flex justify-center items-center gap-1">
             <span>Não tem conta?</span>
-          <button className="text-sm text-emerald-700 underline  hover:transition hover:duration-100 hover:text-blue-800">
+          <button onClick={() => navigate("/")}
+          className="text-sm text-emerald-700 underline  hover:transition hover:duration-100 hover:text-blue-800">
             Registre-se aqui
           </button>
           </div>
