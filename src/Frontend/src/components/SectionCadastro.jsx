@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
 
 function SectionCadastro () {
+  const navigate = useNavigate()
     return (
         <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
         style={{backgroundImage: "url(assets/telaFundo.png)", backgroundRepeat: "no-repeat", backgroundSize: "cover"}}>
@@ -67,7 +69,8 @@ function SectionCadastro () {
 
            <div className="mt-8 flex justify-center items-center gap-1">
             <span>Ja tem conta?</span>
-          <button className="text-sm text-emerald-700 underline  hover:transition hover:duration-100 hover:text-blue-800">
+          <button onClick={() => navigate("/login")}
+           className="text-sm text-emerald-700 underline  hover:transition hover:duration-100 hover:text-blue-800">
             Faça login
           </button>
           </div>
