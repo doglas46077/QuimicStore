@@ -7,17 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 class Produto extends Model
 {
     protected $table = 'produtos';
-    protected $primaryKey = 'id_produto';
 
     protected $fillable = [
-        'nome_produto',
+        'categoria_id',
+        'nome',
         'descricao',
-        'imagem',
-        'valor_produto',
-        'quantidade_estoque',
-        'disponivel',
-        'prazo_producao',
-        'id_categorias',
+        'preco',
+        'estoque',
+        'ativo',
+        'imagem'
+    ];
+
+    protected $casts = [
+        // O casts usa uma convenção diferente no model do que no controller. Usa-se somente o :2 pois refere-se a duas casas decimais após a virgula.
+        
+        'preco' => 'decimal:2',
+        'ativo' => 'boolean',
     ];
 
     public function categoria()
@@ -29,4 +34,5 @@ class Produto extends Model
     {
         return $this->hasMany(Avaliacao::class, 'id_produtos', 'id_produto');
     }
+
 }
