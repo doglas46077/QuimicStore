@@ -6,6 +6,7 @@ use App\Models\itemPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
 use App\Models\Usuario;
+use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Request;
 
 use function PHPUnit\Framework\isEmpty;
@@ -104,6 +105,17 @@ class PedidosController extends Controller
         return response()->json([
             "mensagem" => 'O usuario ' . $id . ' tem estes itens no carrinho:',
             "dados" => $pedidos
+        ]);
+    }
+
+
+ // =======================================================================================================
+    // Atualizar pedido
+ // =======================================================================================================
+
+    public function update(Request $request, int $id) {
+        $dataUpdate = $request->validate([
+            
         ]);
     }
 
