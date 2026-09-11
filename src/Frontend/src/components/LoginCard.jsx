@@ -55,12 +55,7 @@ function LoginCard() {
           </form>
 
 
-          <div className="my-6 h-px w-full bg-slate-100" />
-          <button 
-            type="button" 
-            className="w-full rounded-lg border border-emerald-700 py-3 text-sm font-semibold text-emerald-800 hover:scale-105 hover:transition hover:duration-300 hover:bg-emerald-800 hover:text-white">
-            Voltar à loja
-          </button>
+          
           
           <div className="mt-8 flex justify-center items-center gap-1">
             <span>Não tem conta?</span>
