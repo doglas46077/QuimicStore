@@ -3,8 +3,7 @@ import HeaderLogin from "./Header/HeaderLogin";
 function LoginCard() {
   return (
 
-    <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
-    style={{backgroundImage: "url(assets/telaFundo.png)", backgroundRepeat: "no-repeat", backgroundSize: "cover"}}>
+    <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50">
       <HeaderLogin />
 
       <div className="flex flex-1 justify-center">
@@ -18,7 +17,9 @@ function LoginCard() {
               Painel Administrativo
       </p>
           </div>
-         
+          <div className="mt-6 rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800">
+            Acesso restrito para professores e administradores da instituição.
+          </div>
           <form className="mt-6">
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
               E-mail
@@ -27,7 +28,7 @@ function LoginCard() {
               type="email"
               id="email"
               name="email"
-              placeholder="Digite seu email"
+              placeholder="professor@fiec.edu.br"
               required
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
             <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
@@ -40,11 +41,6 @@ function LoginCard() {
               placeholder="Digite sua senha"
               required
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
-
-          <button className="text-sm text-emerald-700 underline  w-full text-right hover:transition hover:duration-100 hover:text-blue-800">
-            Esqueci minha senha
-          </button>
-
             <button
               type="submit"
               className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300">
@@ -52,25 +48,20 @@ function LoginCard() {
             </button>
           </form>
 
-
+          <button className="text-sm text-emerald-700 underline w-full text-center hover:transition hover:duration-100 hover:text-blue-800">
+            Esqueci minha senha
+          </button>
           <div className="my-6 h-px w-full bg-slate-100" />
           <button 
             type="button" 
             className="w-full rounded-lg border border-emerald-700 py-3 text-sm font-semibold text-emerald-800 hover:scale-105 hover:transition hover:duration-300 hover:bg-emerald-800 hover:text-white">
             Voltar à loja
           </button>
-          
-          <div className="mt-8 flex justify-center items-center gap-1">
-            <span>Não tem conta?</span>
-          <button className="text-sm text-emerald-700 underline  hover:transition hover:duration-100 hover:text-blue-800">
-            Registre-se aqui
-          </button>
-          </div>
 
         </div>
       </div>
           <footer className="bg-gray-200 relative z-10 py-6 text-center text-xs text-slate-600">
-            © 2026 QuimicStore. Todos os direitos reservados.
+            © 2024 QuimicStore. Todos os direitos reservados.
           </footer>
     </main>
   );
