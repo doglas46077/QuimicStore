@@ -50,7 +50,7 @@ export default function SectionCatalogo() {
             </section>
 
             <section className="grid lg:grid-cols-4 gap-4 w-[80%] md:grid-cols-2">
-                {produtos.map((produto) => (
+
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
@@ -68,7 +68,7 @@ export default function SectionCatalogo() {
                         </div>
                     </div>
                 </div>
-                ))}
+            
                 
 
             </section>
