@@ -11,13 +11,20 @@ use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Request;
 
 use function PHPUnit\Framework\isEmpty;
+use function PHPUnit\Framework\throwException;
 
 class PedidosController extends Controller
 {
+
+
+    // ======================================================================
+    // CONTROLLER PEDIDOS DESENVOLVIDO POR DÔGLAS   
+    // ======================================================================
+
     public function criarPedido(Request $request)
     {
         $pedidoArmazenado = $request->validate([
-            // Aprendi esta forma de array com IA 
+            // Precisei recorrer a IA para fazer a requisição por array 
             // array ('itens') que é uma requisição obrigatória e que tenha no mínimo 1 produto dentro do array de itens
             'itens' => 'required|array|min:1',
             // percorrer ('*') no array ('itens') pegando cada item(produto_id) dentro do array, verifica se realmente foi enviada, do tipo inteiro e realmente existe na tabela produtos
@@ -129,7 +136,9 @@ class PedidosController extends Controller
         ]);
 
         foreach ($pedidoArmazenado['itens'] as $item) {
-            $itemPedido = itemPedido::findOrFail($id);
+            $itemPedido = itemPedido::where('pedido_id', $id)
+                ->where('produto_id', $item['produto_id'])->firstOrFail();
+
             $produto = Produto::findOrFail($itemPedido->produto_id);
 
 
@@ -137,38 +146,59 @@ class PedidosController extends Controller
             $quantidadeAntiga = $itemPedido->quantidade;
 
             $diferenca = $quantidadeNova - $quantidadeAntiga;
+            $diferencaDevolverEstoque = $quantidadeAntiga - $quantidadeNova;
 
-            if ($diferenca > $produto->estoque) {
-                throw new \Exception("Estoque insuficiente para o produto: {$produto->nome}");
+            if ($diferenca > 0) {
+                if ($diferenca > $produto->estoque) {
+                    throw new \Exception("Estoque insuficiente para o produto: {$produto->nome}");
+                } else {
+                    $produto->decrement('estoque', $diferenca);
+                }
+            } elseif ($diferenca < 0) {
+                $produto->increment('estoque', $diferencaDevolverEstoque);
             }
 
-            $produto->increment('estoque', $diferenca);
-        }
-
-        $item->update([
-            "quantidade" => $quantidadeNova
-        ]);
-
-        $pedido = Pedido::findOrFail($id);
-
-        $valorAtual = $pedido->valor_total;
-
-        if ($pedido->itens()->count() === 0) {
-            $pedido->delete();
-            return response()->json([
-                'mensagem' => 'Não há itens no carrinho'
+            $itemPedido->update([
+                "quantidade" => $quantidadeNova
             ]);
         }
 
+        $pedido = Pedido::findOrFail($id);
 
-        $valorAtual += $produto->preco * $quantidadeNova;
+        // PRECISEI RECORRER A IA PARA ESTE TRECHO DE CÓDIGO DO VALOR TOTAL
+        $valorTotal = ItemPedido::where('pedido_id', $id)
+            ->get()
+            ->sum(function ($item) {
+                return $item->quantidade * $item->produto->preco;
+            });
 
-        // atualiza no campo valorTotal de pedido com o valor acumulado
-        $pedido->update(['valor_total' => $valorAtual]);
+        $pedido->update(['valor_total' => $valorTotal]);
 
-        
+
         return response()->json([
             'mensagem' => 'Pedido atualizado com sucesso',
+            'valor_total' => $valorTotal
+        ], 200);
+    }
+
+    // ====================================================================================
+    // EXCLUIR UM PEDIDO
+    // ====================================================================================
+
+    public function destroy(int $id)
+    {
+        $pedido = Pedido::findOrFail($id);
+
+        foreach ($pedido->itens as $item) {
+            $produto = Produto::findOrFail($item->produto_id);
+            $produto->increment('estoque', $item->quantidade);
+        }
+
+        $pedido->itens()->delete();
+        $pedido->delete();
+
+        return response()->json([
+            'mensagem' => 'Pedido exlcuido'
         ], 200);
     }
 }
