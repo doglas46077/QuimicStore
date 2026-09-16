@@ -2,15 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\itemPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
+use App\Models\Usuario;
+use Error;
+use Illuminate\Http\Client\Events\RequestSending;
 use Illuminate\Http\Request;
+
+use function PHPUnit\Framework\isEmpty;
+use function PHPUnit\Framework\throwException;
 
 class PedidosController extends Controller
 {
-    public function criarPedido(Request $request) {
+
+
+    // ======================================================================
+    // CONTROLLER PEDIDOS DESENVOLVIDO POR DÔGLAS   
+    // ======================================================================
+
+    public function criarPedido(Request $request)
+    {
         $pedidoArmazenado = $request->validate([
-            // Aprendi esta forma de array com IA 
+            // Precisei recorrer a IA para fazer a requisição por array 
             // array ('itens') que é uma requisição obrigatória e que tenha no mínimo 1 produto dentro do array de itens
             'itens' => 'required|array|min:1',
             // percorrer ('*') no array ('itens') pegando cada item(produto_id) dentro do array, verifica se realmente foi enviada, do tipo inteiro e realmente existe na tabela produtos
@@ -19,13 +33,13 @@ class PedidosController extends Controller
         ]);
 
         // se a quantidade retirada pelo usuário for maior do que há no estoque, solta um erro que para tudo
-            foreach ($pedidoArmazenado['itens'] as $item) {
-                $produto = Produto::find($item['produto_id']);
+        foreach ($pedidoArmazenado['itens'] as $item) {
+            $produto = Produto::find($item['produto_id']);
 
-                if ($item['quantidade'] > $produto->estoque) {
-                    throw new \Exception("Estoque insuficiente para o produto: {$produto->nome}");
-                }
+            if ($item['quantidade'] > $produto->estoque) {
+                throw new \Exception("Estoque insuficiente para o produto: {$produto->nome}");
             }
+        }
 
         // pega o id do usuario que está adicionando os produtos no carrinho
         //* $usuario = $request->user()->id;
@@ -42,7 +56,7 @@ class PedidosController extends Controller
         $valorTotal = 0;
 
         // Processar cada item do carrinho através do foreach
-        foreach($pedidoArmazenado['itens'] as $item) {
+        foreach ($pedidoArmazenado['itens'] as $item) {
             $produto = Produto::find($item['produto_id']);
 
 
@@ -53,7 +67,7 @@ class PedidosController extends Controller
             $pedido->itens()->create([
                 'produto_id' => $produto->id,
                 'quantidade' => $item['quantidade'],
-                'preco_unitario_na_hora_da_compra'=> $produto->preco
+                'preco_unitario_na_hora_da_compra' => $produto->preco
             ]);
 
             // valor total recebe o preco do produto vezes a quantidade solicitada
@@ -68,5 +82,123 @@ class PedidosController extends Controller
             // busca no model pedido, a funcao itens e retorna os registros da tabela itens_pedidos vinculados ao id do pedido // Aprendi com IA
             "dados" => $pedido->load('itens')
         ], 201);
+    }
+
+
+    // =================================================================================================
+    // Buscar todos os pedidos de todos os usuários
+    // =================================================================================================
+    public function buscarTodosPedidos()
+    {
+        $pedidos = Pedido::with('usuario', 'itens.produto')->get();
+
+        return response()->json([
+            "mensagem" => "Todos os pedidos de todos os usuários registrados ao sistema",
+            "dados" => $pedidos
+        ]);
+    }
+
+
+
+    // =================================================================================================
+    // BUSCAR PEDIDO POR USUÁRIO 
+    // =================================================================================================
+    public function buscarPedidoPorUsuario(int $id)
+    {
+        $pedidos = Pedido::with('usuario', 'itens.produto')->where('usuario_id', $id)->get();
+
+        if (count($pedidos) === 0) {
+            return response()->json([
+                "mensagem" => 'Usuário ainda não tem um pedido'
+            ], 404);
+        }
+
+        return response()->json([
+            "mensagem" => 'O usuario ' . $id . ' tem estes itens no carrinho:',
+            "dados" => $pedidos
+        ]);
+    }
+
+
+    // =======================================================================================================
+    // Atualizar pedido
+    // =======================================================================================================
+
+    public function update(Request $request, int $id)
+    {
+        $pedidoArmazenado = $request->validate([
+            // Aprendi esta forma de array com IA 
+            // array ('itens') que é uma requisição obrigatória e que tenha no mínimo 1 produto dentro do array de itens
+            'itens' => 'required|array|min:1',
+            // percorrer ('*') no array ('itens') pegando cada item(produto_id) dentro do array, verifica se realmente foi enviada, do tipo inteiro e realmente existe na tabela produtos
+            'itens.*.produto_id' => 'required|integer|exists:produtos,id',
+            'itens.*.quantidade' => 'required|integer|min:1'
+        ]);
+
+        foreach ($pedidoArmazenado['itens'] as $item) {
+            $itemPedido = itemPedido::where('pedido_id', $id)
+                ->where('produto_id', $item['produto_id'])->firstOrFail();
+
+            $produto = Produto::findOrFail($itemPedido->produto_id);
+
+
+            $quantidadeNova = $item['quantidade'];
+            $quantidadeAntiga = $itemPedido->quantidade;
+
+            $diferenca = $quantidadeNova - $quantidadeAntiga;
+            $diferencaDevolverEstoque = $quantidadeAntiga - $quantidadeNova;
+
+            if ($diferenca > 0) {
+                if ($diferenca > $produto->estoque) {
+                    throw new \Exception("Estoque insuficiente para o produto: {$produto->nome}");
+                } else {
+                    $produto->decrement('estoque', $diferenca);
+                }
+            } elseif ($diferenca < 0) {
+                $produto->increment('estoque', $diferencaDevolverEstoque);
+            }
+
+            $itemPedido->update([
+                "quantidade" => $quantidadeNova
+            ]);
+        }
+
+        $pedido = Pedido::findOrFail($id);
+
+        // PRECISEI RECORRER A IA PARA ESTE TRECHO DE CÓDIGO DO VALOR TOTAL
+        $valorTotal = ItemPedido::where('pedido_id', $id)
+            ->get()
+            ->sum(function ($item) {
+                return $item->quantidade * $item->produto->preco;
+            });
+
+        $pedido->update(['valor_total' => $valorTotal]);
+
+
+        return response()->json([
+            'mensagem' => 'Pedido atualizado com sucesso',
+            'valor_total' => $valorTotal
+        ], 200);
+    }
+
+    // ====================================================================================
+    // EXCLUIR UM PEDIDO
+    // ====================================================================================
+
+    public function destroy(int $id)
+    {
+        $pedido = Pedido::findOrFail($id);
+
+        foreach ($pedido->itens as $item) {
+            $produto = Produto::findOrFail($item->produto_id);
+            $produto->increment('estoque', $item->quantidade);
+        }
+
+        $pedido->itens()->delete();
+        $pedido->delete();
+
+        return response()->json([
+            'mensagem' => 'Pedido exlcuido'
+        ], 200);
     }
 }

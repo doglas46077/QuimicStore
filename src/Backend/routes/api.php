@@ -3,10 +3,11 @@
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
+use App\Models\Pedido;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
-// ! CADASTRO
+// ! CADASTRO - DOGLAS
 // ==========================================================================
 
 Route::prefix('/cadastro')->group(function () {
@@ -15,7 +16,7 @@ Route::prefix('/cadastro')->group(function () {
     });
     
 // ==========================================================================
-//  ! LOGIN
+//  ! LOGIN - DOGLAS
 // ==========================================================================
 Route::prefix('/login')->group(function () {
     Route::post('/', [LoginController::class, 'login']);
@@ -33,7 +34,7 @@ Route::prefix('/login')->group(function () {
 });
 
 // ==========================================================================
-//  ! PRODUTOS
+//  ! PRODUTOS - DOGLAS
 // ==========================================================================
 
 Route::prefix('/produtos')->group(function() {
@@ -52,12 +53,23 @@ Route::prefix('/produtos')->group(function() {
 });
 
 // ==========================================================================
-//  ! PEDIDOS
+//  ! PEDIDOS - DOGLAS
 // ==========================================================================
 
 Route::prefix('/pedidos')->group(function() {
     // CREATE
     Route::post('/', [PedidosController::class, 'criarPedido']);
+    
+    // READ
+    Route::get('/', [PedidosController::class, 'buscarTodosPedidos']);
+
+    Route::get('/{id}', [PedidosController::class, 'buscarPedidoPorUsuario']);
+
+    // ATUALIZAR UM PEDIDO
+    Route::put('/{id}', [PedidosController::class, 'update']);
+
+    // DELETAR UM PEDIDO
+    Route::delete('/{id}', [PedidosController::class, 'destroy']);
 });
 
 
