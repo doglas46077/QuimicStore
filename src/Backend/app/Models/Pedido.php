@@ -7,18 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Pedido extends Model
 {
     protected $table = 'pedidos';
+    protected $fillable = ['usuario_id', 'valor_total', 'status'];
 
-    protected $fillable = [
-        'usuario_id',
-        'valor_total',
-        'status'
-    ];
-
-    public function usuario() {
-        return $this->belongsTo(Usuario::class, 'usuario_id');
+    // Relacionamento com a tabela itens_pedido
+    public function itens()
+    {
+        return $this->hasMany(ItemPedido::class, 'pedido_id');
     }
 
-    public function itens() {
-        return $this->hasMany(ItemPedido::class, 'pedido_id');
+    // Relacionamento com a tabela pagamentos
+    public function pagamento()
+    {
+        return $this->hasOne(Pagamento::class, 'pedido_id');
     }
 }
