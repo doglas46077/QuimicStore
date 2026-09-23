@@ -1,8 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
+import { useState } from "react";
 
 function SectionCadastro () {
   const navigate = useNavigate()
+
+  const [email, setEmail] = useState("")
+  const [senha, setSenha] = useState("")
+  const [isLoading, setIsLoadin] = useState("")
+
+  async function cadastrar(event) {
+    event.prevenDefault()
+    setIsLoadin(true)
+
+    const usuario = {
+      email: email,
+      senha: senha
+  }
+
+    const resposta = await fetch(
+      ""
+    )
+}
     return (
         <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
         style={{backgroundImage: "url(assets/telaFundo.png)", backgroundRepeat: "no-repeat", backgroundSize: "cover"}}>
@@ -20,7 +39,8 @@ function SectionCadastro () {
       </p>
           </div>
           
-          <form className="mt-6">
+          <form className="mt-6"
+          onSubmit={cadastrar}>
              <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
               Digite seu Nome
             </label>
@@ -40,8 +60,11 @@ function SectionCadastro () {
               id="email"
               name="email"
               placeholder="Digite seu email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               required
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+            
             <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
               Crie sua Senha
             </label>
@@ -50,13 +73,16 @@ function SectionCadastro () {
               id="senha"
               name="senha"
               placeholder="Digite sua senha"
+              value={senha}
+              onChange={(event) => setSenha(event.target.value)}
               required
               className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
            
             <button
               type="submit"
+              disabled={isLoading}
               className="mt-6 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300">
-              Cadastrar
+              {isLoading ? "Cadastrando..." : "Cadastrar"}
             </button>
           </form>
 
