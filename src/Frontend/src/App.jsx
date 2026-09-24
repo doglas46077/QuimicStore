@@ -5,6 +5,7 @@ import SectionPedidoStatus from "./components/SectionPedidoStatus";
 import SectionCadastro from "./components/SectionCadastro";
 import { Routes, Route } from "react-router-dom";
 import SectionCarrinho from "./components/PrincipalCarrinho";
+import SectionStatus from "./components/SectionStatus";
 
 function App() {
     return (
@@ -27,6 +28,7 @@ function App() {
 
         <SectionCarrinho />
 
+        <SectionStatus />
         </div>
     </>
   )
