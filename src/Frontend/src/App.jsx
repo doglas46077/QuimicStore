@@ -14,6 +14,7 @@ function App() {
        <Routes>
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={ <LoginCard/>}/>
+      <Route path="/catalogo" element={<SectionCatalogo/>}/>
         </Routes>
 
 

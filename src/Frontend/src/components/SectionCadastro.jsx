@@ -22,7 +22,7 @@ function SectionCadastro() {
         try {
 
             const resposta = await fetch(
-                "http://localhost:8000/api/cadastro",
+                "http://127.0.0.1:8000/api/cadastro",
                 {
                     method: "POST",
 
