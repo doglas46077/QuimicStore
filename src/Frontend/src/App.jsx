@@ -10,22 +10,13 @@ function App() {
     return (
         <>
         <div className="bg-olive-50 font-bold">
-       <Layers/>
-
-       <SectionCatalogo/>
-       
-       
-       
-       <SectionPedidoStatus/>
-
-       
-
+ 
        <Routes>
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={ <LoginCard/>}/>
         </Routes>
 
-        <SectionCarrinho />
+
 
         </div>
     </>
