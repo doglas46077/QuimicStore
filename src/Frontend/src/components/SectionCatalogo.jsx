@@ -16,7 +16,7 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col ml-8 gap-1 font-sans">
                     <p className="flex justify-baseline text-green-400">FÁBRICA ESCOLA - FIEC</p>
                     <div className="w-200 text-white">
-                        <h1 className="flex justify-baseline">Produtos feitos por alunos de Química</h1>
+                        <h1 className="flex justify-baseline text-3xl">Produtos feitos por alunos de Química</h1>
                         <p className="flex justify-baseline">Limpeza, higiene e cosméticos fabricados na instituição.</p>
                     </div>
                 </div>
@@ -49,19 +49,19 @@ export default function SectionCatalogo() {
                 </div>
             </section>
 
-            <section className="grid grid-cols-4 gap-4 w-[80%] ">
+            <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] ">
                 
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div className="" >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -72,14 +72,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -90,14 +90,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -108,14 +108,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -126,14 +126,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -144,14 +144,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -162,14 +162,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
@@ -180,14 +180,14 @@ export default function SectionCatalogo() {
                 <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                     <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
                     <div className="flex flex-col items-baseline w-[90%]">
-                        <p className="text-emerald-700">Categoria</p>
+                        <p className="text-emerald-700 text-2xl">Categoria</p>
                         <div >
-                            <h1>Nome Produto</h1>
+                            <h1 className='text-3xl'>Nome Produto</h1>
                             <p className="flex justify-baseline">Descrição</p>
                         </div>
                     </div>
-                    <div className="flex w-[90%] justify-between items-center mt-[25%]">
-                        <h1>R$ 00,00</h1>
+                    <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
+                        <h1 className='text-2xl'>R$ 00,00</h1>
                         <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
                             <CartLarge5 size={24} />
                             <p>Adicionar</p>
