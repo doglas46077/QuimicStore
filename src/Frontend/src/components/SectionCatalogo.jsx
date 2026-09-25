@@ -11,7 +11,7 @@ export default function SectionCatalogo() {
     return (
         <>
         <HeaderLogin />
-        <div className="flex flex-col gap-5 items-center mt-4  min-h-screen bg-olive-50">
+        <div className="flex flex-col gap-5 items-center mt-4 mb-6 min-h-screen bg-olive-50">
             <header className="flex flex-col justify-center items-baseline bg-emerald-950  rounded-xl w-[80%] h-30">
                 <div className="flex flex-col ml-8 gap-1 font-sans">
                     <p className="flex justify-baseline text-green-400">FÁBRICA ESCOLA - FIEC</p>

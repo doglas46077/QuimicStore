@@ -5,7 +5,7 @@ import { Gear } from 'reicon-react';
 
 export default function FooterCatalogo() {
     return (
-        <footer className="h-20 bg-white mt-10">
+        <footer className="h-20 bg-white mt-0">
             <div className="flex h-full justify-center items-center gap-[20%]">
                 <div className='flex flex-col items-center p-2 hover:border-b-green-600 hover:border-b-3 hover:text-green-600 hover:transition hover:duration-200'>
                     <Home3 size={30} />

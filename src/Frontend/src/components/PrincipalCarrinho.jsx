@@ -100,7 +100,6 @@ function SectionCarrinho() {
             </div>
           </div>
         </div>
-        <div className="h-16 bg-emerald-950" />
       </div>
     </>
   );
