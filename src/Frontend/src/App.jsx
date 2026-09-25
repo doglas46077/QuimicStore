@@ -15,6 +15,9 @@ function App() {
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={ <LoginCard/>}/>
       <Route path="/catalogo" element={<SectionCatalogo/>}/>
+
+      <Route path="/carrinho" element={<SectionCarrinho/>}/>
+      <Route path="/pedidos" element={<SectionPedidoStatus/>}/>
         </Routes>
 
 
