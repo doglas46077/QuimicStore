@@ -96,7 +96,7 @@ class PedidosController extends Controller
     // =================================================================================================
     // Listar todos os pedidos de um usuário específico
     // =================================================================================================
-    public function listarPedidosDoUsuario($usuario_id)
+    public function listarPedidosDoUsuario(int $usuario_id)
     {
         $pedidos = Pedido::with(['itens.produto', 'pagamento'])
             ->where('usuario_id', $usuario_id)
@@ -124,25 +124,6 @@ class PedidosController extends Controller
 
         return response()->json([
             "mensagem" => "Todos os pedidos de todos os usuários registrados ao sistema",
-            "dados" => $pedidos
-        ]);
-    }
-
-    // =================================================================================================
-    // BUSCAR PEDIDO POR USUÁRIO 
-    // =================================================================================================
-    public function buscarPedidoPorUsuario(int $id)
-    {
-        $pedidos = Pedido::with('usuario', 'itens.produto')->where('usuario_id', $id)->get();
-
-        if ($pedidos->isEmpty()) {
-            return response()->json([
-                "mensagem" => 'Usuário ainda não tem um pedido'
-            ], 404);
-        }
-
-        return response()->json([
-            "mensagem" => 'O usuario ' . $id . ' tem estes pedidos:',
             "dados" => $pedidos
         ]);
     }

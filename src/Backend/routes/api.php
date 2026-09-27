@@ -63,7 +63,7 @@ Route::prefix('/pedidos')->group(function() {
     // READ
     Route::get('/', [PedidosController::class, 'buscarTodosPedidos']);
 
-    Route::get('/{id}', [PedidosController::class, 'buscarPedidoPorUsuario']);
+    Route::get('/{id}', [PedidosController::class, 'listarPedidosDoUsuario']);
 
     // ATUALIZAR UM PEDIDO
     Route::put('/{id}', [PedidosController::class, 'update']);
