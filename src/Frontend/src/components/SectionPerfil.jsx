@@ -56,13 +56,12 @@ const navigate = useNavigate()
           />
  
           <label htmlFor="telefone" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
-            Telefone
+            senha
           </label>
           <input
-            type="text"
-            id="telefone"
-            name="telefone"
-            defaultValue="(19) 99999-0000"
+            type="password"
+            id="senha"
+            name="senha"
             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
           />
  
