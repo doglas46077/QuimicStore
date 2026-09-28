@@ -7,8 +7,10 @@ import { Truck } from "reicon-react"
 import { Headphones } from "reicon-react"
 import { Store } from "reicon-react"
 import HeaderLogin from "./Header/HeaderLogin"
+import { useNavigate } from "react-router-dom"
 
 function SectionCarrinho() {
+const navigate = useNavigate()
   return (
     <>
       <HeaderLogin />
@@ -23,10 +25,9 @@ function SectionCarrinho() {
               <h1 className="text-xl font-bold text-slate-900">Meu carrinho</h1>
             </div>
 
-            <button
+            <button onClick={()=>navigate("/catalogo")}
               type="button"
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-slate-300"
-            >
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-slate-300">
               <ArrowLeft className="h-4 w-4" />
               Voltar para a loja
             </button>
@@ -49,7 +50,7 @@ function SectionCarrinho() {
               Que tal explorar nossas categorias e encontrar o que precisa?
             </p>
 
-            <button
+            <button onClick={()=> navigate("/catalogo")}
               type="button"
               className="mx-auto mt-6 flex cursor-pointer items-center gap-2 rounded-lg bg-emerald-950 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-900"
             >
