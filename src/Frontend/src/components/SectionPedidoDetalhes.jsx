@@ -5,6 +5,8 @@ import { Calendar } from 'reicon-react';
 import { BagShopping } from 'reicon-react';
 import { LocationAlt } from 'reicon-react';
 import { Star } from 'reicon-react';
+import { TruckFast } from 'reicon-react';
+
 
 
 
@@ -89,10 +91,21 @@ export default function SectionPedidoDetalhes() {
 
             {//futuramente sera utilizado o metodo map() no lugar
             } 
-                <div className="grid grid-cols-2 w-[91%]">
-                    <div className="w-[98%] h-33 bg-white shadow m-2 rounded-lg">1</div>
 
-                    <div className="flex justify-center w-[98%] h-33 p-3 bg-white shadow m-2 rounded-lg">
+
+
+            {
+                //================================== RESUMO DE PEDIDO ======================
+            }
+                <div className="grid grid-cols-2 w-[91%]">
+                    <div className="w-[98%] h-40 bg-white shadow m-2 rounded-lg">1</div>
+
+
+
+{
+    //============================================ INFORMAÇÕES DE RETIRADA ==================
+}
+                    <div className="flex justify-center w-[98%] h-40 p-3 bg-white shadow m-2 rounded-lg">
                         <div className="flex w-[96%] gap-3">
                             <div className="flex justify-center items-center bg-emerald-200 h-8 w-8 rounded-full">
                                 <LocationAlt size={20} />
@@ -110,10 +123,61 @@ export default function SectionPedidoDetalhes() {
                         </div>
                     </div>
 
-                    <div className="w-[98%] h-33 bg-white shadow m-2 rounded-lg">3</div>
+                    {
+                        //============================== STATUS DE PEDIDO ===========================
+                    }
 
-                    <div className="w-[96%] h-33 p-3 bg-white shadow m-2 rounded-lg">
-                        <div className="flex flex-col justify-center w-full">
+                    <div className="flex flex-col items-center  gap-2 w-[98%] h-40 p-3 bg-white shadow m-2 rounded-lg">
+                        <div className="w-[96%]">
+                            <div className="flex items-center gap-3">
+                                <div className="flex justify-center items-center rounded-full bg-emerald-200 h-8 w-8">
+                                    <TruckFast size={20} />
+                                </div>
+                                <p>Status de pedido</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-7 justify- w-[94%]">
+                            <div>
+                                {[1, 2, 3, 4].map((item, index) => (
+                                    <div key={item} className="flex flex-col items-center">
+                                        <div className={`w-4 h-4 rounded-full border-2 ${
+                                            index === 0 ? "bg-orange-400 border-orange-400" : "bg-white border-gray-300"
+                                        }`} />
+                                        {index < 3 && <div className="w-0.5 h-2 bg-gray-300" />}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="w-full">
+                                <div className="flex justify-between w-full">
+                                    <p>Pedido realizado</p>
+                                    <p className="font-light">data e horario</p>
+                                </div>
+                                
+                                <div className="flex justify-between w-full">
+                                    <p>Em preparação</p>
+                                    <p className="font-light">data e horario</p>
+                                </div>
+
+                                <div className="flex justify-between w-full">
+                                    <p>Pronto para retirada</p>
+                                    <p className="font-light">data e horario</p>
+                                </div>
+                                
+                                <div className="flex justify-between w-full">
+                                    <p>Retirado</p>
+                                    <p className="font-light">data e horario</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+{//================================ AVALIAÇÃO POR ESTRELAS =========================
+}
+
+                    <div className="flex justify-center w-[98%] h-40 p-3 bg-white shadow m-2 rounded-lg">
+                        <div className="flex flex-col justify-center items-center w-full">
                             <div className="flex items-center gap-3 w-[96%]">
                                 <div className="flex justify-center items-center rounded-full bg-emerald-200 h-8 w-8">
                                     <Star size={20} />
