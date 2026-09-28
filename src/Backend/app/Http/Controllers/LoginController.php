@@ -16,13 +16,14 @@ class LoginController extends Controller
     public function cadastrar(Request $request) {
 
         $request->validate([
+            "nome" => 'required|min-3|string',
             "email" => 'required|email',
             "senha" => 'required|string|min:6'
         ]);
 
         $email = $request->input('email');
         $senha = $request->input('senha');
-        $nome = Str::before($email, '@');
+        $nome = $request->input('nome');
 
         if(Usuario::where('email', $email)->first()) {
             return response()->json([
