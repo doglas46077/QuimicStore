@@ -1,8 +1,45 @@
 import HeaderLogin from "./Header/HeaderLogin";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function LoginCard() {
  const navigate = useNavigate()
+
+const [email, useEmail] = useState("")
+const [senha, useSenha] = useState("")
+
+const [erro, useError] = useState("")
+const [carregando, isCarregando] = useState(false)
+
+async function login(e) { 
+        e.preventDefault()
+        useError("")
+        isCarregando(true)
+
+        try{
+          const response= await fetch("http://localhost:8000/api/login", {
+            method: "POST",
+            headers: {"Content-type": "application/json"},
+            body:JSON.stringify({email, senha}),
+          })
+
+          const guardar = await response.json()
+
+          if(!response.ok) {
+            useError(guardar.mensagem || "Erro ao fazer o login")
+            return
+          }
+
+          console.log(guardar)
+          navigate("/catalogo")
+        }catch(erro){
+          useError("Não foi possivel conectar ao servidor")
+        } finally{
+          isCarregando(false)
+        }
+    
+}
+
   return (
 
     <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
