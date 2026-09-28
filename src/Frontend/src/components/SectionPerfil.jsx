@@ -1,7 +1,11 @@
 import HeaderLogin from "./Header/HeaderLogin";
 import { User, Package } from "reicon-react";
+import FooterCatalogo from "./FooterCatalogo"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function SectionPerfil() {
+const navigate = useNavigate()
     return(
         <>
         <HeaderLogin/>
@@ -116,6 +120,12 @@ function SectionPerfil() {
             </span>
           </div>
         </div>
+      </div>
+      <div>
+       <button className="mx-auto mt-4 block rounded-lg bg-red-600 px-20 py-3 text-base font-semibold text-white hover:bg-red-700" onClick={()=> navigate("/login")}>
+        <h1>Sair da conta</h1>
+       </button>
+
       </div>
     </div>
         </>
