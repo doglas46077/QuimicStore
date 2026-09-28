@@ -8,6 +8,7 @@ function SectionCadastro() {
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
+    const [nome, setNome] = useState("")
 
     const [erro, setErro] = useState("");
     const [carregando, setCarregando] = useState(false);
@@ -33,7 +34,8 @@ function SectionCadastro() {
 
                     body: JSON.stringify({
                         email: email,
-                        senha: senha
+                        senha: senha,
+                        nome: nome
                     })
                 }
             );
@@ -119,6 +121,8 @@ function SectionCadastro() {
                             name="nome"
                             placeholder="Digite seu nome"
                             required
+                            value={nome}
+                            onChange={(e)=>setNome(e.target.value)}
                             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
                         />
 
