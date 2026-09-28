@@ -5,12 +5,19 @@ import SectionPedidoStatus from "./components/SectionPedidoStatus";
 import SectionCadastro from "./components/SectionCadastro";
 import { Routes, Route } from "react-router-dom";
 import SectionCarrinho from "./components/PrincipalCarrinho";
+import SectionPerfil from "./components/SectionPerfil";
 
 function App() {
     return (
         <>
         <div className="bg-olive-50 font-bold">
- 
+<Layer />
+
+<SectionCatalogo />
+
+<SectionPerfil />
+
+<SectionPedidoStatus />
        <Routes>
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={ <LoginCard/>}/>
@@ -21,6 +28,8 @@ function App() {
         </Routes>
 
 
+
+       
 
         </div>
     </>
