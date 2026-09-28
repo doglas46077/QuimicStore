@@ -64,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Login::class,
+            'model' => App\Models\Usuario::class, // Aponta para o model USUARIO que não é User por padrao, pois eu alterei
         ],
 
         // 'users' => [

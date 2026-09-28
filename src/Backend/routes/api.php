@@ -7,32 +7,27 @@ use App\Models\Pedido;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
-// ! CADASTRO - DOGLAS
+// ! Rotas públicas
 // ==========================================================================
+Route::post('/cadastro', [LoginController::class, 'cadastrar']);
+Route::post('/login', [LoginController::class, 'login']);
 
-Route::prefix('/cadastro')->group(function () {
-    // CREATE
-    Route::post('/', [LoginController::class, 'cadastrar']);
-    });
-    
 // ==========================================================================
-//  ! LOGIN - DOGLAS
+// ! Rotas com protecao
 // ==========================================================================
-Route::prefix('/login')->group(function () {
-    Route::post('/', [LoginController::class, 'login']);
+Route::middleware('auth_sanctum')->group(function() {
+    // Usuários
+    Route::get('/usuarios', [LoginController::class, 'users']);
+    Route::get('/usuario/{id}', [LoginController::class, 'user']);
+    Route::put('/updateUser/{id}', [LoginController::class, 'updateLogin']);
+    Route::delete('deleteUser/{id}', [LoginController::class, 'delete']);
 
-    // READ
-    Route::get('/', [LoginController::class, 'users']);
-    Route::get('/{id}', [LoginController::class, 'user']);
-    
-    // UPDATE
-    Route::put('/{id}', [LoginController::class, 'updateLogin']);
-    
-    // DELETE
-    Route::delete('/{id}', [LoginController::class, 'destroy']);
 
+    // Produtos
+    Route::post('/product', [ProdutosController::class, 'RegisterProduct']);
+    
 });
-
+ 
 // ==========================================================================
 //  ! PRODUTOS - DOGLAS
 // ==========================================================================

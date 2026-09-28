@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable; // 1. Herança para autenticação
+use Laravel\Sanctum\HasApiTokens;                       // 2. Trait para Tokens do Sanctum
+use Illuminate\Notifications\Notifiable;
+use Override;
 
-class Usuario extends Model
+class Usuario extends Authenticatable
 {
     protected $table = 'usuarios';
 
@@ -20,6 +23,12 @@ class Usuario extends Model
     protected $hidden = [
         'senha'
     ];
+
+    #[Override]
+    public function getAuthPassword()
+    {
+        return $this->senha;
+    }
 
 
     public function avaliacoes() {

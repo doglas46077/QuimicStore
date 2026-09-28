@@ -10,13 +10,14 @@ use Illuminate\Support\Str;
 class LoginController extends Controller
 {
 
-// =======================================================================================================
-// CADASTRAR NOVO USUÁRIO
-// =======================================================================================================
-    public function cadastrar(Request $request) {
+    // =======================================================================================================
+    // CADASTRAR NOVO USUÁRIO
+    // =======================================================================================================
+    public function cadastrar(Request $request)
+    {
 
         $request->validate([
-            "nome" => 'required|min-3|string',
+            "nome" => 'required|min:3|string',
             "email" => 'required|email',
             "senha" => 'required|string|min:6'
         ]);
@@ -25,7 +26,7 @@ class LoginController extends Controller
         $senha = $request->input('senha');
         $nome = $request->input('nome');
 
-        if(Usuario::where('email', $email)->first()) {
+        if (Usuario::where('email', $email)->first()) {
             return response()->json([
                 'mensagem' => 'Este e-mail já está cadastrado'
             ], 400);
@@ -40,18 +41,28 @@ class LoginController extends Controller
             'nivel_acesso' => 'cliente'
         ]);
 
+        $token = $novoUsuario->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            "mensagem" => "Usuário cadastrado com sucesso!",
-            "dados" => $novoUsuario
+            "Status" => true,
+            "Token" => $token,
+            "usuario" => [
+                'id' => $novoUsuario->id,
+                'nome' => $novoUsuario->nome,
+                'email' => $novoUsuario->email,
+                'nivel_acesso' => $novoUsuario->nivel_acesso
+            ],
+            "Mensagem" => "Usúario cadastrado com sucesso"
         ], 201);
     }
 
-// =======================================================================================================
-// LOGIN DE USUÁRIO
-// =======================================================================================================  
+    // =======================================================================================================
+    // LOGIN DE USUÁRIO
+    // =======================================================================================================  
 
     // VALIDAR LOGIN DO USUÁRIO
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         $request->validate([
             "email" => 'required|email',
             "senha" => 'required|string|min:6'
@@ -62,7 +73,7 @@ class LoginController extends Controller
 
         $usuario = Usuario::where('email', $email)->first();
 
-        if(empty($usuario)) {
+        if (empty($usuario)) {
             return response()->json([
                 "mensagem" => "Email ou senha incorreta"
             ], 400);
@@ -74,38 +85,72 @@ class LoginController extends Controller
             ], 400);
         }
 
+        $token = $usuario->createToken('auth_token')->plainTextToken;
+
         return response()->json([
             "Status" => true,
+            "Token" => $token,
+            "usuario" => [
+                'id' => $usuario->id,
+                'nome' => $usuario->nome,
+                'email' => $usuario->email,
+                'nivel_acesso' => $usuario->nivel_acesso
+            ],
             "Mensagem" => "Acesso liberado. Usuário logado com sucesso"
-        ], 201);
+        ], 200);
     }
 
 
-    // VER TODOS OU UM LOGIN ESPECIFICO
+    // VER TODOS OS LOGINS
 
-    public function users() {
+    public function users()
+    {
         $usuarios = Usuario::all();
 
         return response()->json([
             "status" => true,
             "mensagem" => 'Exibindo todos os usuários cadastrados no sistema!',
-            "dados" => $usuarios
+            "usuarios" => [
+                'id' => $usuarios->id,
+                'nome' => $usuarios->nome,
+                'email' => $usuarios->email,
+                'nivel_acesso' => $usuarios->nivel_acesso
+            ],
         ]);
     }
 
-    public function user(int $id) {
+    public function user(int $id)
+    {
         $usuario = Usuario::findOrFail($id);
 
         return response()->json([
             "status" => true,
             "mensagem" => 'Usuário: ' . $usuario->nome . ' Encontrado com sucesso',
-            "dados" => $usuario
+            "usuarios" => [
+                'id' => $usuario->id,
+                'nome' => $usuario->nome,
+                'email' => $usuario->email,
+                'nivel_acesso' => $usuario->nivel_acesso
+            ],
         ]);
     }
 
 
     // ATUALIZAR ALGO DO LOGIN NO BANCO
-    public function updateLogin(Request $request, int $id) {
+    public function updateLogin(Request $request, int $id)
+    {
+        $usuarioLogado = $request->user();
+
+        $donoDaConta = $usuarioLogado->id === $id;
+        $administrador = $usuarioLogado->nivel_acesso === "professor";
+
+        // Se o usuário do ID 5 estiver tentando excluir a conta do usuário do ID 7 ou se nao for o professor responsavel pelo site, a aplicação quebra retornando erro
+        if (!$donoDaConta && !$administrador) {
+            return response()->json([
+                "mensagem" => "Acesso não autorizado"
+            ], 403); // acesso negado
+        }
+
         $usuario = Usuario::findOrFail($id);
 
         $request->validate([
@@ -120,15 +165,15 @@ class LoginController extends Controller
 
 
         // filled, verifica se realmente há um valor vindo dentro do campo da requisição, evitando sobrescrever o campo com valor vazio ("")
-        if($request->filled('nome')) { 
+        if ($request->filled('nome')) {
             $usuario->nome = $nome;
         }
 
-        if($request->filled('email')) { 
+        if ($request->filled('email')) {
             $usuario->email = $email;
         }
-        
-        if($request->filled('senha')) {
+
+        if ($request->filled('senha')) {
             $usuario->senha = Hash::make($senha);
         }
 
@@ -143,7 +188,8 @@ class LoginController extends Controller
 
 
     // EXCLUIR UM USUÁRIO
-    public function destroy(Request $request, int $id) {
+    public function destroy(Request $request, int $id)
+    {
 
         $usuarioLogado = $request->user();
 
@@ -151,7 +197,7 @@ class LoginController extends Controller
         $administrador = $usuarioLogado->nivel_acesso === "professor";
 
         // Se o usuário do ID 5 estiver tentando excluir a conta do usuário do ID 7 ou se nao for o professor responsavel pelo site, a aplicação quebra retornando erro
-        if(!$donoDaConta && !$administrador) {
+        if (!$donoDaConta && !$administrador) {
             return response()->json([
                 "mensagem" => "Acesso não autorizado"
             ], 403); // acesso negado

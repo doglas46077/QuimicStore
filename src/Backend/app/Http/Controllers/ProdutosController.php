@@ -11,8 +11,8 @@ class ProdutosController extends Controller
 // ===================================================================================================
 // CADASTRAR PRODUTO
 // ===================================================================================================
-    public function cadastrarProduto(Request $request) {
-        $dadosProdutos = $request->validate([
+    public function RegisterProduct(Request $request) {
+        $productData = $request->validate([
             'categoria_id' => 'required|integer|exists:categorias,id',
             'nome' => 'required|string|unique:produtos,nome',
             'descricao' => 'required|string|max:255',
@@ -22,11 +22,11 @@ class ProdutosController extends Controller
             'imagem' => 'required|string|max:2048'
         ]);
 
-        $novoProduto = Produto::create($dadosProdutos);
+        $newProduct = Produto::create($productData);
 
         return response()->json([
-            "mensagem" => "Produto criado com sucesso",
-            "dados" => $novoProduto
+            "menssage" => "Produto criado com sucesso",
+            "data" => $newProduct
         ], 201);
     }
 
@@ -36,8 +36,8 @@ class ProdutosController extends Controller
     public function buscarProdutos() {
         $produtos = Produto::all();
         return response()->json([
-            "mensagem" => "Exibindo produtos",
-            "dados" => $produtos
+            "menssage" => "Exibindo produtos",
+            "data" => $produtos
         ], 200);
     }
 
@@ -48,8 +48,8 @@ class ProdutosController extends Controller
         $produto = Produto::findOrFail($id);
 
         return response()->json([
-            "mensagem" => "Exibindo produto",
-            "dados" => $produto
+            "menssage" => "Exibindo produto",
+            "data" => $produto
         ], 200);
     }
 
@@ -59,7 +59,7 @@ class ProdutosController extends Controller
     public function update(Request $request, int $id) {
         $produto = Produto::findOrFail($id);
         
-        $dadosAtualizados = $request->validate([
+        $dataAtualizados = $request->validate([
             'categoria_id' => 'integer|exists:categorias,id',
             'nome' => 'string|unique:produtos,nome,' . $id,
             'descricao' => 'string|max:255',
@@ -69,11 +69,11 @@ class ProdutosController extends Controller
             'imagem' => 'string|max:2048'
             ]);
       
-        $produto->update($dadosAtualizados);
+        $produto->update($dataAtualizados);
 
         return response()->json([
-            "mensagem" => "Produto atualizado com sucesso",
-            "dados" => $produto
+            "menssage" => "Produto atualizado com sucesso",
+            "data" => $produto
         ], 200);
     }
 
@@ -88,7 +88,7 @@ class ProdutosController extends Controller
 
         if(!$administrador) {
             return response()->json([
-                "mensagem" => "Acesso não autorizado"
+                "menssage" => "Acesso não autorizado"
             ], 403); // acesso negado
         }
 
@@ -97,8 +97,8 @@ class ProdutosController extends Controller
         $produto->delete();
 
         return response()->json([
-            "mensagem" => "Produto exclúido",
-            "dados" => $produto
+            "menssage" => "Produto exclúido",
+            "data" => $produto
         ], 200);
     }
 }
