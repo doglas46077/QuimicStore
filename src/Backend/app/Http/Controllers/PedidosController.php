@@ -2,73 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ItemPedido; // Corrigido para PascalCase (padrão Laravel)
+use App\Models\ItemPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
-use App\Models\Pagamento; // Adicionado modelo de Pagamento
-use App\Models\Usuario;
+use App\Models\Pagamento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 class PedidosController extends Controller
 {
-    // ======================================================================
-    // CONTROLLER PEDIDOS DESENVOLVIDO POR DÔGLAS   
-    // ======================================================================
 
-    public function criarPedido(Request $request)
+    public function store(Request $request)
     {
+
+        $userAutorizado = $request->user()->nivel_acesso;
+
+        if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
+            return response()->json([
+                "message" => 'Acesso restrito'
+            ], 403);
+        }
+
         $pedidoArmazenado = $request->validate([
             'itens' => 'required|array|min:1',
             'itens.*.produto_id' => 'required|integer|exists:produtos,id',
             'itens.*.quantidade' => 'required|integer|min:1',
-            'metodo_pagamento' => 'required|string' // Adicionado pois é utilizado no registro de pagamento
+            'metodo_pagamento' => 'required|string'
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Verifica o estoque de todos os itens antes de iniciar as inserções
-            foreach ($pedidoArmazenado['itens'] as $item) {
-                $produto = Produto::findOrFail($item['produto_id']);
-
-                if ($item['quantidade'] > $produto->estoque) {
-                    throw new Exception("Estoque insuficiente para o produto: {$produto->nome}");
-                }
-            }
-
-            // Cria o pedido inicial com valor zero
             $pedido = Pedido::create([
-                'usuario_id' => 1, // Idealmente seria auth()->id() em produção
+                'usuario_id' => $request->user()->id,
                 'status' => 'pendente',
                 'valor_total' => 0,
             ]);
 
             $valorTotal = 0;
 
-            // Processa cada item do pedido
             foreach ($pedidoArmazenado['itens'] as $item) {
                 $produto = Produto::findOrFail($item['produto_id']);
 
-                // Decrementa o estoque
+                if ($item['quantidade'] > $produto->estoque) {
+                    throw new Exception("Estoque insuficiente para o produto: {$produto->nome}");
+                }
+
                 $produto->decrement('estoque', $item['quantidade']);
 
-                // Insere na tabela de itens do pedido
                 $pedido->itens()->create([
                     'produto_id' => $produto->id,
                     'quantidade' => $item['quantidade'],
                     'preco_unitario_na_hora_da_compra' => $produto->preco
                 ]);
 
-                // Soma ao valor total
                 $valorTotal += ($produto->preco * $item['quantidade']);
             }
 
-            // Atualiza o valor total real do pedido
             $pedido->update(['valor_total' => $valorTotal]);
 
-            // Registra o pagamento
             Pagamento::create([
                 'pedido_id' => $pedido->id,
                 'metodo' => $pedidoArmazenado['metodo_pagamento'],
@@ -79,25 +72,31 @@ class PedidosController extends Controller
             DB::commit();
 
             return response()->json([
-                "mensagem" => 'Pedido realizado com sucesso!',
+                "message" => 'Pedido realizado com sucesso!',
                 "dados" => $pedido->load(['itens', 'pagamento'])
             ], 201);
-
         } catch (Exception $e) {
             DB::rollBack();
 
             return response()->json([
-                "mensagem" => 'Erro ao processar o pedido no banco de dados',
+                "message" => 'Erro ao processar o pedido no banco de dados',
                 "erro" => $e->getMessage()
             ], 500);
         }
     }
 
-    // =================================================================================================
-    // Listar todos os pedidos de um usuário específico
-    // =================================================================================================
-    public function listarPedidosDoUsuario(int $usuario_id)
+    public function show(Request $request, int $usuario_id)
     {
+        $usuarioLogado = $request->user();
+        $donoDaConta = $usuarioLogado->id === $usuario_id;
+        $temPermissao = $usuarioLogado->nivel_acesso === 'professor' ||  $usuarioLogado->nivel_acesso === 'estagiario';
+
+        if (!$donoDaConta && !$temPermissao) {
+            return response()->json([
+                "message" => "Acesso restrito"
+            ], 403);
+        }
+
         $pedidos = Pedido::with(['itens.produto', 'pagamento'])
             ->where('usuario_id', $usuario_id)
             ->orderBy('created_at', 'desc')
@@ -105,34 +104,44 @@ class PedidosController extends Controller
 
         if ($pedidos->isEmpty()) {
             return response()->json([
-                'mensagem' => 'Nenhum pedido encontrado para este usuário.'
+                'message' => 'Nenhum pedido encontrado para este usuário.'
             ], 404);
         }
 
         return response()->json([
-            'mensagem' => 'Pedidos recuperados com sucesso!',
+            'message' => 'Pedidos recuperados com sucesso!',
             'dados' => $pedidos
         ], 200);
     }
 
-    // =================================================================================================
-    // Buscar todos os pedidos de todos os usuários
-    // =================================================================================================
-    public function buscarTodosPedidos()
+    public function index(Request $request)
     {
+        $userAutorizado = $request->user()->nivel_acesso;
+
+        if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
+            return response()->json([
+                "message" => 'Acesso restrito'
+            ], 403);
+        }
+
         $pedidos = Pedido::with('usuario', 'itens.produto')->get();
 
         return response()->json([
-            "mensagem" => "Todos os pedidos de todos os usuários registrados ao sistema",
+            "message" => "Todos os pedidos de todos os usuários registrados ao sistema",
             "dados" => $pedidos
         ]);
     }
 
-    // =======================================================================================================
-    // Atualizar pedido
-    // =======================================================================================================
     public function update(Request $request, int $id)
     {
+        $userAutorizado = $request->user()->nivel_acesso;
+
+        if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
+            return response()->json([
+                "message" => 'Acesso restrito'
+            ], 403);
+        }
+
         $pedidoArmazenado = $request->validate([
             'itens' => 'required|array|min:1',
             'itens.*.produto_id' => 'required|integer|exists:produtos,id',
@@ -140,42 +149,47 @@ class PedidosController extends Controller
         ]);
 
         DB::beginTransaction();
+
         try {
+            $pedido = Pedido::findOrFail($id);
+
             foreach ($pedidoArmazenado['itens'] as $item) {
-                $itemPedido = ItemPedido::where('pedido_id', $id)
-                    ->where('produto_id', $item['produto_id'])
-                    ->firstOrFail();
+                $produto = Produto::findOrFail($item['produto_id']);
 
-                $produto = Produto::findOrFail($itemPedido->produto_id);
+                // Busca o item já existente ou cria um novo para o pedido
+                $itemPedido = ItemPedido::firstOrNew([
+                    'pedido_id' => $id,
+                    'produto_id' => $item['produto_id']
+                ]);
 
+                $quantidadeAntiga = $itemPedido->exists ? $itemPedido->quantidade : 0;
                 $quantidadeNova = $item['quantidade'];
-                $quantidadeAntiga = $itemPedido->quantidade;
-
                 $diferenca = $quantidadeNova - $quantidadeAntiga;
-                
-                // Trata a devolução ou remoção do estoque dependendo da diferença
+
                 if ($diferenca > 0) {
                     if ($diferenca > $produto->estoque) {
                         throw new Exception("Estoque insuficiente para o produto: {$produto->nome}");
-                    } else {
-                        $produto->decrement('estoque', $diferenca);
                     }
+                    $produto->decrement('estoque', $diferenca);
                 } elseif ($diferenca < 0) {
                     $produto->increment('estoque', abs($diferenca));
                 }
 
-                $itemPedido->update([
-                    "quantidade" => $quantidadeNova
-                ]);
+                $itemPedido->quantidade = $quantidadeNova;
+
+                // Se for um item novo no pedido, grava o preço atual
+                if (!$itemPedido->exists) {
+                    $itemPedido->preco_unitario_na_hora_da_compra = $produto->preco;
+                }
+
+                $itemPedido->save();
             }
 
-            $pedido = Pedido::findOrFail($id);
-
-            // Recalcula o valor total da compra
+            // Recalcula o total usando o preco_unitario_na_hora_da_compra
             $valorTotal = ItemPedido::where('pedido_id', $id)
                 ->get()
                 ->sum(function ($item) {
-                    return $item->quantidade * $item->produto->preco;
+                    return $item->quantidade * $item->preco_unitario_na_hora_da_compra;
                 });
 
             $pedido->update(['valor_total' => $valorTotal]);
@@ -183,48 +197,49 @@ class PedidosController extends Controller
             DB::commit();
 
             return response()->json([
-                'mensagem' => 'Pedido atualizado com sucesso',
+                'message' => 'Pedido atualizado com sucesso',
                 'valor_total' => $valorTotal
             ], 200);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
-                'mensagem' => 'Erro ao atualizar o pedido',
+                'message' => 'Erro ao atualizar o pedido',
                 'erro' => $e->getMessage()
             ], 500);
         }
     }
 
-    // ====================================================================================
-    // EXCLUIR UM PEDIDO
-    // ====================================================================================
-    public function destroy(int $id)
+    public function destroy(Request $request, int $id)
     {
+        $userAutorizado = $request->user()->nivel_acesso;
+
+        if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
+            return response()->json([
+                "message" => 'Acesso restrito'
+            ], 403);
+        }
+
         DB::beginTransaction();
         try {
             $pedido = Pedido::findOrFail($id);
 
-            // Devolve as quantidades ao estoque antes de deletar
             foreach ($pedido->itens as $item) {
                 $produto = Produto::findOrFail($item->produto_id);
                 $produto->increment('estoque', $item->quantidade);
             }
 
-            // Exclui os itens e depois o pedido
             $pedido->itens()->delete();
             $pedido->delete();
 
             DB::commit();
 
             return response()->json([
-                'mensagem' => 'Pedido excluído e estoque restaurado com sucesso'
+                'message' => 'Pedido excluído e estoque restaurado com sucesso'
             ], 200);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
-                'mensagem' => 'Erro ao excluir o pedido',
+                'message' => 'Erro ao excluir o pedido',
                 'erro' => $e->getMessage()
             ], 500);
         }

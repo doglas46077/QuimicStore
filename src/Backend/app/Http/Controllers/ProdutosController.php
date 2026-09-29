@@ -8,11 +8,23 @@ use Illuminate\Http\Request;
 class ProdutosController extends Controller
 {
 
-// ===================================================================================================
-// CADASTRAR PRODUTO
-// ===================================================================================================
-    public function cadastrarProduto(Request $request) {
-        $dadosProdutos = $request->validate([
+    // ===================================================================================================
+    // CADASTRAR PRODUTO
+    // ===================================================================================================
+    public function store(Request $request)
+    {
+
+        $estagiario = $request->user()->nivel_acesso === 'estagiario';
+        $professor = $request->user()->nivel_acesso === 'professor';
+
+        if (!$estagiario && !$professor) {
+            return response()->json([
+                "message" => "Acesso negado"
+            ], 403);
+        }
+
+
+        $productData = $request->validate([
             'categoria_id' => 'required|integer|exists:categorias,id',
             'nome' => 'required|string|unique:produtos,nome',
             'descricao' => 'required|string|max:255',
@@ -22,44 +34,56 @@ class ProdutosController extends Controller
             'imagem' => 'required|string|max:2048'
         ]);
 
-        $novoProduto = Produto::create($dadosProdutos);
+        $newProduct = Produto::create($productData);
 
         return response()->json([
-            "mensagem" => "Produto criado com sucesso",
-            "dados" => $novoProduto
+            "message" => "Produto criado com sucesso",
+            "data" => $newProduct
         ], 201);
     }
 
-// ===================================================================================================
-// BUSCAR TODOS PRODUTOS
-// ===================================================================================================
-    public function buscarProdutos() {
+    // ===================================================================================================
+    // BUSCAR TODOS PRODUTOS
+    // ===================================================================================================
+    public function index()
+    {
         $produtos = Produto::all();
         return response()->json([
-            "mensagem" => "Exibindo produtos",
-            "dados" => $produtos
+            "message" => "Exibindo produtos",
+            "data" => $produtos
         ], 200);
     }
 
-// ===================================================================================================
-// BUSCAR UM PRODUTO ESPECIFICO
-// ===================================================================================================
-    public function buscarProduto(int $id) {
+    // ===================================================================================================
+    // BUSCAR UM PRODUTO ESPECIFICO
+    // ===================================================================================================
+    public function show(int $id)
+    {
         $produto = Produto::findOrFail($id);
 
         return response()->json([
-            "mensagem" => "Exibindo produto",
-            "dados" => $produto
+            "message" => "Exibindo produto",
+            "data" => $produto
         ], 200);
     }
 
-// ===================================================================================================
-// ATUALIZAR PRODUTO
-// ===================================================================================================
-    public function update(Request $request, int $id) {
+    // ===================================================================================================
+    // ATUALIZAR PRODUTO
+    // ===================================================================================================
+    public function update(Request $request, int $id)
+    {
+        $estagiario = $request->user()->nivel_acesso === 'estagiario';
+        $professor = $request->user()->nivel_acesso === 'professor';
+
+        if (!$estagiario && !$professor) {
+            return response()->json([
+                "message" => "Acesso negado"
+            ], 403);
+        }
+
         $produto = Produto::findOrFail($id);
-        
-        $dadosAtualizados = $request->validate([
+
+        $dataAtualizados = $request->validate([
             'categoria_id' => 'integer|exists:categorias,id',
             'nome' => 'string|unique:produtos,nome,' . $id,
             'descricao' => 'string|max:255',
@@ -67,28 +91,29 @@ class ProdutosController extends Controller
             'estoque' => 'integer|min:0',
             'ativo' => 'boolean',
             'imagem' => 'string|max:2048'
-            ]);
-      
-        $produto->update($dadosAtualizados);
+        ]);
+
+        $produto->update($dataAtualizados);
 
         return response()->json([
-            "mensagem" => "Produto atualizado com sucesso",
-            "dados" => $produto
+            "message" => "Produto atualizado com sucesso",
+            "data" => $produto
         ], 200);
     }
 
 
-// ===================================================================================================
-// DELETAR PRODUTO
-// ===================================================================================================
-    public function destroy(Request $request, int $id) {
+    // ===================================================================================================
+    // DELETAR PRODUTO
+    // ===================================================================================================
+    public function destroy(Request $request, int $id)
+    {
         $usuarioLogado = $request->user();
 
         $administrador = $usuarioLogado->nivel_acesso === "professor";
 
-        if(!$administrador) {
+        if (!$administrador) {
             return response()->json([
-                "mensagem" => "Acesso não autorizado"
+                "message" => "Acesso não autorizado, apenas professores podem excluir produtos"
             ], 403); // acesso negado
         }
 
@@ -97,8 +122,8 @@ class ProdutosController extends Controller
         $produto->delete();
 
         return response()->json([
-            "mensagem" => "Produto exclúido",
-            "dados" => $produto
+            "message" => "Produto excluído",
+            "data" => $produto
         ], 200);
     }
 }
