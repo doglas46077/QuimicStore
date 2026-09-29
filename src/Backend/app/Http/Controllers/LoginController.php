@@ -78,6 +78,8 @@ class LoginController extends Controller
             ], 400);
         }
 
+        $usuario->tokens()->delete();
+
         $token = $usuario->createToken('auth_token')->plainTextToken;
 
         return response()->json([
