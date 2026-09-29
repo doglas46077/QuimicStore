@@ -21,9 +21,9 @@ function SectionCadastro() {
         setCarregando(true);
 
         try {
-
+            
             const resposta = await fetch(
-                "http://127.0.0.1:8000/api/cadastro",
+                "http://127.0.0.1:8000/api/registerUser",
                 {
                     method: "POST",
 
@@ -77,7 +77,12 @@ function SectionCadastro() {
             }}
         >
 
-            <HeaderLogin />
+           <div className="flex w-full justify-center pt-8">
+    <h1 className="text-6xl font-bold">
+        <span className="text-slate-900">Quimic</span>{" "}
+        <span className="text-amber-400">Store</span>
+    </h1>
+</div>
 
             <div className="flex flex-1 justify-center">
 
