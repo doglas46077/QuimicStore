@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -13,24 +12,18 @@ class LoginController extends Controller
     // =======================================================================================================
     // CADASTRAR NOVO USUÁRIO
     // =======================================================================================================
-    public function cadastrar(Request $request)
+    public function store(Request $request)
     {
 
         $request->validate([
             "nome" => 'required|min:3|string',
-            "email" => 'required|email',
+            "email" => 'required|email|unique:usuarios,email',
             "senha" => 'required|string|min:6'
         ]);
 
         $email = $request->input('email');
         $senha = $request->input('senha');
         $nome = $request->input('nome');
-
-        if (Usuario::where('email', $email)->first()) {
-            return response()->json([
-                'mensagem' => 'Este e-mail já está cadastrado'
-            ], 400);
-        }
 
         $senhaCriptografadaComHash = Hash::make($senha);
 
@@ -103,24 +96,39 @@ class LoginController extends Controller
 
     // VER TODOS OS LOGINS
 
-    public function users()
+    public function index(Request $request)
     {
-        $usuarios = Usuario::all();
+
+        $usuarioLogado = $request->user();
+
+        if ($usuarioLogado->nivel_acesso !== 'professor') {
+            return response()->json([
+                "mensagem" => "Acesso não autorizado"
+            ], 403);
+        }
+
+        $users = Usuario::all();
 
         return response()->json([
             "status" => true,
             "mensagem" => 'Exibindo todos os usuários cadastrados no sistema!',
-            "usuarios" => [
-                'id' => $usuarios->id,
-                'nome' => $usuarios->nome,
-                'email' => $usuarios->email,
-                'nivel_acesso' => $usuarios->nivel_acesso
-            ],
+            "usuarios" => $users
         ]);
     }
 
-    public function user(int $id)
+    public function show(Request $request, int $id)
     {
+        $usuarioLogado = $request->user();
+
+        $donoDaConta = $usuarioLogado->id === $id;
+        $administrador = $usuarioLogado->nivel_acesso === "professor";
+
+        if (!$donoDaConta && !$administrador) {
+            return response()->json([
+                "mensagem" => "Acesso não autorizado"
+            ], 403); // acesso negado
+        }
+
         $usuario = Usuario::findOrFail($id);
 
         return response()->json([
@@ -137,7 +145,7 @@ class LoginController extends Controller
 
 
     // ATUALIZAR ALGO DO LOGIN NO BANCO
-    public function updateLogin(Request $request, int $id)
+    public function update(Request $request, int $id)
     {
         $usuarioLogado = $request->user();
 

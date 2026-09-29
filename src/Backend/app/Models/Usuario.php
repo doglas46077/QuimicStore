@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable; // 1. Herança para autenticação
-use Laravel\Sanctum\HasApiTokens;                       // 2. Trait para Tokens do Sanctum
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Override;
 
 class Usuario extends Authenticatable
 {
+    use HasApiTokens, Notifiable;
+
     protected $table = 'usuarios';
 
     protected $fillable = [

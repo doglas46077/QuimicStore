@@ -3,157 +3,37 @@
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
-use App\Models\Pedido;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
 // ! Rotas públicas
 // ==========================================================================
-Route::post('/cadastro', [LoginController::class, 'cadastrar']);
+Route::post('/registerUser', [LoginController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
 
 // ==========================================================================
 // ! Rotas com protecao
 // ==========================================================================
-Route::middleware('auth_sanctum')->group(function() {
+Route::middleware('auth:sanctum')->group(function() {
     // Usuários
-    Route::get('/usuarios', [LoginController::class, 'users']);
-    Route::get('/usuario/{id}', [LoginController::class, 'user']);
-    Route::put('/updateUser/{id}', [LoginController::class, 'updateLogin']);
-    Route::delete('deleteUser/{id}', [LoginController::class, 'delete']);
+    Route::get('/showUsers', [LoginController::class, 'index']);
+    Route::get('/showUser/{id}', [LoginController::class, 'show']);
+    Route::put('/updateUser/{id}', [LoginController::class, 'update']);
+    Route::delete('/deleteUser/{id}', [LoginController::class, 'destroy']);
 
 
     // Produtos
-    Route::post('/product', [ProdutosController::class, 'RegisterProduct']);
-    
+    Route::post('/registerProducts', [ProdutosController::class, 'store']);
+    Route::get('/showProducts', [ProdutosController::class, 'index']);
+    Route::get('/showProduct/{id}', [ProdutosController::class, 'show']);
+    Route::put('/updateProduct/{id}', [ProdutosController::class, 'update']);
+    Route::delete('/deleteProduct/{id}', [ProdutosController::class, 'destroy']);
+
+
+    // Pedidos
+    Route::post('/registerOrder', [PedidosController::class, 'store']);
+    Route::get('/showOrders', [PedidosController::class, 'index']);
+    Route::get('/showOrder/user/{usuario_id}', [PedidosController::class, 'show']);
+    Route::put('/updateOrder/{id}', [PedidosController::class, 'update']);
+    Route::delete('/deleteOrder/{id}', [PedidosController::class, 'destroy']);
 });
- 
-// ==========================================================================
-//  ! PRODUTOS - DOGLAS
-// ==========================================================================
-
-Route::prefix('/produtos')->group(function() {
-    // CREATE
-    Route::post('/', [ProdutosController::class, 'cadastrarProduto']);
-
-    // READ
-    Route::get('/', [ProdutosController::class, 'buscarProdutos']);
-    Route::get('/{id}', [ProdutosController::class, 'buscarProduto']);
-
-    // UPDATE
-    Route::put('/{id}', [ProdutosController::class, 'update']);
-
-    // DELETE
-    Route::delete('/{id}', [ProdutosController::class, 'destroy']);
-});
-
-// ==========================================================================
-//  ! PEDIDOS - DOGLAS
-// ==========================================================================
-
-Route::prefix('/pedidos')->group(function() {
-    // CREATE
-    Route::post('/', [PedidosController::class, 'criarPedido']);
-    
-    // READ
-    Route::get('/', [PedidosController::class, 'buscarTodosPedidos']);
-
-    Route::get('/{id}', [PedidosController::class, 'listarPedidosDoUsuario']);
-
-    // ATUALIZAR UM PEDIDO
-    Route::put('/{id}', [PedidosController::class, 'update']);
-
-    // DELETAR UM PEDIDO
-    Route::delete('/{id}', [PedidosController::class, 'destroy']);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//     // use App\Http\Controllers\AvaliacaoController;
-//     // use App\Http\Controllers\CategoriaController;
-//     // use App\Http\Controllers\CompradorController;
-//     // use App\Http\Controllers\LayersController;
-//     // use App\Http\Controllers\PagamentoController;
-//     // use App\Http\Controllers\ProdutoController;
-//     // use App\Http\Controllers\VendaController;
-
-// Route::post('/avaliacao', [AvaliacaoController::class, 'store']);
-// Route::post('/comprador', [CompradorController::class, 'store']);
-// Route::post('/categoria', [CategoriaController::class, 'store']);
-// Route::post('/pagamento', [PagamentoController::class, 'store']);
-// Route::post('/venda', [VendaController::class, 'store']);
-// Route::post('/layers/auth', [LayersController::class, 'autenticar']);
-
-// Route::post('/login', [LoginController::class, 'login']);
-// // Route::post('/login') => Crie uma porta do tipo Post que é acessada no navegador. Exemplo: [seusite.com/api/login]
-// // LoginController::class => Chama quem está dentro da classe 'loginController' que no caso é o 'login'
-// // 'login' => Chama a função, ativando-a
-
-
-// Route::get('/buscar-produtos', [ProdutoController::class, 'buscar']);
-
-// // Route::profix organiza aos caminhos deixando mais limpo
-
-// Route::prefix('produtos')->controller(ProdutoController::class)->group(function () {
-// Route::get('/', 'index');
-// Route::post('/', 'store');
-// Route::put('/{id}', 'update');
-// Route::delete('/{id}', 'destroy');
-// });
-
-//     // Route::post('/produtos', [ProdutoController::class, 'store']);
-//     // Route::post('/avaliacao', [AvaliacaoController::class, 'store']);
-//     // Route::post('/comprador', [CompradorController::class, 'store']);
-//     // Route::post('/categoria', [CategoriaController::class, 'store']);
-//     // Route::post('/pagamento', [PagamentoController::class, 'store']);
-//     // Route::post('/venda', [VendaController::class, 'store']);
-//     // Route::post('/layers/auth', [LayersController::class, 'autenticar']);
-    
-//     // Route::post('/login', [LoginController::class, 'login']);
-//     // // Route::post('/login') => Crie uma porta do tipo Post que é acessada no navegador. Exemplo: [seusite.com/api/login]
-//     // // LoginController::class => Chama quem está dentro da classe 'loginController' que no caso é o 'login'
-//     // // 'login' => Chama a função, ativando-a
-    
-    
-//     // Route::get('/buscar-produtos', [ProdutoController::class, 'buscar']);
