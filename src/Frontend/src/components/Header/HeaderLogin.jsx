@@ -2,16 +2,16 @@ import { useState } from "react";
 import { FaCircleUser } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
-function sair(){
-    const navigate = useNavigate()
-
-    localStorage.removerItem("token")
-    navigate("/login")
-}
 
 function HeaderLogin() {
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
+
+  function sair(){
+    localStorage.removeItem("usuario")
+      localStorage.removeItem("token")
+      navigate("/login")
+  }
 
   return (
     <header className="flex items-center justify-between bg-emerald-950 px-6 py-3">
