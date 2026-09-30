@@ -1,5 +1,5 @@
 import HeaderLogin from "./Header/HeaderLogin";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function LoginCard() {
@@ -19,7 +19,9 @@ async function login(e) {
         try{
           const response= await fetch("http://localhost:8000/api/login", {
             method: "POST",
-            headers: {"Content-type": "application/json"},
+            headers: {"Content-Type": "application/json",
+              "Accept": "application/json",
+            },
             body:JSON.stringify({email, senha}),
           })
 
@@ -29,8 +31,9 @@ async function login(e) {
             useError(guardar.mensagem || "Erro ao fazer o login")
             return
           }
-
-          console.log(guardar)
+          localStorage.setItem("token", guardar.Token)
+          localStorage.setItem("usuario", JSON.stringify(guardar.usuario))
+          
           navigate("/catalogo")
         }catch(erro){
           useError("Não foi possivel conectar ao servidor")
