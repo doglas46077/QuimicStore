@@ -2,6 +2,13 @@ import { useState } from "react";
 import { FaCircleUser } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
+function sair(){
+    const navigate = useNavigate()
+
+    localStorage.removerItem("token")
+    navigate("/login")
+}
+
 function HeaderLogin() {
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
@@ -32,7 +39,7 @@ function HeaderLogin() {
             </button>
 
             <button
-              onClick={() => navigate("/login")}
+              onClick={sair}
               className="block w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-slate-100 border-t-2 border-slate-400"
             >
               Sair
