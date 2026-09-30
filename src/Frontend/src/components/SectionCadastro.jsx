@@ -48,15 +48,12 @@ function SectionCadastro() {
                 );
             }
 
-            console.log("Usuário cadastrado:", dados);
-
-            alert("Cadastro realizado com sucesso!");
+           localStorage.setItem("token", dados.Token);
+           localStorage.setItem("usuario", JSON.stringify(dados.usuario))
 
             navigate("/catalogo");
 
         } catch (error) {
-
-            console.error(error);
 
             setErro(error.message);
 
@@ -103,7 +100,7 @@ function SectionCadastro() {
                         </div>
 
                         <p className="mt-2 text-xs font-medium uppercase text-slate-500">
-                            Painel Administrativo
+                            Cadastre-Se com email e senha
                         </p>
 
                     </div>
