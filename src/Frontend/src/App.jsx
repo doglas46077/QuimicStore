@@ -8,6 +8,7 @@ import SectionPerfil from "./components/SectionPerfil";
 import SectionStatus from "./components/SectionStatus";
 import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
+import TelaAdm from "./components/TelaAdm";
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
 
       <Route path="/pedidoDetalhe" element={<SectionPedidoDetalhes/>}/>
       <Route path="/pedidoStatus" element={<SectionPedidoStatus/>}/>
+      <Route path="/adm" element={<TelaAdm/>}/>
         </Routes>
         </div>
     </>

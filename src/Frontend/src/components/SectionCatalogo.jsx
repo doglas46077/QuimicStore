@@ -6,8 +6,10 @@ import { Leaf } from 'reicon-react';
 import { Wand3 } from 'reicon-react';
 import Footer from "./FooterCatalogo"
 import HeaderLogin from './Header/HeaderLogin';
+import { useNavigate } from 'react-router-dom';
 
 export default function SectionCatalogo() {
+    const navigate = useNavigate
     return (
         <>
         <HeaderLogin />
@@ -20,7 +22,9 @@ export default function SectionCatalogo() {
                         <p className="flex justify-baseline">Limpeza, higiene e cosméticos fabricados na instituição.</p>
                     </div>
                 </div>
+
             </header>
+                
             
             <form className="flex bg-white rounded-xl w-[80%] h-10 items-center shadow">
                 <button className="flex w-10 h-10 items-center justify-center hover:text-green-600" type='submit'><Search4 size={24} /></button>
