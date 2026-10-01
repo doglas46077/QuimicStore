@@ -3,6 +3,7 @@
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
+use App\Models\Avaliacao;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
@@ -10,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 // ==========================================================================
 Route::post('/registerUser', [LoginController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
+
+// Comentario teste
+Route::post('/coments', [Avaliacao::class, 'store']);
 
 // ==========================================================================
 // ! Rotas com protecao
@@ -22,8 +26,8 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::delete('/deleteUser/{id}', [LoginController::class, 'destroy']);
 
 
-    // Produtos
     Route::post('/registerProducts', [ProdutosController::class, 'store']);
+    // Produtos
     Route::get('/showProducts', [ProdutosController::class, 'index']);
     Route::get('/showProduct/{id}', [ProdutosController::class, 'show']);
     Route::put('/updateProduct/{id}', [ProdutosController::class, 'update']);
