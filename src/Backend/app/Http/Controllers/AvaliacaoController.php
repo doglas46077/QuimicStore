@@ -32,4 +32,13 @@ class AvaliacaoController extends Controller
             "data" => $avaliacao
         ], 201);
     }
+
+    public function index() {
+         $avaliacoes = Avaliacao::with('usuario');
+        
+         return response()->json([
+            "message" => 'Comentarios buscado com sucesso',
+            "data" => $avaliacoes
+         ]);
+    }
 }
