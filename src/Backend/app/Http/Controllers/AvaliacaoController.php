@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 
 class AvaliacaoController extends Controller
 {
-    public function store(Request $request, int $reqProdutoID) {
+    public function store(Request $request, int $reqProdutoID)
+    {
         $request->validate([
             "nota" => "required|integer|between:1,5",
             "comentario" => "string|nullable"
@@ -25,20 +26,23 @@ class AvaliacaoController extends Controller
             "usuario_id" => $userId,
             "nota" => $nota,
             "comentario" => $comentario
-        ]); 
-        
+        ]);
+
         return response()->json([
             "message" => "Avaliação enviada",
             "data" => $avaliacao
         ], 201);
     }
 
-    public function index() {
-         $avaliacoes = Avaliacao::with('usuario')->get();
-        
-         return response()->json([
-            "message" => 'Comentarios buscado com sucesso',
+    public function index(int $produtoId)
+    {
+        $avaliacoes = Avaliacao::with(['usuario:id,nome', 'produto:id,nome,descricao,preco'])->where('produto_id', $produtoId)->get();
+
+        return response()->json([
+            "message" => 'Comentários buscados com sucesso',
             "data" => $avaliacoes
-         ]);
+        ]);
     }
+
+
 }
