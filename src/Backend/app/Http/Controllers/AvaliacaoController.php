@@ -34,7 +34,7 @@ class AvaliacaoController extends Controller
     }
 
     public function index() {
-         $avaliacoes = Avaliacao::with('usuario');
+         $avaliacoes = Avaliacao::with('usuario')->get();
         
          return response()->json([
             "message" => 'Comentarios buscado com sucesso',
