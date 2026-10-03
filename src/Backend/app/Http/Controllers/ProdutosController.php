@@ -126,4 +126,5 @@ class ProdutosController extends Controller
             "data" => $produto
         ], 200);
     }
+
 }

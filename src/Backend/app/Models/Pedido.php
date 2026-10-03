@@ -14,6 +14,12 @@ class Pedido extends Model
         'status'
     ];
 
+    public function pagamento()
+    {
+        // Define que um Pedido possui um Pagamento (ou tem relação de 1 para 1 / 1 para N)
+        return $this->hasOne(Pagamento::class, 'pedido_id');
+    }
+
     public function usuario() {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
