@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('/registerUser', [LoginController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
 
-// Comentario teste
-Route::post('/coments', [Avaliacao::class, 'store']);
-
+// Avaliacao
+Route::post('/adicionarComentario', [Avaliacao::class, 'store']);
+Route::get('/comentario/{produtoId}', [Avaliacao::class, 'index']);
 // ==========================================================================
 // ! Rotas com protecao
 // ==========================================================================
@@ -24,20 +24,24 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/showUser/{id}', [LoginController::class, 'show']);
     Route::put('/updateUser/{id}', [LoginController::class, 'update']);
     Route::delete('/deleteUser/{id}', [LoginController::class, 'destroy']);
-
-
-    Route::post('/registerProducts', [ProdutosController::class, 'store']);
+    
+    
     // Produtos
+    Route::post('/registerProducts', [ProdutosController::class, 'store']);
     Route::get('/showProducts', [ProdutosController::class, 'index']);
     Route::get('/showProduct/{id}', [ProdutosController::class, 'show']);
     Route::put('/updateProduct/{id}', [ProdutosController::class, 'update']);
     Route::delete('/deleteProduct/{id}', [ProdutosController::class, 'destroy']);
-
-
+    
+    
     // Pedidos
     Route::post('/registerOrder', [PedidosController::class, 'store']);
     Route::get('/showOrders', [PedidosController::class, 'index']);
     Route::get('/showOrder/user/{usuario_id}', [PedidosController::class, 'show']);
     Route::put('/updateOrder/{id}', [PedidosController::class, 'update']);
     Route::delete('/deleteOrder/{id}', [PedidosController::class, 'destroy']);
-});
+    
+    // Avaliacao
+    Route::put('/atualizarComentario/{avaliacaoId}', [Avaliacao::class, 'update']);
+    Route::delete('/deleteComentario/{avaliacaoId}]', [Avaliacao::class, 'destroy']);
+    });
