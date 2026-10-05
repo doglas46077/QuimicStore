@@ -38,6 +38,7 @@ export default function SectionCatalogo() {
                     </div>
 
                     <div className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                        
                         <Wand3 size={24} />
                         <h3>Limpeza</h3>
                     </div>
@@ -53,7 +54,7 @@ export default function SectionCatalogo() {
                     </div>
                 </section>
 
-                <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] ">
+                <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] pb-24 ">
 
                     <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
                         <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>

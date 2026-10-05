@@ -1,15 +1,34 @@
 import HeaderLogin from "./Header/HeaderLogin";
 import { User, Package } from "reicon-react";
 import FooterCatalogo from "./FooterCatalogo"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function SectionPerfil() {
 const navigate = useNavigate()
+
+const [nome, setNome] = useState("")
+const [email, setEmail] = useState("")
+
+    useEffect (() => {
+      const usuarioSalvo = JSON.parse(localStorage.getItem("usuario")|| "null")
+      const token = localStorage.getItem("token")
+
+      if (!usuarioSalvo || !token) {
+        navigate("/login")
+        return
+      }
+
+      setNome(usuarioSalvo.nome)
+      setEmail(usuarioSalvo.email)
+    }, [])
+
+    const inicial = nome ? nome.charAt(0).toUpperCase() : "?"
+
     return(
         <>
         <HeaderLogin/>
-         <div className="min-h-screen w-full bg-slate-50">
+         <div className="min-h-screen w-full bg-slate-50 pb-24">
  
     
       <div className="flex items-center gap-3 px-6 pt-6">
@@ -23,10 +42,10 @@ const navigate = useNavigate()
        
         <div className="rounded-xl bg-white p-7 text-center shadow-sm">
           <div className="mx-auto flex h-18 w-18 items-center justify-center rounded-full bg-emerald-50 text-2xl font-bold text-emerald-700">
-            D
+            {inicial}
           </div>
-          <p className="mt-3 text-base font-bold text-slate-900">Dóglas</p>
-          <p className="text-sm text-slate-500">professor@fiec.edu.br</p>
+          <p className="mt-3 text-base font-bold text-slate-900">{nome}</p>
+          <p className="text-sm text-slate-500">{email}</p>
         </div>
  
         
@@ -40,7 +59,8 @@ const navigate = useNavigate()
             type="text"
             id="nome"
             name="nome"
-            defaultValue="Dóglas Vitor Silva"
+            value={nome}
+           readOnly
             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
           />
  
@@ -51,7 +71,8 @@ const navigate = useNavigate()
             type="email"
             id="email"
             name="email"
-            defaultValue="professor@fiec.edu.br"
+            value={email}
+            readOnly
             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
           />
  

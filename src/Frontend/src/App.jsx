@@ -17,17 +17,17 @@ function App() {
 
        <Routes>
         <Route path="/" element={<SectionCadastro />} />
-      <Route path="/login" element={ <LoginCard/>}/>
+      <Route path="/login" element={<LoginCard/>}/>
       <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/></ProtecaoRotas>}/>
 
-      <Route path="/carrinho" element={<SectionCarrinho/>}/>
-      <Route path="/pedidos" element={<SectionPedidoStatus/>}/>
+      <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
+      <Route path="/pedidos" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
 
-      <Route path="/perfil" element={<SectionPerfil/>}/>
+      <Route path="/perfil" element={<ProtecaoRotas><SectionPerfil/></ProtecaoRotas> }/>
 
-      <Route path="/pedidoDetalhe" element={<SectionPedidoDetalhes/>}/>
-      <Route path="/pedidoStatus" element={<SectionPedidoStatus/>}/>
-      <Route path="/adm" element={<TelaAdm/>}/>
+      <Route path="/pedidoDetalhe" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
+      <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
+      <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
         </Routes>
         </div>
     </>

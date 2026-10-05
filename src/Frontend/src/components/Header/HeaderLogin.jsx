@@ -7,6 +7,9 @@ function HeaderLogin() {
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
 
+  const usuario = JSON.parse(localStorage.getItem("usuario")|| "null")
+  const adm = usuario?.nivel_acesso === "professor" || usuario?.nivel_acesso === "estagiario"
+
   function sair(){
     localStorage.removeItem("usuario")
       localStorage.removeItem("token")
@@ -25,7 +28,7 @@ function HeaderLogin() {
           className="flex items-center gap-3"
           onClick={() => setAberto(!aberto)}
         >
-          <span className="text-sm text-white/90">Olá, Usuário</span>
+          <span className="text-sm text-white/90">Olá, {usuario?.nome || "Usuário"}</span>
           <FaCircleUser className="text-zinc-300" size={20} />
         </button>
 
@@ -38,8 +41,12 @@ function HeaderLogin() {
               Perfil
             </button>
 
-            <button onClick={() => navigate("/adm")}className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100">Editar</button>           
-            
+          {adm && (
+            <button 
+                onClick={() => navigate("/adm")}
+                className="block w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100">Editar</button>           
+          )}
+          
             <button
               onClick={sair}
               className="block w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-slate-100 border-t-2 border-slate-400"
