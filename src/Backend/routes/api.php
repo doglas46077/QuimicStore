@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
@@ -13,8 +14,7 @@ Route::post('/registerUser', [LoginController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
 
 // Avaliacao
-Route::post('/adicionarComentario', [Avaliacao::class, 'store']);
-Route::get('/comentario/{produtoId}', [Avaliacao::class, 'index']);
+Route::get('/comentario/{produtoId}', [AvaliacaoController::class, 'index']);
 // ==========================================================================
 // ! Rotas com protecao
 // ==========================================================================
@@ -44,4 +44,5 @@ Route::middleware('auth:sanctum')->group(function() {
     // Avaliacao
     Route::put('/atualizarComentario/{avaliacaoId}', [Avaliacao::class, 'update']);
     Route::delete('/deleteComentario/{avaliacaoId}]', [Avaliacao::class, 'destroy']);
+    Route::post('/adicionarComentario/{reqProdutoID}', [AvaliacaoController::class, 'store']);
     });
