@@ -39,6 +39,8 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/showOrder/user/{usuario_id}', [PedidosController::class, 'show']);
     Route::put('/updateOrder/{id}', [PedidosController::class, 'update']);
     Route::delete('/deleteOrder/{id}', [PedidosController::class, 'destroy']);
+    // atualiza o pedido
+    Route::post('/finalizeOrder/{id}/pedido', [PedidosController::class, 'fecharPedido']);
     
     // Avaliacao
     Route::put('/atualizarComentario/{avaliacaoId}', [AvaliacaoController::class, 'update']);
