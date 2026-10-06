@@ -5,7 +5,6 @@ import SectionCadastro from "./components/SectionCadastro";
 import { Routes, Route } from "react-router-dom";
 import SectionCarrinho from "./components/PrincipalCarrinho";
 import SectionPerfil from "./components/SectionPerfil";
-import SectionStatus from "./components/SectionStatus";
 import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
