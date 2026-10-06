@@ -21,6 +21,8 @@ class Produto extends Model
         'imagem'
     ];
 
+    
+
     protected $casts = [
         // O casts usa uma convenção diferente no model do que no controller. Usa-se somente o :2 pois refere-se a duas casas decimais após a virgula.
         
@@ -36,6 +38,12 @@ class Produto extends Model
     public function avaliacoes()
     {
         return $this->hasMany(Avaliacao::class, 'id_produtos', 'id_produto');
+    }
+
+    protected $appends = ['imagem_url'];
+
+    public function getImagemUrlAttribute() {
+        return $this->imagem ? asset('/storage' . $this->imagem) : null;
     }
 
 }

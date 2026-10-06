@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Produto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProdutosController extends Controller
 {
@@ -31,8 +32,11 @@ class ProdutosController extends Controller
             'preco' => 'required|numeric|decimal:0,2|min:0',
             'estoque' => 'required|integer|min:0',
             'ativo' => 'required|boolean',
-            'imagem' => 'required|string|max:2048'
+            'imagem' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
+
+        $path = $request->file('imagem')->store('produtos', 'public');
+        $productData['imagem'] = $path;
 
         $newProduct = Produto::create($productData);
 
@@ -90,8 +94,15 @@ class ProdutosController extends Controller
             'preco' => 'numeric|decimal:0,2|min:0',
             'estoque' => 'integer|min:0',
             'ativo' => 'boolean',
-            'imagem' => 'string|max:2048'
+            'imagem' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
+
+        if ($request->hasFile('imagem')) {
+            if ($produto->imagem) {
+                Storage::disk('public')->delete($produto->imagem);
+            }
+            $dataAtualizados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+        }
 
         $produto->update($dataAtualizados);
 
@@ -118,6 +129,10 @@ class ProdutosController extends Controller
         }
 
         $produto = Produto::findOrFail($id);
+
+        if ($produto->imagem) {
+            Storage::disk('public')->delete($produto->imagem);
+        }
 
         $produto->delete();
 
