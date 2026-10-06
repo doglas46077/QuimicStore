@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Avaliacao;
 use App\Models\Produto;
-use App\Models\Usuario;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+
 
 class AvaliacaoController extends Controller
 {

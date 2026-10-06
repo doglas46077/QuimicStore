@@ -4,7 +4,6 @@ use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
-use App\Models\Avaliacao;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================================================
@@ -42,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::delete('/deleteOrder/{id}', [PedidosController::class, 'destroy']);
     
     // Avaliacao
-    Route::put('/atualizarComentario/{avaliacaoId}', [Avaliacao::class, 'update']);
-    Route::delete('/deleteComentario/{avaliacaoId}]', [Avaliacao::class, 'destroy']);
+    Route::put('/atualizarComentario/{avaliacaoId}', [AvaliacaoController::class, 'update']);
+    Route::delete('/deleteComentario/{avaliacaoId}]', [AvaliacaoController::class, 'destroy']);
     Route::post('/adicionarComentario/{reqProdutoID}', [AvaliacaoController::class, 'store']);
     });
