@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,5 +27,12 @@ class DatabaseSeeder extends Seeder
         \App\Models\Usuario::factory(20)->create();
         \App\Models\Categoria::factory(20)->create();
         \App\Models\Produto::factory(20)->create();
+
+        Usuario::create([
+            'nome' => 'Professor',
+            "email" => "professor@fiec.edu.br",
+            "senha" => Hash::make('senha123'),
+            "nivel_acesso" => 'professor'
+        ]);
     }
 }

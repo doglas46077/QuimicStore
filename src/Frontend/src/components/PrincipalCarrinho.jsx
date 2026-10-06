@@ -8,6 +8,7 @@ import { Headphones } from "reicon-react"
 import { Store } from "reicon-react"
 import HeaderLogin from "./Header/HeaderLogin"
 import { useNavigate } from "react-router-dom"
+import FooterCatalogo from "./FooterCatalogo"
 
 function SectionCarrinho() {
 const navigate = useNavigate()
@@ -101,7 +102,7 @@ const navigate = useNavigate()
             </div>
           </div>
         </div>
-        <div className="h-16 bg-emerald-950" />
+        <FooterCatalogo/>
       </div>
     </>
   );

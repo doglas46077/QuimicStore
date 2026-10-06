@@ -1,5 +1,5 @@
 import HeaderLogin from "./Header/HeaderLogin";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 function LoginCard() {
@@ -19,7 +19,9 @@ async function login(e) {
         try{
           const response= await fetch("http://localhost:8000/api/login", {
             method: "POST",
-            headers: {"Content-type": "application/json"},
+            headers: {"Content-Type": "application/json",
+              "Accept": "application/json",
+            },
             body:JSON.stringify({email, senha}),
           })
 
@@ -29,8 +31,9 @@ async function login(e) {
             useError(guardar.mensagem || "Erro ao fazer o login")
             return
           }
-
-          console.log(guardar)
+          localStorage.setItem("token", guardar.Token)
+          localStorage.setItem("usuario", JSON.stringify(guardar.usuario))
+          
           navigate("/catalogo")
         }catch(erro){
           useError("Não foi possivel conectar ao servidor")
@@ -44,8 +47,13 @@ async function login(e) {
 
     <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
     style={{backgroundImage: "url(assets/telaFundo.png)", backgroundRepeat: "no-repeat", backgroundSize: "cover"}}>
-      <HeaderLogin />
 
+      <div className="flex w-full justify-center pt-8">
+    <h1 className="text-6xl font-bold">
+        <span className="text-slate-900">Quimic</span>{" "}
+        <span className="text-amber-400">Store</span>
+    </h1>
+</div>
       <div className="flex flex-1 justify-center">
         <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
           <div className="text-center">
@@ -54,11 +62,12 @@ async function login(e) {
               <span className="text-amber-400">Store</span>
             </div>
             <p className="mt-2 text-xs font-medium uppercase text-slate-500">
-              Painel Administrativo
+            Faça login com seu email e senha
       </p>
           </div>
          
-          <form className="mt-6">
+          <form onSubmit={login}
+           className="mt-6">
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
               E-mail
             </label>

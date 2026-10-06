@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 export default function FooterCatalogo() {
     const navigate = useNavigate()
     return (
-        <footer className="h-20 bg-white mt-10">
+        <footer className="fixed bottom-0 left-0 z-50 h-20 w-full bg-white">
             <div className="flex h-full justify-center items-center gap-[20%]">
                 <div className='flex flex-col items-center p-2 hover:border-b-green-600 hover:border-b-3 hover:text-green-600 hover:transition hover:duration-200'>
                     <button onClick={() =>navigate("/catalogo")}>
