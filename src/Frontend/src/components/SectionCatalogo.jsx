@@ -1,5 +1,5 @@
 import { Search4 } from 'reicon-react';
-import { CartLarge5 } from 'reicon-react';
+import CardCatalogo from './CardCatalogo';
 import { Widget } from 'reicon-react';
 import { Droplet } from 'reicon-react';
 import { Leaf } from 'reicon-react';
@@ -9,7 +9,7 @@ import HeaderLogin from './Header/HeaderLogin';
 import { useNavigate } from 'react-router-dom';
 
 export default function SectionCatalogo() {
-    const navigate = useNavigate
+    const navigate = useNavigate()
     return (
         <>
             <HeaderLogin />
@@ -32,174 +32,38 @@ export default function SectionCatalogo() {
                 </form>
 
                 <section className="flex gap-3 w-[80%]">
-                    <div className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Widget size={24} />
                         <h3>Todos</h3>
-                    </div>
+                    </button>
 
-                    <div className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
-                        
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Wand3 size={24} />
                         <h3>Limpeza</h3>
-                    </div>
+                    </button>
 
-                    <div className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Droplet size={24} />
                         <h3>Higiene</h3>
-                    </div>
+                    </button>
 
-                    <div className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Leaf size={24} />
                         <h3>Estética</h3>
-                    </div>
+                    </button>
                 </section>
 
-                <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] pb-24 ">
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div className="" >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col w-[95%] h-110 bg-white rounded-xl shadow items-center gap-3 hover:scale-105 hover:transition hover:duration-300">
-                        <div className="bg-gray-500 w-[90%] h-[45%] mt-3 rounded-xl"></div>
-                        <div className="flex flex-col items-baseline w-[90%]">
-                            <p className="text-emerald-700 text-2xl">Categoria</p>
-                            <div >
-                                <h1 className='text-3xl'>Nome Produto</h1>
-                                <p className="flex justify-baseline">Descrição</p>
-                            </div>
-                        </div>
-                        <div className="flex w-[90%] justify-between items-center mt-[10%] lg:mt-[22%] md:mt-[15%]">
-                            <h1 className='text-2xl'>R$ 00,00</h1>
-                            <div className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white'>
-                                <CartLarge5 size={24} />
-                                <p>Adicionar</p>
-                            </div>
-                        </div>
-                    </div>
-
+                <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] ">
+                    {produtos.map((produto) => (
+                        <CardCatalogo 
+                            key={produto.id}
+                            nome={produto.nome}
+                            descricao={produto.descricao}
+                            preco={produto.preco}
+                            imagem={produto.imagem}
+                            categoria={produto.categoria}
+                        />
+                    ))}
                 </section>
 
             </div>
