@@ -1,5 +1,6 @@
 import LoginCard from "./components/LoginCard"
 import SectionCatalogo from "./components/SectionCatalogo";
+<<<<<<< HEAD
 import SectionPedidoStatus from "./components/SectionPedidoStatus";
 import SectionCadastro from "./components/SectionCadastro";
 import { Routes, Route } from "react-router-dom";
@@ -9,11 +10,20 @@ import SectionStatus from "./components/SectionStatus";
 import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
+=======
+import Layers from "./components/Layers";
+import ProductPage from "./components/ProductPage";
+>>>>>>> front/feature/pre-carrinho
 
 function App() {
     return (
         <>
         <div className="bg-olive-50 font-bold">
+<<<<<<< HEAD
+=======
+       <Layers/>
+       <ProductPage />
+>>>>>>> front/feature/pre-carrinho
 
        <Routes>
         <Route path="/" element={<SectionCadastro />} />
