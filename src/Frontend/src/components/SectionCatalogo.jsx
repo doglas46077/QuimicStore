@@ -7,9 +7,12 @@ import { Wand3 } from 'reicon-react';
 import Footer from "./FooterCatalogo"
 import HeaderLogin from './Header/HeaderLogin';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function SectionCatalogo() {
     const navigate = useNavigate()
+
+      const [produtos, setProdutos] = useState([])
     return (
         <>
             <HeaderLogin />
