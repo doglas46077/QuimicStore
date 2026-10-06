@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
@@ -9,6 +10,8 @@ use Override;
 
 class Usuario extends Authenticatable
 {
+    use HasFactory;
+    
     use HasApiTokens, Notifiable;
 
     protected $table = 'usuarios';

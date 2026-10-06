@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/registerUser', [LoginController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
 
+// Avaliacao
+Route::get('/comentario/{produtoId}', [AvaliacaoController::class, 'index']);
 // ==========================================================================
 // ! Rotas com protecao
 // ==========================================================================
@@ -20,20 +23,25 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::get('/showUser/{id}', [LoginController::class, 'show']);
     Route::put('/updateUser/{id}', [LoginController::class, 'update']);
     Route::delete('/deleteUser/{id}', [LoginController::class, 'destroy']);
-
-
+    
+    
     // Produtos
     Route::post('/registerProducts', [ProdutosController::class, 'store']);
     Route::get('/showProducts', [ProdutosController::class, 'index']);
     Route::get('/showProduct/{id}', [ProdutosController::class, 'show']);
     Route::put('/updateProduct/{id}', [ProdutosController::class, 'update']);
     Route::delete('/deleteProduct/{id}', [ProdutosController::class, 'destroy']);
-
-
+    
+    
     // Pedidos
     Route::post('/registerOrder', [PedidosController::class, 'store']);
     Route::get('/showOrders', [PedidosController::class, 'index']);
     Route::get('/showOrder/user/{usuario_id}', [PedidosController::class, 'show']);
     Route::put('/updateOrder/{id}', [PedidosController::class, 'update']);
     Route::delete('/deleteOrder/{id}', [PedidosController::class, 'destroy']);
-});
+    
+    // Avaliacao
+    Route::put('/atualizarComentario/{avaliacaoId}', [AvaliacaoController::class, 'update']);
+    Route::delete('/deleteComentario/{avaliacaoId}]', [AvaliacaoController::class, 'destroy']);
+    Route::post('/adicionarComentario/{reqProdutoID}', [AvaliacaoController::class, 'store']);
+    });

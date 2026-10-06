@@ -204,7 +204,6 @@ class PedidosController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Erro ao atualizar o pedido',
-                'erro' => $e->getMessage()
             ], 500);
         }
     }
@@ -240,7 +239,6 @@ class PedidosController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Erro ao excluir o pedido',
-                'erro' => $e->getMessage()
             ], 500);
         }
     }
