@@ -204,6 +204,7 @@ class PedidosController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Erro ao atualizar o pedido',
+                'erro' => $e->getMessage()
             ], 500);
         }
     }
@@ -239,7 +240,82 @@ class PedidosController extends Controller
             DB::rollBack();
             return response()->json([
                 'message' => 'Erro ao excluir o pedido',
+                'erro' => $e->getMessage()
             ], 500);
         }
     }
+
+// ======================================================================================================
+// FECHAR PEDIDO
+// ======================================================================================================
+
+    public function fecharPedido(Request $request, $id) {
+
+
+// restringe o nivel de  acesso se não for professor
+$userAutorizado = $request->user()->nivel_acesso;
+
+if($userAutorizado !== 'professor') {
+    return response()->json([
+        "mensagem" => "Acesso restrito"
+    ], 403);
+}
+// começa a rodar os dados mas não salva
+DB::beginTransaction();
+
+try{
+
+$pedido = Pedido::with('pagamento')->findOrFail($id);
+
+// verifica o status do pedido
+if($pedido->status === 'aprovado') {
+    return response()->json([
+        "Mensagem" => "Este pedido já foi atualizado"
+    ], 400);
+}
+
+if($pedido->status === 'cancelado') {
+    return response()->json([
+        "mensagem" => "Pedido cancelado não pode ser fechado!"
+    ], 400);
+}
+
+// Percorre o itens e vê se a quantidade de itens é condizente com o estoque
+foreach($pedido->itens as $item) {
+    $produto = $item->produto;
+
+    if($produto->estoque < $item->quantidade) {
+        throw new Exception("Estoque insuficiente para o produto: {$produto->nome}");
+    }
+
+    $produto->decrement('estoque', $item->quantidade);
+}
+
+// atualiza o pedido do status
+$pedido->update(['status' => 'aprovado']);
+
+if($pedido->pagamento) {
+    $pedido->pagamento->update(['status' => 'aprovado']);
+}
+// guarda os dados salvos
+DB::commit();
+
+return response()->json([
+    "mensagem" => "Pedido finalizado com sucesso!",
+    "dados" => $pedido
+], 200);
+
+} catch(Exception $e){
+
+DB::rollBack();
+
+return response()->json([
+    "mensagem" => "Erro na finalizacao do pedido",
+    "Erro" => $e->getMessage()
+], 500);
+
+        }
+    }
+
+    
 }
