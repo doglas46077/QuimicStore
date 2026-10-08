@@ -7,16 +7,72 @@ import { Wand3 } from 'reicon-react';
 import Footer from "./FooterCatalogo"
 import HeaderLogin from './Header/HeaderLogin';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+const API_URL = "http://localhost:8000/api"
 
 export default function SectionCatalogo() {
     const navigate = useNavigate()
 
-      const [produtos, setProdutos] = useState([])
+    const [produtos, setProdutos] = useState([])
+    const [carregando, setCarregando] = useState(true)
+    const [erro, setErro] = useState("")
+    const [categorias, setCategorias] = useState({})
+
+    useEffect(() => {
+        async function carregarProdutos() {
+            try {
+                const token = localStorage.getItem("token")
+                const [response, respostaCategorias] = await Promise.all([
+                    fetch(`${API_URL}/showProducts`, {
+                        headers: {
+                            "Accept": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    }),
+                    fetch(`${API_URL}/categorias`, {
+                        headers: { "Accept": "application/json" },
+                    }),
+                ])
+                
+                if (respostaCategorias.ok) {
+                    const dadosCategorias = await respostaCategorias.json()
+                    const lista = Array.isArray(dadosCategorias)
+                        ? dadosCategorias
+                        : dadosCategorias.data || dadosCategorias.categorias || []
+                    const mapa = {}
+                    lista.forEach((c) => { mapa[c.id] = c.nome })
+                    setCategorias(mapa)
+                }
+
+                if (response.status === 401) {
+                    localStorage.removeItem("token")
+                    localStorage.removeItem("usuario")
+                    navigate("/login")
+                    return
+                }
+
+                const dados = await response.json()
+
+                if (!response.ok) {
+                    setErro(dados.message || dados.mensagem || "Erro ao carregar os produtos")
+                    return
+                }
+                setProdutos(Array.isArray(dados) ? dados : dados.produtos || dados.data || [])
+            } catch (e) {
+                setErro("Não foi possível conectar ao servidor")
+            } finally {
+                setCarregando(false)
+            }
+        }
+
+        carregarProdutos()
+    }, [])
+
     return (
         <>
             <HeaderLogin />
-            <div className="flex flex-col gap-5 items-center mt-4 mb-6 min-h-screen bg-olive-50 pb-24">
+            <div className="flex flex-col gap-5 items-center mt-4 mb-6 min-h-screen bg-olive-50">
                 <header className="flex flex-col justify-center items-baseline truncate bg-emerald-950  rounded-xl w-[80%] h-30">
                     <div className="flex flex-col ml-8 gap-1 font-sans">
                         <p className="flex justify-baseline text-green-400">FÁBRICA ESCOLA - FIEC</p>
@@ -57,21 +113,27 @@ export default function SectionCatalogo() {
                 </section>
 
                 <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] ">
-                    {produtos.map((produto) => (
-                        <CardCatalogo 
+                    {produtos.filter((produto) => produto.ativo !== false && produto.ativo !== 0).map((produto) => (
+                        <CardCatalogo
                             key={produto.id}
                             nome={produto.nome}
                             descricao={produto.descricao}
                             preco={produto.preco}
                             imagem={produto.imagem}
-                            categoria={produto.categoria}
+                            alt={produto.nome}
+                            categoria={categorias[produto.categoria_id]}
                         />
                     ))}
                 </section>
+
+                {carregando && <p className="text-slate-500">Carregando produtos...</p>}
+                {erro && <p className="text-red-600">{erro}</p>}
+                {!carregando && !erro && produtos.length === 0 && (
+                    <p className="text-slate-500">Nenhum produto cadastrado.</p>
+                )}
 
             </div>
             <Footer />
         </>
     )
 }
-
