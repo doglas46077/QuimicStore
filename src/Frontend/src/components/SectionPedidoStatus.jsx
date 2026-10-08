@@ -11,10 +11,10 @@ import { useNavigate } from "react-router-dom";
 export default function SectionPedidoStatus() {
     const navigate = useNavigate()
     return (
-        <div className="">
+        <>
             <HeaderLogin/>
 
-            <div className="flex flex-col gap-6 mt-6  mb-6 items-center">
+            <div className="flex flex-col gap-6 mt-6  mb-6 items-center pb-24">
                 <div className="flex gap-5 w-[90%]">
                     <div className="flex bg-emerald-100 h-30 w-30 rounded-full justify-center items-center text-emerald-950">
                         <ClipboardList size={70} />
@@ -141,6 +141,6 @@ export default function SectionPedidoStatus() {
             </div>
 
             <FooterCatalogo/>
-        </div>
+        </>
     );
 }

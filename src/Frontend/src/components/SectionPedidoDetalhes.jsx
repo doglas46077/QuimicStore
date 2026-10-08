@@ -13,7 +13,7 @@ import { Bill } from 'reicon-react';
 
 export default function SectionPedidoDetalhes() {
     return (
-        <main className="flex flex-col justify-between min-h-screen bg-olive-50">
+        <main className="flex flex-col justify-between min-h-screen bg-olive-50 pb-24">
             <HeaderPedidoStatus />
             <div className="flex justify-center w-full">
                 <div className="flex w-[90%] justify-between">
@@ -21,7 +21,7 @@ export default function SectionPedidoDetalhes() {
                         <div className="bg-yellow-200 text-yellow-500 rounded-full p-3">
                             <ClockCircle size={44} />
                         </div>
-                        <div>
+                        <div >
                             <p className="text-2xl text-emerald-700">Pedido #QS-2026-0042</p>
                             <p className="text-sm">Realizado em 08/04/26 ás 14:32</p>
                         </div>                    
