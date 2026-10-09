@@ -36,9 +36,7 @@ class RedefinirSenhaNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        // Busca a URL do front-end das configurações (.env) com fallback para localhost:3000
-        $frontendUrl = config('app.frontend_url', 'http://localhost:3000');
-        
+        $frontendUrl = rtrim(config('app.frontend_url', 'http://localhost:5173'), '/');
         $urlFront = $frontendUrl . '/redefinir-senha?token=' . $this->token . '&email=' . urlencode($notifiable->email);
 
         return (new MailMessage)

@@ -28,7 +28,7 @@ class ResetPasswordNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reset Password Notification Mail',
+            subject: 'Redefinição de senha',
         );
     }
 

@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Override;
+use App\Notifications\RedefinirSenhaNotification;
 
 class Usuario extends Authenticatable
 {
@@ -46,4 +47,12 @@ class Usuario extends Authenticatable
         // Usuario pode fazer mais de um pedido
     }
 
+
+    /**
+     * Sobrescreve o envio padrão da notificação de redefinição de senha.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new RedefinirSenhaNotification($token));
+    }
 }

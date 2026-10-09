@@ -16,12 +16,9 @@ class AppServiceProvider extends ServiceProvider
     {
         ResetPassword::createUrlUsing(
             function ($usuario, string $token) {
-                $frontend = rtrim(
-                    config('app.frontend_url', 'http://localhost:5173'),
-                    '/'
-                );
+                $frontend = rtrim(config('app.frontend_url', 'http://localhost:5173'), '/');
 
-                return $frontend . '/resetar-senha?token='
+                return $frontend . '/redefinir-senha?token='
                     . urlencode($token)
                     . '&email='
                     . urlencode($usuario->email);
