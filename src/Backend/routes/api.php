@@ -21,7 +21,10 @@ Route::get('/comentario/{produtoId}', [AvaliacaoController::class, 'index']);
 Route::get('/categorias', [CategoriaController::class, 'index']);
 Route::get('/categorias/{id}', [CategoriaController::class, 'show']);
 
+// Recuperação de senha
+Route::post('/esqueceu-senha', [LoginController::class, 'esqueceuSenha']);
 
+Route::post('/resetar-senha', [LoginController::class, 'resetarSenha']);
 
 // ==========================================================================
 // ! Rotas com protecao
