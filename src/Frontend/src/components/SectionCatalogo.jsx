@@ -11,6 +11,15 @@ import { useEffect, useState } from 'react';
 
 const API_URL = "http://localhost:8000/api"
 
+// Ignora maiúsculas e acentos: "estetica" encontra "Estética"
+function normalizar(texto) {
+    return (texto || "")
+        .toString()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+}
+
 export default function SectionCatalogo() {
     const navigate = useNavigate()
 
@@ -18,6 +27,7 @@ export default function SectionCatalogo() {
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState("")
     const [categorias, setCategorias] = useState({})
+    const [busca, setBusca] = useState("")
 
     useEffect(() => {
         async function carregarProdutos() {
@@ -69,6 +79,18 @@ export default function SectionCatalogo() {
         carregarProdutos()
     }, [])
 
+    // Produtos ativos que combinam com o texto da busca (nome, descrição ou categoria)
+    const termo = normalizar(busca.trim())
+
+    const produtosVisiveis = produtos
+        .filter((produto) => produto.ativo !== false && produto.ativo !== 0)
+        .filter((produto) =>
+            !termo ||
+            normalizar(produto.nome).includes(termo) ||
+            normalizar(produto.descricao).includes(termo) ||
+            normalizar(categorias[produto.categoria_id]).includes(termo)
+        )
+
     return (
         <>
             <HeaderLogin />
@@ -85,9 +107,18 @@ export default function SectionCatalogo() {
                 </header>
 
 
-                <form className="flex bg-white rounded-xl w-[80%] h-10 items-center shadow">
+                <form
+                    onSubmit={(e) => e.preventDefault()}
+                    className="flex bg-white rounded-xl w-[80%] h-10 items-center shadow"
+                >
                     <button className="flex w-10 h-10 items-center justify-center hover:text-green-600" type='submit'><Search4 size={24} /></button>
-                    <input className="focus:outline-none focus:ring-0" type="text" placeholder="Buscar Produto..." />
+                    <input
+                        className="flex-1 pr-3 focus:outline-none focus:ring-0"
+                        type="text"
+                        placeholder="Buscar Produto..."
+                        value={busca}
+                        onChange={(e) => setBusca(e.target.value)}
+                    />
                 </form>
 
                 <section className="flex gap-3 w-[80%]">
@@ -113,7 +144,7 @@ export default function SectionCatalogo() {
                 </section>
 
                 <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] ">
-                    {produtos.filter((produto) => produto.ativo !== false && produto.ativo !== 0).map((produto) => (
+                    {produtosVisiveis.map((produto) => (
                         <CardCatalogo
                             key={produto.id}
                             nome={produto.nome}
@@ -130,6 +161,9 @@ export default function SectionCatalogo() {
                 {erro && <p className="text-red-600">{erro}</p>}
                 {!carregando && !erro && produtos.length === 0 && (
                     <p className="text-slate-500">Nenhum produto cadastrado.</p>
+                )}
+                {!carregando && !erro && produtos.length > 0 && produtosVisiveis.length === 0 && (
+                    <p className="text-slate-500">Nenhum produto encontrado para "{busca}".</p>
                 )}
 
             </div>
