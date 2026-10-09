@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 
 const API_URL = "http://localhost:8000/api"
 
-// Ignora maiúsculas e acentos: "estetica" encontra "Estética"
 function normalizar(texto) {
     return (texto || "")
         .toString()
@@ -79,7 +78,6 @@ export default function SectionCatalogo() {
         carregarProdutos()
     }, [])
 
-    // Produtos ativos que combinam com o texto da busca (nome, descrição ou categoria)
     const termo = normalizar(busca.trim())
 
     const produtosVisiveis = produtos

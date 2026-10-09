@@ -11,12 +11,11 @@ const FORM_VAZIO = {
   categoria_id: "",
   preco: "",
   estoque: "",
-  imagem: null, // arquivo escolhido no computador
-  imagemAtual: "", // caminho já salvo no banco (na edição)
+  imagem: null, 
+  imagemAtual: "",
   ativo: true,
 };
 
-// Mesma lógica de imagem do CardCatalogo
 function resolverImagem(imagem) {
   if (!imagem) return null;
   if (/^(https?:|data:|blob:)/.test(imagem)) return imagem;
@@ -24,7 +23,6 @@ function resolverImagem(imagem) {
   return `${API_BASE}/${imagem.replace(/^\/+/, "")}`;
 }
 
-// O banco pode devolver true/false ou 1/0
 function estaAtivo(produto) {
   return produto.ativo === true || produto.ativo === 1 || produto.ativo === "1";
 }
@@ -37,7 +35,6 @@ function lerLista(dados) {
   return Array.isArray(dados) ? dados : dados.data || dados.produtos || dados.categorias || [];
 }
 
-// Laravel devolve erros de validação em { message, errors: { campo: [msg] } }
 function mensagemDeErro(dados, padrao) {
   if (dados?.errors) {
     const primeiro = Object.values(dados.errors)[0];
@@ -71,7 +68,6 @@ export default function TelaAdm() {
 
   const [ajustandoId, setAjustandoId] = useState(null);
 
-  // Pré-visualização do arquivo escolhido no modal
   const [previa, setPrevia] = useState("");
   useEffect(() => {
     if (!form.imagem) {
@@ -99,7 +95,6 @@ export default function TelaAdm() {
   }
 
   useEffect(() => {
-    // só professor e estagiário entram aqui
     if (!podeGerenciar) {
       navigate("/catalogo", { replace: true });
       return;
@@ -145,7 +140,6 @@ export default function TelaAdm() {
     return categorias.find((c) => Number(c.id) === Number(id))?.nome || "Sem categoria";
   }
 
-  // ---------- Criar / editar ----------
   function abrirNovo() {
     setIdEditando(null);
     setForm({ ...FORM_VAZIO, categoria_id: categorias[0]?.id ?? "" });
@@ -174,7 +168,6 @@ export default function TelaAdm() {
     setErroForm("");
     setSalvando(true);
 
-    // Arquivo não vai em JSON, então usamos FormData
     const corpo = new FormData();
     corpo.append("categoria_id", form.categoria_id);
     corpo.append("nome", form.nome.trim());
@@ -183,7 +176,7 @@ export default function TelaAdm() {
     corpo.append("estoque", form.estoque);
     corpo.append("ativo", form.ativo ? "1" : "0");
     if (form.imagem) corpo.append("imagem", form.imagem);
-    // PHP não lê arquivos em PUT de verdade: enviamos POST e o Laravel trata como PUT
+ 
     if (idEditando) corpo.append("_method", "PUT");
 
     try {
@@ -193,7 +186,7 @@ export default function TelaAdm() {
 
       const response = await fetch(url, {
         method: "POST",
-        headers: cabecalhos(), // sem Content-Type: o navegador define sozinho
+        headers: cabecalhos(), 
         body: corpo,
       });
 
@@ -223,7 +216,6 @@ export default function TelaAdm() {
     }
   }
 
-  // ---------- Estoque (+ / -) ----------
   async function ajustarEstoque(produto, delta) {
     const novoEstoque = Math.max(0, produto.estoque + delta);
     if (novoEstoque === produto.estoque) return;
@@ -260,7 +252,6 @@ export default function TelaAdm() {
     }
   }
 
-  // ---------- Remover (só professor) ----------
   async function confirmarExclusao() {
     setErroExcluir("");
     setExcluindo(true);
@@ -372,7 +363,7 @@ export default function TelaAdm() {
                             disabled={ajustandoId === p.id}
                             className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
                           >
-                            −
+                            
                           </button>
                           <span
                             className={`w-16 text-center ${
@@ -447,7 +438,6 @@ export default function TelaAdm() {
         </main>
       </div>
 
-      {/* Modal criar / editar */}
       {modalAberto && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-emerald-950/40 px-4">
           <div className="max-h-[92vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
@@ -589,7 +579,6 @@ export default function TelaAdm() {
         </div>
       )}
 
-      {/* Confirmação de remoção */}
       {produtoParaExcluir && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-emerald-950/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
