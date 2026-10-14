@@ -242,4 +242,67 @@ class PedidosController extends Controller
             ], 500);
         }
     }
+
+
+// ===============================================================================================================
+// fechar pedido
+// ===============================================================================================================
+
+public function fecharPedido(Request $request, int $id)
+    {
+        $userAutorizado = $request->user()->nivel_acesso;
+
+        if ($userAutorizado !== 'professor') {
+            return response()->json([
+                "message" => 'Acesso restrito'
+            ], 403);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Carrega o pedido junto com os relacionamentos de pagamento e itens
+            $pedido = Pedido::with(['pagamento', 'itens.produto'])->findOrFail($id);
+
+            // Validações de Status
+            if ($pedido->status === 'aprovado') {
+                return response()->json([
+                    "message" => "Este pedido já foi aprovado."
+                ], 400);
+            }
+
+            if ($pedido->status === 'cancelado') {
+                return response()->json([
+                    "message" => "Pedido cancelado não pode ser fechado!"
+                ], 400);
+            }
+
+            // Atualiza o status do pedido para aprovado
+            $pedido->update([
+                'status' => 'aprovado'
+            ]);
+
+            // Atualiza o registro de pagamento vinculado (se existir)
+            if ($pedido->pagamento) {
+                $pedido->pagamento->update([
+                    'status' => 'aprovado'
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                "message" => "Pedido finalizado com sucesso!",
+                "dados" => $pedido->fresh(['pagamento', 'itens.produto'])
+            ], 200);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                "message" => "Erro ao finalizar o pedido no banco de dados",
+                "erro" => $e->getMessage()
+            ], 500);
+        }
+    }
 }
