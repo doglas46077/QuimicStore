@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -222,5 +224,73 @@ class LoginController extends Controller
             "mensagem" => "Usuário deletado com sucesso",
             "dados" => $user
         ]);
+    }
+    public function esqueceuSenha(Request $request)
+    {
+        $dados = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $status = Password::sendResetLink([
+            'email' => $dados['email'],
+        ]);
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'status' => true,
+                'mensagem' => 'Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha.',
+            ], 200);
+        }
+
+        if ($status === Password::RESET_THROTTLED) {
+            return response()->json([
+                'status' => false,
+                'mensagem' => 'Aguarde antes de solicitar outro link de recuperação.',
+            ], 429);
+        }
+
+        // Não revelar se o e-mail existe no sistema.
+        return response()->json([
+            'status' => true,
+            'mensagem' => 'Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha.',
+        ], 200);
+    }
+
+    public function resetarSenha(Request $request)
+    {
+        $dados = $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'senha' => 'required|string|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            [
+                'email' => $dados['email'],
+                'token' => $dados['token'],
+                'password' => $dados['senha'],
+                'password_confirmation' => $request->input('senha_confirmation'),
+            ],
+            function (Usuario $usuario, string $senha) {
+                $usuario->senha = Hash::make($senha);
+                $usuario->setRememberToken(Str::random(60));
+                $usuario->save();
+
+                // Invalida os tokens antigos do Sanctum após a troca de senha.
+                $usuario->tokens()->delete();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'status' => true,
+                'mensagem' => 'Senha redefinida com sucesso. Faça login novamente.',
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => false,
+            'mensagem' => 'Não foi possível redefinir a senha. O token pode estar inválido, expirado ou já ter sido utilizado.',
+        ], 400);
     }
 }
