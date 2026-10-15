@@ -1,8 +1,7 @@
 import { Home3 } from 'reicon-react';
-import { CartLarge5 } from 'reicon-react';
 import { ClipboardList } from 'reicon-react';
-import { Gear } from 'reicon-react';
 import { useNavigate } from 'react-router-dom';
+import CestaCarrinho from './CestaCarrinho'
 
 export default function FooterCatalogo() {
     const navigate = useNavigate()
@@ -18,7 +17,7 @@ export default function FooterCatalogo() {
 
                 <div className='flex flex-col items-center p-2 hover:border-b-emerald-700 hover:border-b-3 hover:text-emerald-700 hover:transition hover:duration-200'>
                     <button onClick={()=>navigate("/carrinho")}>
-                    <CartLarge5 size={30} />
+                    <CestaCarrinho size={30} />
                     <h1>Carrinho</h1>
                     </button>
                 </div>

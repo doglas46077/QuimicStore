@@ -8,6 +8,7 @@ import Footer from "./FooterCatalogo"
 import HeaderLogin from './Header/HeaderLogin';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useCarrinho } from './JavaScript/carrinhoAnimacao';
 
 const API_URL = "http://localhost:8000/api"
 
@@ -21,6 +22,7 @@ function normalizar(texto) {
 
 export default function SectionCatalogo() {
     const navigate = useNavigate()
+    const {adicionar, podeAdicionar} =useCarrinho()
 
     const [produtos, setProdutos] = useState([])
     const [carregando, setCarregando] = useState(true)
@@ -151,6 +153,9 @@ export default function SectionCatalogo() {
                             imagem={produto.imagem}
                             alt={produto.nome}
                             categoria={categorias[produto.categoria_id]}
+                            estoque={produto.estoque}
+                            podeAdicionar={() => podeAdicionar(produto)}
+                            onAdicionar={() => adicionar(produto)}
                         />
                     ))}
                 </section>
