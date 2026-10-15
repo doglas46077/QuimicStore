@@ -5,9 +5,9 @@ import { useCarrinho } from "./JavaScript/carrinhoAnimacao"
 
 export const cesta = {basket: null, ring: null}
 function CestaCarrinho({size = 32}) {
-    const basktRef = useRef(null)
+    const basketRef = useRef(null)
     const ringRef = useRef(null)
-    const {totalItem} = useCarrinho()
+    const {totalItens} = useCarrinho()
 
     useEffect(() => {
         cesta.basket = basketRef.current
@@ -20,14 +20,14 @@ function CestaCarrinho({size = 32}) {
 
     return (
         <>
-        <div className="relative inline-flex items-center justify-center" ref={basktRef} style={{width:size, height:size, willChange:"transform"}}>
-        <motion.div ref={ringRef} className="pointer-events-none absolute inset-0 rounded-full border-2 border-amber-400 opacity-0" style={{willChange: "trasform, opacity"}}/>
+        <div className="relative inline-flex items-center justify-center" ref={basketRef} style={{width:size, height:size, willChange:"transform"}}>
+        <motion.div ref={ringRef} className="pointer-events-none absolute inset-0 rounded-full border-2 border-amber-400 opacity-0" style={{willChange: "transform, opacity"}}/>
 
         <CartLarge5 size={size}/>
 
-        {totalItem > 0 && (
+        {totalItens > 0 && (
             <span className="absolute -right-2 -top-1.5 min-w-18px rounded-full bg-amber-400 px-1 text-center text-[11px] font-bold leading-18px text-emerald-950">
-                {totalItem}
+                {totalItens}
             </span>
         )}
         </div>

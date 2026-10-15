@@ -31,7 +31,6 @@ function App() {
 
       <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
         </Routes>
-      
      </div>
     </>
   )

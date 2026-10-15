@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from 'motion/react';
 import { CartLarge5 } from 'reicon-react';
-import { cesta } from './CestaAlvo';
+import { cesta } from './CestaCarrinho';
 
 const API_BASE = "http://localhost:8000"
 
