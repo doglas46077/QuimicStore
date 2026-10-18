@@ -102,6 +102,7 @@ class ProdutosController extends Controller
             'descricao' => 'string|max:255',
             'preco' => 'numeric|decimal:0,2|min:0',
             'estoque' => 'integer|min:0',
+            'tempo_fabricacao' => 'nullable|integer|min:1|max:365',
             'ativo' => 'boolean',
             'imagem' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
