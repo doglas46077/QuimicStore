@@ -15,6 +15,7 @@ return new class extends Migration
             $table->text('descricao')->nullable();
             $table->decimal('preco', 10, 2);
             $table->integer('estoque')->default(0);
+            $table->integer('tempo_fabricacao')->nullable();
             $table->boolean('ativo')->default(true);
             $table->string('imagem', 2048);
             $table->timestamps();

@@ -17,6 +17,7 @@ class Produto extends Model
         'descricao',
         'preco',
         'estoque',
+        'tempo_fabricacao',
         'ativo',
         'imagem'
     ];
@@ -28,6 +29,7 @@ class Produto extends Model
         
         'preco' => 'decimal:2',
         'ativo' => 'boolean',
+        'tempo_fabricacao' => 'integer'
     ];
 
     public function categoria()
