@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ListaEsperaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProdutosController;
@@ -63,4 +64,11 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('/categorias', [CategoriaController::class, 'store']);
     Route::put('/categorias/atualizar/{id}', [CategoriaController::class, 'update']);
     Route::delete('/categorias/deletar/{id}', [CategoriaController::class, 'destroy']);
+
+
+    Route::post('/lista-espera', [ListaEsperaController::class, 'store']);
+    Route::get('/meus-pedidos/lista-espera', [ListaEsperaController::class , 'minhaFila']);
+    Route::delete('/lista-espera/{id}', [ListaEsperaController::class, 'destroy']);
+    // Ver a fila de um unico produto (apenas acesso por professores)
+    Route::get('produtos/{produtoID}/lista-espera', [ListaEsperaController::class, 'produtoIndex']);
     });
