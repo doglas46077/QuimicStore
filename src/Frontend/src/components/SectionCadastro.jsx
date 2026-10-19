@@ -1,6 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import HeaderLogin from "./Header/HeaderLogin";
 import { useState } from "react";
+import { toast } from "react-toastify";
+
+function mensagemDeErro(dados, padrao) {
+    if (dados?.errors) {
+        const primeiro = Object.values(dados.errors)[0];
+        if (primeiro?.[0]) return primeiro[0];
+    }
+    return dados?.mensagem || dados?.Mensagem || dados?.message || padrao;
+}
 
 function SectionCadastro() {
 
@@ -14,55 +22,47 @@ function SectionCadastro() {
     const [carregando, setCarregando] = useState(false);
 
     async function cadastrar(e) {
+    e.preventDefault();
+    setErro("");
 
-        e.preventDefault();
-
-        setErro("");
-        setCarregando(true);
-
-        try {
-            
-            const resposta = await fetch(
-                "http://127.0.0.1:8000/api/registerUser",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        email: email,
-                        senha: senha,
-                        nome: nome
-                    })
-                }
-            );
-
-            const dados = await resposta.json();
-
-            if (!resposta.ok) {
-                throw new Error(
-                    dados.message || "Erro ao realizar cadastro"
-                );
-            }
-
-           localStorage.setItem("token", dados.Token);
-           localStorage.setItem("usuario", JSON.stringify(dados.usuario))
-
-            navigate("/catalogo");
-
-        } catch (error) {
-
-            setErro(error.message);
-
-        } finally {
-
-            setCarregando(false);
-
-        }
+    if (senha.length < 6) {
+        const aviso = "A senha precisa ter no mínimo 6 caracteres";
+        setErro(aviso);
+        toast.error(aviso);
+        return;
     }
+
+    setCarregando(true);
+
+    try {
+        const resposta = await fetch("http://127.0.0.1:8000/api/registerUser", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: JSON.stringify({ email: email, senha: senha, nome: nome }),
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(mensagemDeErro(dados, "Erro ao realizar cadastro"));
+        }
+
+        localStorage.setItem("token", dados.Token);
+        localStorage.setItem("usuario", JSON.stringify(dados.usuario));
+
+        toast.success("Cadastro realizado com sucesso"); // no lugar do alert
+        navigate("/catalogo");
+    } catch (error) {
+        const aviso = error instanceof TypeError ? "Não foi possível conectar ao servidor" : error.message;
+        setErro(aviso);
+        toast.error(aviso);
+    } finally {
+        setCarregando(false);
+    }
+}
 
     return (
         <main

@@ -9,11 +9,17 @@ import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
 import ProductPage from "./components/ProductPage";
+import { ToastContainer } from "react-toastify";
+
+
+<ToastContainer position="top-right" autoClose={3000} theme="colored" />
 
 function App() {
     return (
         <>
         <div className="bg-olive-50 font-bold">
+
+        <ToastContainer position="top-right" autoClose={3000} theme="colored" />
        <Routes>
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={<LoginCard/>}/>

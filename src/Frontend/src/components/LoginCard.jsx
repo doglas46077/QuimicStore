@@ -1,6 +1,15 @@
 import HeaderLogin from "./Header/HeaderLogin";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { toast } from "react-toastify";
+
+function mensagemDeErro(dados, padrao) {
+    if (dados?.errors) {
+        const primeiro = Object.values(dados.errors)[0];
+        if (primeiro?.[0]) return primeiro[0];
+    }
+    return dados?.mensagem || dados?.Mensagem || dados?.message || padrao;
+}
 
 function LoginCard() {
  const navigate = useNavigate()
@@ -11,38 +20,51 @@ const [senha, useSenha] = useState("")
 const [erro, useError] = useState("")
 const [carregando, isCarregando] = useState(false)
 
-async function login(e) { 
-        e.preventDefault()
-        useError("")
-        isCarregando(true)
+async function login(e) {
+    e.preventDefault()
+    useError("")
 
-        try{
-          const response= await fetch("http://localhost:8000/api/login", {
+    if (senha.length < 6) {
+        const aviso = "A senha precisa ter no mínimo 6 caracteres"
+        useError(aviso)
+        toast.error(aviso)
+        return
+    }
+
+    isCarregando(true)
+
+    try {
+        const response = await fetch("http://localhost:8000/api/login", {
             method: "POST",
-            headers: {"Content-Type": "application/json",
-              "Accept": "application/json",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
             },
-            body:JSON.stringify({email, senha}),
-          })
+            body: JSON.stringify({ email, senha }),
+        })
 
-          const guardar = await response.json()
+        const guardar = await response.json()
 
-          if(!response.ok) {
-            useError(guardar.mensagem || "Erro ao fazer o login")
+        if (!response.ok) {
+            const aviso = mensagemDeErro(guardar, "Erro ao fazer o login")
+            useError(aviso)
+            toast.error(aviso)
             return
-          }
-          localStorage.setItem("token", guardar.Token)
-          localStorage.setItem("usuario", JSON.stringify(guardar.usuario))
-          
-          navigate("/catalogo")
-        }catch(erro){
-          useError("Não foi possivel conectar ao servidor")
-        } finally{
-          isCarregando(false)
         }
-    
-}
 
+        localStorage.setItem("token", guardar.Token)
+        localStorage.setItem("usuario", JSON.stringify(guardar.usuario))
+
+        toast.success("Login efetuado com sucesso")
+        navigate("/catalogo")
+    } catch (falha) {
+        const aviso = "Não foi possível conectar ao servidor"
+        useError(aviso)
+        toast.error(aviso)
+    } finally {
+        isCarregando(false)
+    }
+}
   return (
 
     <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
