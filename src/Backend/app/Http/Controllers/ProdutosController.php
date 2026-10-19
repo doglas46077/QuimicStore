@@ -33,7 +33,7 @@ class ProdutosController extends Controller
             'estoque' => 'required|integer|min:0',
             'tempo_fabricacao' => 'nullable|integer|min:1|max:365',
             'ativo' => 'required|boolean',
-            'imagem' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048'
+            'imagem' => 'image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
         if ($request->hasFile('imagem')) {

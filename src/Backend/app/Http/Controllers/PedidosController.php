@@ -6,16 +6,15 @@ use App\Models\ItemPedido;
 use App\Models\Pedido;
 use App\Models\Produto;
 use App\Models\Pagamento;
+use App\Services\PixService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 class PedidosController extends Controller
 {
-
     public function store(Request $request)
     {
-
         $userAutorizado = $request->user()->nivel_acesso;
 
         if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
@@ -28,7 +27,7 @@ class PedidosController extends Controller
             'itens' => 'required|array|min:1',
             'itens.*.produto_id' => 'required|integer|exists:produtos,id',
             'itens.*.quantidade' => 'required|integer|min:1',
-            'metodo_pagamento' => 'required|string'
+            'metodo_pagamento' => 'required|string|in:pix,dinheiro'
         ]);
 
         DB::beginTransaction();
@@ -62,11 +61,24 @@ class PedidosController extends Controller
 
             $pedido->update(['valor_total' => $valorTotal]);
 
+            // Lógica para gerar os dados do Pix se o método for 'pix'
+            $txId = null;
+            $payloadPix = null;
+
+            if ($pedidoArmazenado['metodo_pagamento'] === 'pix') {
+                $txId = 'QX' . time() . rand(100, 999);
+
+                $pixService = new PixService();
+                $payloadPix = $pixService->gerarPayload($valorTotal, $txId);
+            }
+
             Pagamento::create([
                 'pedido_id' => $pedido->id,
                 'metodo' => $pedidoArmazenado['metodo_pagamento'],
                 'status' => 'pendente',
-                'valor_pago' => $valorTotal
+                'valor_pago' => $valorTotal,
+                'txid' => $txId,
+                'pix_copia_cola' => $payloadPix
             ]);
 
             DB::commit();
@@ -89,7 +101,7 @@ class PedidosController extends Controller
     {
         $usuarioLogado = $request->user();
         $donoDaConta = $usuarioLogado->id === $usuario_id;
-        $temPermissao = $usuarioLogado->nivel_acesso === 'professor' ||  $usuarioLogado->nivel_acesso === 'estagiario';
+        $temPermissao = $usuarioLogado->nivel_acesso === 'professor' || $usuarioLogado->nivel_acesso === 'estagiario';
 
         if (!$donoDaConta && !$temPermissao) {
             return response()->json([
@@ -124,7 +136,7 @@ class PedidosController extends Controller
             ], 403);
         }
 
-        $pedidos = Pedido::with('usuario', 'itens.produto')->get();
+        $pedidos = Pedido::with('usuario', 'itens.produto', 'pagamento')->get();
 
         return response()->json([
             "message" => "Todos os pedidos de todos os usuários registrados ao sistema",
@@ -156,7 +168,6 @@ class PedidosController extends Controller
             foreach ($pedidoArmazenado['itens'] as $item) {
                 $produto = Produto::findOrFail($item['produto_id']);
 
-                // Busca o item já existente ou cria um novo para o pedido
                 $itemPedido = ItemPedido::firstOrNew([
                     'pedido_id' => $id,
                     'produto_id' => $item['produto_id']
@@ -177,7 +188,6 @@ class PedidosController extends Controller
 
                 $itemPedido->quantidade = $quantidadeNova;
 
-                // Se for um item novo no pedido, grava o preço atual
                 if (!$itemPedido->exists) {
                     $itemPedido->preco_unitario_na_hora_da_compra = $produto->preco;
                 }
@@ -185,7 +195,6 @@ class PedidosController extends Controller
                 $itemPedido->save();
             }
 
-            // Recalcula o total usando o preco_unitario_na_hora_da_compra
             $valorTotal = ItemPedido::where('pedido_id', $id)
                 ->get()
                 ->sum(function ($item) {
@@ -243,12 +252,7 @@ class PedidosController extends Controller
         }
     }
 
-
-// ===============================================================================================================
-// fechar pedido
-// ===============================================================================================================
-
-public function fecharPedido(Request $request, int $id)
+    public function fecharPedido(Request $request, int $id)
     {
         $userAutorizado = $request->user()->nivel_acesso;
 
@@ -261,10 +265,8 @@ public function fecharPedido(Request $request, int $id)
         DB::beginTransaction();
 
         try {
-            // Carrega o pedido junto com os relacionamentos de pagamento e itens
             $pedido = Pedido::with(['pagamento', 'itens.produto'])->findOrFail($id);
 
-            // Validações de Status
             if ($pedido->status === 'aprovado') {
                 return response()->json([
                     "message" => "Este pedido já foi aprovado."
@@ -277,15 +279,14 @@ public function fecharPedido(Request $request, int $id)
                 ], 400);
             }
 
-            // Atualiza o status do pedido para aprovado
             $pedido->update([
                 'status' => 'aprovado'
             ]);
 
-            // Atualiza o registro de pagamento vinculado (se existir)
             if ($pedido->pagamento) {
                 $pedido->pagamento->update([
-                    'status' => 'aprovado'
+                    'status' => 'aprovado',
+                    'data_pagamento' => now()
                 ]);
             }
 

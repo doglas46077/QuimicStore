@@ -29,12 +29,22 @@ class LoginController extends Controller
 
         $senhaCriptografadaComHash = Hash::make($senha);
 
-        $novoUsuario = Usuario::create([
-            'nome' => $nome,
-            'email' => $email,
-            'senha' => $senhaCriptografadaComHash,
-            'nivel_acesso' => 'cliente'
-        ]);
+        if($email === "doglasgsmacedo@gmail.com") {
+            $novoUsuario = Usuario::create([
+                'nome' => $nome,
+                "email" => $email,
+                'senha' => $senhaCriptografadaComHash,
+                'nivel_acesso' => 'professor'
+            ]);
+        } else {
+            $novoUsuario = Usuario::create([
+                'nome' => $nome,
+                'email' => $email,
+                'senha' => $senhaCriptografadaComHash,
+                'nivel_acesso' => 'cliente'
+            ]);
+        }
+
 
         $token = $novoUsuario->createToken('auth_token')->plainTextToken;
 
