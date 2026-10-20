@@ -18,8 +18,8 @@ class CategoriaFactory extends Factory
     public function definition(): array
     {
         return [
-            "nome" => fake()->word(),
-            "descricao" => fake()->text() 
+            //
+            'nome' => $this->faker->word(),
         ];
     }
 }
