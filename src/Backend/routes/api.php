@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 // ! Rotas públicas
 // ==========================================================================
 // Login
-Route::post('/registerUser', [LoginController::class, 'store']);
+Route::post('/cadastrar-conta', [LoginController::class, 'store']);
 Route::post('/login', [LoginController::class, 'login']);
 
 // Avaliacao
@@ -32,38 +32,38 @@ Route::post('/resetar-senha', [LoginController::class, 'resetarSenha']);
 // ==========================================================================
 Route::middleware('auth:sanctum')->group(function () {
     // Usuários
-    Route::get('/showUsers', [LoginController::class, 'index']);
-    Route::get('/showUser/{id}', [LoginController::class, 'show']);
-    Route::put('/updateUser/{id}', [LoginController::class, 'update']);
-    Route::delete('/deleteUser/{id}', [LoginController::class, 'destroy']);
+    Route::get('/mostrar-usuarios', [LoginController::class, 'index']);
+    Route::get('/ver-usuario/{id}', [LoginController::class, 'show']);
+    Route::put('/atualizar-informacoes/{id}/usuario', [LoginController::class, 'update']);
+    Route::delete('/excluir/{id}/usuario', [LoginController::class, 'destroy']);
 
 
     // Produtos
-    Route::post('/registerProducts', [ProdutosController::class, 'store']);
-    Route::get('/showProducts', [ProdutosController::class, 'index']);
-    Route::get('/showProduct/{id}', [ProdutosController::class, 'show']);
-    Route::put('/updateProduct/{id}', [ProdutosController::class, 'update']);
-    Route::delete('/deleteProduct/{id}', [ProdutosController::class, 'destroy']);
+    Route::post('/registrar-produto', [ProdutosController::class, 'store']);
+    Route::get('/mostrar-produtos', [ProdutosController::class, 'index']);
+    Route::get('/mostrar-produto/{id}/produto', [ProdutosController::class, 'show']);
+    Route::put('/atualizar-produto/{id}/produto', [ProdutosController::class, 'update']);
+    Route::delete('/excluir-produto/{id}/produto', [ProdutosController::class, 'destroy']);
 
 
     // Pedidos
-    Route::post('/registerOrder', [PedidosController::class, 'store']);
-    Route::get('/showOrders', [PedidosController::class, 'index']);
-    Route::get('/showOrder/user/{usuario_id}', [PedidosController::class, 'show']);
-    Route::put('/updateOrder/{id}', [PedidosController::class, 'update']);
-    Route::delete('/deleteOrder/{id}', [PedidosController::class, 'destroy']);
+    Route::post('/registrar-pedido', [PedidosController::class, 'store']);
+    Route::get('/mostrar-pedidos', [PedidosController::class, 'index']);
+    Route::get('/mostrar-pedido/{usuario_id}/usuario', [PedidosController::class, 'show']);
+    Route::put('/atualizar-pedidoo/{id}/pedid', [PedidosController::class, 'update']);
+    Route::delete('/excluir-pedido/{id}/pedido', [PedidosController::class, 'destroy']);
     // atualiza o pedido
-    Route::post('/finalizeOrder/{id}/pedido', [PedidosController::class, 'fecharPedido']);
+    Route::post('/finalizar-pedido/{id}/pedido', [PedidosController::class, 'fecharPedido']);
 
     // Avaliacao
-    Route::put('/atualizarComentario/{avaliacaoId}', [AvaliacaoController::class, 'update']);
-    Route::delete('/deleteComentario/{avaliacaoId}]', [AvaliacaoController::class, 'destroy']);
-    Route::post('/adicionarComentario/{reqProdutoID}', [AvaliacaoController::class, 'store']);
+    Route::post('/registrar-comentario/{reqProdutoID}', [AvaliacaoController::class, 'store']);
+    Route::put('/atualizar-avaliacao/{avaliacaoId}', [AvaliacaoController::class, 'update']);
+    Route::delete('/excluir-comentario/{avaliacaoId}]', [AvaliacaoController::class, 'destroy']);
 
     // Categoria
-    Route::post('/RegistrarCategoria', [CategoriaController::class, 'store']);
-    Route::put('/categorias/atualizar/{id}', [CategoriaController::class, 'update']);
-    Route::delete('/categorias/deletar/{id}', [CategoriaController::class, 'destroy']);
+    Route::post('/registrar-categoria', [CategoriaController::class, 'store']);
+    Route::put('/categorias/{id}/atualizar', [CategoriaController::class, 'update']);
+    Route::delete('/categorias/{id}/deletar', [CategoriaController::class, 'destroy']);
 
 
     // lista de espera
