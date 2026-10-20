@@ -25,7 +25,6 @@ Route::get('/categorias/{id}', [CategoriaController::class, 'show']);
 
 // Recuperação de senha
 Route::post('/esqueceu-senha', [LoginController::class, 'esqueceuSenha']);
-
 Route::post('/resetar-senha', [LoginController::class, 'resetarSenha']);
 
 // ==========================================================================
