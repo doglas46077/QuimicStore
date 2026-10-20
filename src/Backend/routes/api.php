@@ -50,7 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/registrar-pedido', [PedidosController::class, 'store']);
     Route::get('/mostrar-pedidos', [PedidosController::class, 'index']);
     Route::get('/mostrar-pedido/{usuario_id}/usuario', [PedidosController::class, 'show']);
-    Route::put('/atualizar-pedidoo/{id}/pedid', [PedidosController::class, 'update']);
+    Route::put('/atualizar-pedidoo/{id}/pedido', [PedidosController::class, 'update']);
     Route::delete('/excluir-pedido/{id}/pedido', [PedidosController::class, 'destroy']);
     // atualiza o pedido
     Route::post('/finalizar-pedido/{id}/pedido', [PedidosController::class, 'fecharPedido']);
