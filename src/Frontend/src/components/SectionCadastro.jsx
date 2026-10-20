@@ -8,7 +8,7 @@ function SectionCadastro() {
 
     const [email, setEmail] = useState("");
     const [senha, setSenha] = useState("");
-    const [nome, setNome] = useState("")
+    const [nome, setNome] = useState("");
 
     const [erro, setErro] = useState("");
     const [carregando, setCarregando] = useState(false);
@@ -21,9 +21,9 @@ function SectionCadastro() {
         setCarregando(true);
 
         try {
-            
+
             const resposta = await fetch(
-                "http://127.0.0.1:8000/api/registerUser",
+                "http://127.0.0.1:8000/api/cadastrar-conta",
                 {
                     method: "POST",
 
@@ -48,8 +48,8 @@ function SectionCadastro() {
                 );
             }
 
-           localStorage.setItem("token", dados.Token);
-           localStorage.setItem("usuario", JSON.stringify(dados.usuario))
+            localStorage.setItem("token", dados.Token);
+            localStorage.setItem("usuario", JSON.stringify(dados.usuario));
 
             navigate("/catalogo");
 
@@ -74,12 +74,12 @@ function SectionCadastro() {
             }}
         >
 
-           <div className="flex w-full justify-center pt-8">
-    <h1 className="text-6xl font-bold">
-        <span className="text-slate-900">Quimic</span>{" "}
-        <span className="text-amber-400">Store</span>
-    </h1>
-</div>
+            <div className="flex w-full justify-center pt-8">
+                <h1 className="text-6xl font-bold">
+                    <span className="text-slate-900">Quimic</span>{" "}
+                    <span className="text-amber-400">Store</span>
+                </h1>
+            </div>
 
             <div className="flex flex-1 justify-center">
 
@@ -124,7 +124,7 @@ function SectionCadastro() {
                             placeholder="Digite seu nome"
                             required
                             value={nome}
-                            onChange={(e)=>setNome(e.target.value)}
+                            onChange={(e) => setNome(e.target.value)}
                             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
                         />
 
