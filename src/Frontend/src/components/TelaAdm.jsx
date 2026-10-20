@@ -102,7 +102,7 @@ export default function TelaAdm() {
     async function carregar() {
       try {
         const [respProdutos, respCategorias] = await Promise.all([
-          fetch(`${API_URL}/mostrar-produtos`, { headers: cabecalhos() }),
+          fetch(`${API_URL}/showProducts`, { headers: cabecalhos() }),
           fetch(`${API_URL}/categorias`, { headers: { Accept: "application/json" } }),
         ]);
 
@@ -180,8 +180,8 @@ export default function TelaAdm() {
 
     try {
       const url = idEditando
-        ? `${API_URL}/atualizar-produto/${idEditando}/produto`
-        : `${API_URL}/registrar-produto`;
+        ? `${API_URL}/updateProduct/${idEditando}`
+        : `${API_URL}/registerProducts`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -223,7 +223,7 @@ export default function TelaAdm() {
     setErro("");
 
     try {
-      const response = await fetch(`${API_URL}/atualizar-produto/${produto.id}/produto`, {
+      const response = await fetch(`${API_URL}/updateProduct/${produto.id}`, {
         method: "PUT",
         headers: cabecalhos(true),
         body: JSON.stringify({ estoque: novoEstoque }),
@@ -256,7 +256,7 @@ export default function TelaAdm() {
     setExcluindo(true);
 
     try {
-      const response = await fetch(`${API_URL}/excluir-produto/${produtoParaExcluir.id}/produto`, {
+      const response = await fetch(`${API_URL}/deleteProduct/${produtoParaExcluir.id}`, {
         method: "DELETE",
         headers: cabecalhos(),
       });
@@ -362,6 +362,7 @@ export default function TelaAdm() {
                             disabled={ajustandoId === p.id}
                             className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
                           >
+                            −
                           </button>
                           <span
                             className={`w-16 text-center ${

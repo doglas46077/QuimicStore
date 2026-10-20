@@ -23,6 +23,10 @@ function SectionCarrinho() {
   const navigate = useNavigate();
   const { itens, total, totalItens, alterarQuantidade, remover, limpar, sincronizar } = useCarrinho();
 
+  function finalizarCompra() {
+    // Implemente a lógica de finalização do pedido aqui
+  }
+
   useEffect(() => {
     async function atualizar() {
       try {
@@ -46,6 +50,7 @@ function SectionCarrinho() {
         const dados = await response.json();
         sincronizar(Array.isArray(dados) ? dados : dados.data || dados.produtos || []);
       } catch (e) {
+        // tratamento de erro
       }
     }
 
@@ -185,6 +190,15 @@ function SectionCarrinho() {
                     </button>
                   </div>
                 </div>
+
+                {/* Botão de Finalizar Compra inserido dentro do bloco com itens */}
+                <button
+                  type="button"
+                  onClick={finalizarCompra}
+                  className="w-full cursor-pointer rounded-lg bg-emerald-950 py-4 text-sm font-semibold text-white transition hover:bg-emerald-900"
+                >
+                  Finalizar compra
+                </button>
               </div>
             )}
           </div>

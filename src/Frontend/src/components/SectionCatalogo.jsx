@@ -28,13 +28,14 @@ export default function SectionCatalogo() {
     const [erro, setErro] = useState("")
     const [categorias, setCategorias] = useState({})
     const [busca, setBusca] = useState("")
+    const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todos")
 
     useEffect(() => {
         async function carregarProdutos() {
             try {
                 const token = localStorage.getItem("token")
                 const [response, respostaCategorias] = await Promise.all([
-                    fetch(`${API_URL}/mostrar-produtos`, {
+                    fetch(`${API_URL}/showProducts`, {
                         headers: {
                             "Accept": "application/json",
                             "Authorization": `Bearer ${token}`,
@@ -79,16 +80,24 @@ export default function SectionCatalogo() {
         carregarProdutos()
     }, [])
 
-    const termo = normalizar(busca.trim())
+   const termo = normalizar(busca.trim())
 
-    const produtosVisiveis = produtos
-        .filter((produto) => produto.ativo !== false && produto.ativo !== 0)
-        .filter((produto) =>
-            !termo ||
+const produtosVisiveis = produtos
+    .filter((produto) => produto.ativo !== false && produto.ativo !== 0)
+    .filter((produto) => {
+        const nomeCategoria = normalizar(categorias[produto.categoria_id])
+
+        const correspondeBusca =
             normalizar(produto.nome).includes(termo) ||
             normalizar(produto.descricao).includes(termo) ||
-            normalizar(categorias[produto.categoria_id]).includes(termo)
-        )
+            nomeCategoria.includes(termo)
+
+        const correspondeCategoria =
+            categoriaSelecionada === "Todos" ||
+            nomeCategoria === normalizar(categoriaSelecionada)
+
+        return correspondeBusca && correspondeCategoria
+    })
 
     return (
         <>
@@ -121,22 +130,26 @@ export default function SectionCatalogo() {
                 </form>
 
                 <section className="flex gap-3 w-[80%]">
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
+                        onClick={() => setCategoriaSelecionada("Todos")}>
                         <Widget size={24} />
                         <h3>Todos</h3>
                     </button>
 
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
+                     onClick={() => setCategoriaSelecionada("Limpeza")}>
                         <Wand3 size={24} />
                         <h3>Limpeza</h3>
                     </button>
 
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
+                    onClick={() =>setCategoriaSelecionada("Higiene")}>
                         <Droplet size={24} />
                         <h3>Higiene</h3>
                     </button>
 
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
+                    onClick={()=> setCategoriaSelecionada("Estética")}>
                         <Leaf size={24} />
                         <h3>Estética</h3>
                     </button>
