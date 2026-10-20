@@ -9,7 +9,6 @@ import HeaderLogin from './Header/HeaderLogin';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCarrinho } from './JavaScript/carrinhoAnimacao';
-
 const API_URL = "http://localhost:8000/api"
 
 function normalizar(texto) {
@@ -35,7 +34,7 @@ export default function SectionCatalogo() {
             try {
                 const token = localStorage.getItem("token")
                 const [response, respostaCategorias] = await Promise.all([
-                    fetch(`${API_URL}/showProducts`, {
+                    fetch(`${API_URL}/mostrar-produtos`, {
                         headers: {
                             "Accept": "application/json",
                             "Authorization": `Bearer ${token}`,

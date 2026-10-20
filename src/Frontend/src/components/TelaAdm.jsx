@@ -4,14 +4,13 @@ import HeaderLogin from "./Header/HeaderLogin";
 
 const API_URL = "http://localhost:8000/api";
 const API_BASE = "http://localhost:8000";
-
 const FORM_VAZIO = {
   nome: "",
   descricao: "",
   categoria_id: "",
   preco: "",
   estoque: "",
-  imagem: null, 
+  imagem: null,
   imagemAtual: "",
   ativo: true,
 };
@@ -103,7 +102,7 @@ export default function TelaAdm() {
     async function carregar() {
       try {
         const [respProdutos, respCategorias] = await Promise.all([
-          fetch(`${API_URL}/showProducts`, { headers: cabecalhos() }),
+          fetch(`${API_URL}/mostrar-produtos`, { headers: cabecalhos() }),
           fetch(`${API_URL}/categorias`, { headers: { Accept: "application/json" } }),
         ]);
 
@@ -176,17 +175,17 @@ export default function TelaAdm() {
     corpo.append("estoque", form.estoque);
     corpo.append("ativo", form.ativo ? "1" : "0");
     if (form.imagem) corpo.append("imagem", form.imagem);
- 
+
     if (idEditando) corpo.append("_method", "PUT");
 
     try {
       const url = idEditando
-        ? `${API_URL}/updateProduct/${idEditando}`
-        : `${API_URL}/registerProducts`;
+        ? `${API_URL}/atualizar-produto/${idEditando}/produto`
+        : `${API_URL}/registrar-produto`;
 
       const response = await fetch(url, {
         method: "POST",
-        headers: cabecalhos(), 
+        headers: cabecalhos(),
         body: corpo,
       });
 
@@ -224,7 +223,7 @@ export default function TelaAdm() {
     setErro("");
 
     try {
-      const response = await fetch(`${API_URL}/updateProduct/${produto.id}`, {
+      const response = await fetch(`${API_URL}/atualizar-produto/${produto.id}/produto`, {
         method: "PUT",
         headers: cabecalhos(true),
         body: JSON.stringify({ estoque: novoEstoque }),
@@ -257,7 +256,7 @@ export default function TelaAdm() {
     setExcluindo(true);
 
     try {
-      const response = await fetch(`${API_URL}/deleteProduct/${produtoParaExcluir.id}`, {
+      const response = await fetch(`${API_URL}/excluir-produto/${produtoParaExcluir.id}/produto`, {
         method: "DELETE",
         headers: cabecalhos(),
       });
@@ -363,7 +362,6 @@ export default function TelaAdm() {
                             disabled={ajustandoId === p.id}
                             className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
                           >
-                            
                           </button>
                           <span
                             className={`w-16 text-center ${

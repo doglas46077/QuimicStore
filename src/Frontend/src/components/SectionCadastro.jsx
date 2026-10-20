@@ -35,7 +35,7 @@ function SectionCadastro() {
     setCarregando(true);
 
     try {
-        const resposta = await fetch("http://127.0.0.1:8000/api/registerUser", {
+        const resposta = await fetch("http://127.0.0.1:8000/api/cadastrar-conta", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

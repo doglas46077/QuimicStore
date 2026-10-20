@@ -27,7 +27,7 @@ function SectionCarrinho() {
     async function atualizar() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${API_URL}/showProducts`, {
+        const response = await fetch(`${API_URL}/mostrar-produtos`, {
           headers: {
             Accept: "application/json",
             Authorization: `Bearer ${token}`,
