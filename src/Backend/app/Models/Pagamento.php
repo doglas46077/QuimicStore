@@ -19,7 +19,6 @@ class Pagamento extends Model
         'valor_pago',
         'txid',
         'pix_copia_cola',
-        'comprovante_path',
         'data_pagamento',
     ];
 
