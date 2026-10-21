@@ -70,7 +70,7 @@ export default function SectionCatalogo() {
             try {
                 const token = localStorage.getItem("token")
                 const response = await fetch(
-                    `${API_URL}/mostrar-produtos?page=${pagina}&per_page=${POR_PAGINA}`,
+                    `${API_URL}/showProducts?page=${pagina}&per_page=${POR_PAGINA}`,
                     {
                         headers: {
                             "Accept": "application/json",
