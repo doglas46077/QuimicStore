@@ -185,20 +185,15 @@ function SectionCarrinho() {
               </div>
             )}
 
-            {/* Fica fora do if/else, então aparece sempre: desativado com o carrinho vazio, ativo quando tem item */}
-            <button
-              type="button"
-              onClick={finalizarCompra}
-              disabled={carrinhoVazio}
-              title={carrinhoVazio ? "Adicione um produto para finalizar a compra" : undefined}
-              className={`mt-4 w-full rounded-lg py-4 text-sm font-semibold transition ${
-                carrinhoVazio
-                  ? "cursor-not-allowed bg-slate-200 text-slate-400"
-                  : "cursor-pointer bg-emerald-950 text-white hover:bg-emerald-900"
-              }`}
-            >
-              Finalizar compra
-            </button>
+            {!carrinhoVazio && (
+              <button
+                type="button"
+                onClick={finalizarCompra}
+                className="mt-4 w-full cursor-pointer rounded-lg bg-emerald-950 py-4 text-sm font-semibold text-white transition hover:bg-emerald-900"
+              >
+                Finalizar compra
+              </button>
+            )}
           </div>
 
           <div className="mx-10 mt-10 flex justify-between rounded-xl bg-white p-6 shadow-sm">

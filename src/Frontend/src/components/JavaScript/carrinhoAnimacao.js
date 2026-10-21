@@ -22,7 +22,10 @@ function salvarCarrinho(itens) {
 }
 
 function estaAtivo(produto) {
-  return produto.ativo === true || produto.ativo === 1 || produto.ativo === "1";
+  // Algumas rotas de consulta não incluem o campo `ativo`. Nesse caso,
+  // preserve o item; só remova quando o servidor informar que está inativo.
+  return produto.ativo === undefined || produto.ativo === null ||
+    produto.ativo === true || produto.ativo === 1 || produto.ativo === "1";
 }
 
 // Devolve true se adicionou, false se bateu no limite do estoque
@@ -31,7 +34,7 @@ function adicionar(produto, quantidade = 1) {
   if (estoque <= 0) return false;
 
   const atual = lerCarrinho();
-  const existente = atual.find((item) => item.id === produto.id);
+  const existente = atual.find((item) => String(item.id) === String(produto.id));
 
   if (existente) {
     if (existente.quantidade + quantidade > estoque) return false;
@@ -56,13 +59,13 @@ function adicionar(produto, quantidade = 1) {
 function podeAdicionar(produto, quantidade = 1) {
   const estoque = Number(produto.estoque);
   if (estoque <= 0) return false;
-  const existente = lerCarrinho().find((item) => item.id === produto.id);
+  const existente = lerCarrinho().find((item) => String(item.id) === String(produto.id));
   return (existente?.quantidade ?? 0) + quantidade <= estoque;
 }
 
 function alterarQuantidade(id, delta) {
   const atual = lerCarrinho().map((item) => {
-    if (item.id !== id) return item;
+    if (String(item.id) !== String(id)) return item;
     const nova = item.quantidade + delta;
     if (nova < 1 || nova > item.estoque) return item;
     return { ...item, quantidade: nova };
@@ -71,7 +74,7 @@ function alterarQuantidade(id, delta) {
 }
 
 function remover(id) {
-  salvarCarrinho(lerCarrinho().filter((item) => item.id !== id));
+  salvarCarrinho(lerCarrinho().filter((item) => String(item.id) !== String(id)));
 }
 
 function limpar() {
@@ -80,13 +83,24 @@ function limpar() {
 
 // Atualiza preço e estoque com o que está no banco agora.
 // Tira do carrinho o que foi removido, desativado ou esgotou.
+
 function sincronizar(produtosDoBanco) {
   const atualizado = lerCarrinho()
     .map((item) => {
-      const produto = produtosDoBanco.find((p) => p.id === item.id);
-      if (!produto || !estaAtivo(produto) || Number(produto.estoque) <= 0) return null;
+    const produto = produtosDoBanco.find(
+        (p) => String(p.id) === String(item.id)
+      );
+
+      if (
+        !produto ||
+        !estaAtivo(produto) ||
+        Number(produto.estoque) <= 0
+      ) {
+        return null;
+      }
 
       const estoque = Number(produto.estoque);
+
       return {
         ...item,
         nome: produto.nome,

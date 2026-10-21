@@ -6,11 +6,11 @@ import HeaderLogin from "./Header/HeaderLogin";
 import FooterCatalogo from "./FooterCatalogo";
 import { resolverImagem } from "./CardCatalogo";
 import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
-import { buscarProdutosAtuais } from "./JavaScript/buscarProdutosAtuais";
+import { Buscarprodutos } from "./JavaScript/Buscarprodutos";
 
 const API_URL = "http://localhost:8000/api";
 
-const ROTA_CRIAR_PEDIDO = "/registrar-pedido"; 
+const ROTA_CRIAR_PEDIDO = "/registerOrder";
 const METODO_PAGAMENTO = "pix";
 
 function formatarPreco(valor) {
@@ -44,7 +44,7 @@ function SectionResumoCompra() {
     if (itens.length === 0) return;
 
     try {
-      const atuais = await buscarProdutosAtuais(itens);
+      const atuais = await Buscarprodutos(itens);
       sincronizar(atuais);
     } catch (e) {
       if (e.message === "401") sessaoExpirada();

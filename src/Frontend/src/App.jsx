@@ -6,6 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import SectionCarrinho from "./components/PrincipalCarrinho";
 import SectionPerfil from "./components/SectionPerfil";
 import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
+import SectionResumoCompra from "./components/SectionResumo";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
 import ProductPage from "./components/ProductPage";
@@ -26,6 +27,7 @@ function App() {
       <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/></ProtecaoRotas>}/>
 
       <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
+      <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
 
       <Route path="/pedidos" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
 
