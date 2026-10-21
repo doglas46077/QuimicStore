@@ -35,18 +35,11 @@ class DatabaseSeeder extends Seeder
             "nivel_acesso" => 'professor'
         ]);
 
-    $categorias = Categoria::factory()
-    ->count(3)
-    ->sequence(
-        ['nome' => 'limpeza'],
-        ['nome' => 'higiene'],
-        ["nome" => "estética"]
-    )
-    ->create();
 
-    // O produto será gerado após as 3 categorias gerando assim produtos apenas com elas 3
-       \App\Models\Produto::factory(100)->create([
-    'categoria_id' => fn () => $categorias->random()->id,
-        ]);
+    $this->call([
+        ProdutoSeeder::class,
+    ]);
+
+
     }
 }
