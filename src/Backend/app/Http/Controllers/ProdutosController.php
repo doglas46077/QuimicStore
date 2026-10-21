@@ -58,13 +58,22 @@ class ProdutosController extends Controller
     // ===================================================================================================
     // BUSCAR TODOS PRODUTOS
     // ===================================================================================================
-    public function index()
+    public function index(Request $request)
     {
-        $produtos = Produto::all();
-        return response()->json([
-            "message" => "Exibindo produtos",
-            "data" => $produtos
-        ], 200);
+           $perPage = max(1, min((int) $request->query('per_page', 30), 50));
+
+    $produtos = Produto::orderBy('id')->paginate($perPage);
+
+    return response()->json([
+        "message" => "Exibindo produtos",
+        "data" => $produtos->items(),
+        "meta" => [
+            "current_page" => $produtos->currentPage(),
+            "last_page"    => $produtos->lastPage(),
+            "per_page"     => $produtos->perPage(),
+            "total"        => $produtos->total(),
+        ],
+    ], 200);
     }
 
     // ===================================================================================================

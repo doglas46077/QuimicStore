@@ -16,7 +16,7 @@ class ProdutoSeeder extends Seeder
         $estetica = Categoria::firstOrCreate(['nome' => 'estética']);
 
         // 2. Lista completa com os produtos identificados nas imagens do PDF
-        $produtos = [
+       $produtos = [
             // --- Categoria: LIMPEZA ---
             [
                 'categoria_id' => $limpeza->id,
@@ -25,7 +25,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 6.50,
                 'estoque' => 45,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/multiuso-algas-500ml.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -34,7 +34,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 3.80,
                 'estoque' => 80,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-azul.png',
+                'imagem' => 'img/produtosImgs/detergente-limao-500ml.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -43,7 +43,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 3.50,
                 'estoque' => 90,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/detergente-neutro-500ml.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -52,7 +52,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 3.80,
                 'estoque' => 60,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/detergente-laranja-500ml.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -61,7 +61,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 3.90,
                 'estoque' => 70,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/detergente-coco-500ml.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -70,7 +70,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 28.90,
                 'estoque' => 25,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/detergente-laranja-5l.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -79,7 +79,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 32.00,
                 'estoque' => 30,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/desinfetante-lavanda-5l.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -88,7 +88,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 35.50,
                 'estoque' => 20,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/amaciante-roupas-5l.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -97,7 +97,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 18.00,
                 'estoque' => 40,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/agua-lencois-bambo-mm-500ml.jpg',
             ],
             [
                 'categoria_id' => $limpeza->id,
@@ -106,7 +106,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 18.00,
                 'estoque' => 35,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/agua-lencois-garden-500ml.jpg',
             ],
 
             // --- Categoria: HIGIENE ---
@@ -117,7 +117,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 12.50,
                 'estoque' => 50,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/sabonete-liquido-500ml.jpg',
             ],
             [
                 'categoria_id' => $higiene->id,
@@ -126,7 +126,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 24.90,
                 'estoque' => 30,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/sabonete-liquido-alfazema-2l.jpg',
             ],
             [
                 'categoria_id' => $higiene->id,
@@ -135,7 +135,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 24.90,
                 'estoque' => 30,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/sabonete-liquido-erva-doce-2l.jpg',
             ],
             [
                 'categoria_id' => $higiene->id,
@@ -144,7 +144,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 24.90,
                 'estoque' => 25,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/sabonete-liquido-mirra-2l.jpg',
             ],
             [
                 'categoria_id' => $higiene->id,
@@ -153,7 +153,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 5.00,
                 'estoque' => 100,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/alcool-gel-frutas-vermelhas-30g.jpg',
             ],
             [
                 'categoria_id' => $higiene->id,
@@ -162,7 +162,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 5.00,
                 'estoque' => 100,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/alcool-gel-maca-verde-30g.jpg',
             ],
 
             // --- Categoria: ESTÉTICA ---
@@ -173,7 +173,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 14.90,
                 'estoque' => 45,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/creme-maos-cereja-avela-40g.jpg',
             ],
             [
                 'categoria_id' => $estetica->id,
@@ -182,7 +182,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 16.50,
                 'estoque' => 50,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/creme-maos-avela-mel-60g.jpg',
             ],
             [
                 'categoria_id' => $estetica->id,
@@ -191,7 +191,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 22.90,
                 'estoque' => 35,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/mascara-detox-castanha-do-para-60ml.jpg',
             ],
             [
                 'categoria_id' => $estetica->id,
@@ -200,7 +200,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 19.90,
                 'estoque' => 60,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/locao-repelente-120g.jpg',
             ],
             [
                 'categoria_id' => $estetica->id,
@@ -209,7 +209,7 @@ class ProdutoSeeder extends Seeder
                 'preco' => 18.50,
                 'estoque' => 55,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/repelente-spray-citronela-120ml.jpg',
             ],
             [
                 'categoria_id' => $estetica->id,
@@ -218,10 +218,9 @@ class ProdutoSeeder extends Seeder
                 'preco' => 21.00,
                 'estoque' => 40,
                 'ativo' => true,
-                'imagem' => 'img/produtosImgs/produto-verde.png',
+                'imagem' => 'img/produtosImgs/creme-arnica-massagem-120g.jpg',
             ],
         ];
-
         // 3. Cadastra ou atualiza os produtos sem duplicar
         foreach ($produtos as $produtoData) {
             Produto::firstOrCreate(
