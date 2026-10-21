@@ -10,7 +10,7 @@ import { Buscarprodutos } from "./JavaScript/Buscarprodutos";
 
 const API_URL = "http://localhost:8000/api";
 
-const ROTA_CRIAR_PEDIDO = "/registerOrder";
+const ROTA_CRIAR_PEDIDO = "/registrar-pedido"; 
 const METODO_PAGAMENTO = "pix";
 
 function formatarPreco(valor) {
