@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Pagamento;
 use App\Services\PixService;
 use Illuminate\Http\Request;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PagamentoController extends Controller
 {
@@ -21,16 +20,9 @@ class PagamentoController extends Controller
 
         $txId = 'QX' . time() . rand(100, 999);
 
-
         $pixService = new PixService();
         $payloadPix = $pixService->gerarPayload($valor, $txId);
-
-        $qrCodeSvg = QrCode::format('svg')
-            ->size(300)
-            ->errorCorrection('M')
-            ->generate($payloadPix);
-
-        $qrCodeBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrCodeSvg);
+        $qrCodeBase64 = $pixService->gerarQrCodeBase64($payloadPix);
 
         $pagamento = Pagamento::create([
             'pedido_id' => $pedidoId,
@@ -56,34 +48,6 @@ class PagamentoController extends Controller
         ], 201);
     }
 
-    public function enviarComprovante(Request $request, int $id)
-    {
-        $request->validate([
-            'comprovante' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048', // máximo 2MB
-        ]);
-
-        $pagamento = Pagamento::findOrFail($id);
-
-        if ($request->hasFile('comprovante')) {
-            // Salva o ficheiro na pasta storage/app/public/comprovantes
-            $caminho = $request->file('comprovante')->store('comprovantes', 'public');
-
-            $pagamento->comprovante_path = $caminho;
-            $pagamento->save();
-
-            return response()->json([
-                'status' => true,
-                'mensagem' => 'Comprovante enviado com sucesso!',
-                'caminho' => $caminho
-            ]);
-        }
-
-        return response()->json([
-            'status' => false,
-            'mensagem' => 'Erro ao processar o arquivo.'
-        ], 400);
-    }
-
     public function aprovarPagamento(Request $request, int $id)
     {
         $usuarioLogado = $request->user();
@@ -98,7 +62,6 @@ class PagamentoController extends Controller
             'status' => 'required|in:aprovado,cancelado'
         ]);
 
-        // Carrega o pagamento junto com o pedido vinculado
         $pagamento = Pagamento::with('pedido')->findOrFail($id);
         $novoStatus = $request->input('status');
 
@@ -110,7 +73,6 @@ class PagamentoController extends Controller
 
         $pagamento->save();
 
-        // Sincroniza o status no Pedido
         if ($pagamento->pedido) {
             $pagamento->pedido->update([
                 'status' => $novoStatus
