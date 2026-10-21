@@ -59,11 +59,7 @@ class ProdutosController extends Controller
     // ===================================================================================================
     public function index()
     {
-        $produtos = Produto::all();
-        return response()->json([
-            "message" => "Exibindo produtos",
-            "data" => $produtos
-        ], 200);
+        return Produto::paginate(12);
     }
 
     // ===================================================================================================
