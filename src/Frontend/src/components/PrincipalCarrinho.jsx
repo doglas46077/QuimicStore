@@ -5,8 +5,7 @@ import HeaderLogin from "./Header/HeaderLogin";
 import FooterCatalogo from "./FooterCatalogo";
 import { resolverImagem } from "./CardCatalogo";
 import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
-
-const API_URL = "http://localhost:8000/api";
+import { Buscarprodutos } from "./JavaScript/Buscarprodutos";
 
 const beneficios = [
   { Icone: ShieldCheck, titulo: "Compra segura", texto: "Seus dados protegidos com criptografia" },
@@ -23,34 +22,27 @@ function SectionCarrinho() {
   const navigate = useNavigate();
   const { itens, total, totalItens, alterarQuantidade, remover, limpar, sincronizar } = useCarrinho();
 
+  const carrinhoVazio = itens.length === 0;
+
   function finalizarCompra() {
-    // Implemente a lógica de finalização do pedido aqui
+    navigate("/resumo");
   }
 
   useEffect(() => {
     async function atualizar() {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${API_URL}/mostrar-produtos`, {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      if (itens.length === 0) return;
 
-        if (response.status === 401) {
+      try {
+        // confere preço e estoque de cada item no banco
+        const atuais = await Buscarprodutos(itens);
+        sincronizar(atuais);
+      } catch (e) {
+        if (e.message === "401") {
           localStorage.removeItem("token");
           localStorage.removeItem("usuario");
           navigate("/login");
-          return;
         }
-
-        if (!response.ok) return;
-
-        const dados = await response.json();
-        sincronizar(Array.isArray(dados) ? dados : dados.data || dados.produtos || []);
-      } catch (e) {
-        // tratamento de erro
+        // outros erros (sem conexão): mantém o carrinho como está
       }
     }
 
@@ -82,7 +74,7 @@ function SectionCarrinho() {
           </div>
 
           <div className="mx-6">
-            {itens.length === 0 ? (
+            {carrinhoVazio ? (
               <div className="rounded-xl bg-white p-16 text-center shadow-sm">
                 <div className="relative mx-auto flex h-50 w-50 items-center justify-center rounded-full bg-emerald-50">
                   <ShoppingCart className="h-20 w-20 text-emerald-300" strokeWidth={1.5} />
@@ -190,17 +182,23 @@ function SectionCarrinho() {
                     </button>
                   </div>
                 </div>
-
-                {/* Botão de Finalizar Compra inserido dentro do bloco com itens */}
-                <button
-                  type="button"
-                  onClick={finalizarCompra}
-                  className="w-full cursor-pointer rounded-lg bg-emerald-950 py-4 text-sm font-semibold text-white transition hover:bg-emerald-900"
-                >
-                  Finalizar compra
-                </button>
               </div>
             )}
+
+            {/* Fica fora do if/else, então aparece sempre: desativado com o carrinho vazio, ativo quando tem item */}
+            <button
+              type="button"
+              onClick={finalizarCompra}
+              disabled={carrinhoVazio}
+              title={carrinhoVazio ? "Adicione um produto para finalizar a compra" : undefined}
+              className={`mt-4 w-full rounded-lg py-4 text-sm font-semibold transition ${
+                carrinhoVazio
+                  ? "cursor-not-allowed bg-slate-200 text-slate-400"
+                  : "cursor-pointer bg-emerald-950 text-white hover:bg-emerald-900"
+              }`}
+            >
+              Finalizar compra
+            </button>
           </div>
 
           <div className="mx-10 mt-10 flex justify-between rounded-xl bg-white p-6 shadow-sm">

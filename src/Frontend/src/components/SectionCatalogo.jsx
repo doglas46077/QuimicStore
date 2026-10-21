@@ -1,15 +1,19 @@
 import { Search4 } from 'reicon-react';
 import CardCatalogo from './CardCatalogo';
+import Paginacao from './Paginacao';
 import { Widget } from 'reicon-react';
 import { Droplet } from 'reicon-react';
 import { Leaf } from 'reicon-react';
 import { Wand3 } from 'reicon-react';
 import Footer from "./FooterCatalogo"
 import HeaderLogin from './Header/HeaderLogin';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCarrinho } from './JavaScript/carrinhoAnimacao';
+
 const API_URL = "http://localhost:8000/api"
+const POR_PAGINA = 12 
+
 
 function normalizar(texto) {
     return (texto || "")
@@ -21,40 +25,60 @@ function normalizar(texto) {
 
 export default function SectionCatalogo() {
     const navigate = useNavigate()
-    const {adicionar, podeAdicionar} =useCarrinho()
+    const { adicionar, podeAdicionar } = useCarrinho()
+
+   
+    const [params, setParams] = useSearchParams()
+    const pagina = Math.max(1, Number(params.get("page")) || 1)
 
     const [produtos, setProdutos] = useState([])
+    const [ultimaPagina, setUltimaPagina] = useState(1)
+    const [total, setTotal] = useState(0)
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState("")
     const [categorias, setCategorias] = useState({})
     const [busca, setBusca] = useState("")
-    const [categoriaSelecionada, setCategoriaSelecionada] = useState("Todos")
 
     useEffect(() => {
+        async function carregarCategorias() {
+            try {
+                const resposta = await fetch(`${API_URL}/categorias`, {
+                    headers: { "Accept": "application/json" },
+                })
+                if (!resposta.ok) return
+
+                const dados = await resposta.json()
+                const lista = Array.isArray(dados)
+                    ? dados
+                    : dados.data || dados.categorias || []
+                const mapa = {}
+                lista.forEach((c) => { mapa[c.id] = c.nome })
+                setCategorias(mapa)
+            } catch (e) {
+            }
+        }
+
+        carregarCategorias()
+    }, [])
+
+    useEffect(() => {
+        let cancelado = false 
         async function carregarProdutos() {
+            setCarregando(true)
+            setErro("")
+
             try {
                 const token = localStorage.getItem("token")
-                const [response, respostaCategorias] = await Promise.all([
-                    fetch(`${API_URL}/showProducts`, {
+                const response = await fetch(
+                    `${API_URL}/mostrar-produtos?page=${pagina}&per_page=${POR_PAGINA}`,
+                    {
                         headers: {
                             "Accept": "application/json",
                             "Authorization": `Bearer ${token}`,
                         },
-                    }),
-                    fetch(`${API_URL}/categorias`, {
-                        headers: { "Accept": "application/json" },
-                    }),
-                ])
-                
-                if (respostaCategorias.ok) {
-                    const dadosCategorias = await respostaCategorias.json()
-                    const lista = Array.isArray(dadosCategorias)
-                        ? dadosCategorias
-                        : dadosCategorias.data || dadosCategorias.categorias || []
-                    const mapa = {}
-                    lista.forEach((c) => { mapa[c.id] = c.nome })
-                    setCategorias(mapa)
-                }
+                    }
+                )
+                if (cancelado) return
 
                 if (response.status === 401) {
                     localStorage.removeItem("token")
@@ -64,40 +88,50 @@ export default function SectionCatalogo() {
                 }
 
                 const dados = await response.json()
+                if (cancelado) return
 
                 if (!response.ok) {
                     setErro(dados.message || dados.mensagem || "Erro ao carregar os produtos")
                     return
                 }
-                setProdutos(Array.isArray(dados) ? dados : dados.produtos || dados.data || [])
+
+                const lista = Array.isArray(dados) ? dados : dados.data || dados.produtos || []
+                const ultima = dados.meta?.last_page || 1
+
+                if (pagina > ultima) {
+                    setParams({ page: ultima }, { replace: true })
+                    return
+                }
+
+                setProdutos(lista)
+                setUltimaPagina(ultima)
+                setTotal(dados.meta?.total ?? lista.length)
             } catch (e) {
-                setErro("Não foi possível conectar ao servidor")
+                if (!cancelado) setErro("Não foi possível conectar ao servidor")
             } finally {
-                setCarregando(false)
+                if (!cancelado) setCarregando(false)
             }
         }
 
         carregarProdutos()
-    }, [])
+        return () => { cancelado = true }
+    }, [pagina])
 
-   const termo = normalizar(busca.trim())
+    function irParaPagina(numero) {
+        setParams(numero === 1 ? {} : { page: numero })
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }
 
-const produtosVisiveis = produtos
-    .filter((produto) => produto.ativo !== false && produto.ativo !== 0)
-    .filter((produto) => {
-        const nomeCategoria = normalizar(categorias[produto.categoria_id])
+    const termo = normalizar(busca.trim())
 
-        const correspondeBusca =
+    const produtosVisiveis = produtos
+        .filter((produto) => produto.ativo !== false && produto.ativo !== 0)
+        .filter((produto) =>
+            !termo ||
             normalizar(produto.nome).includes(termo) ||
             normalizar(produto.descricao).includes(termo) ||
-            nomeCategoria.includes(termo)
-
-        const correspondeCategoria =
-            categoriaSelecionada === "Todos" ||
-            nomeCategoria === normalizar(categoriaSelecionada)
-
-        return correspondeBusca && correspondeCategoria
-    })
+            normalizar(categorias[produto.categoria_id]).includes(termo)
+        )
 
     return (
         <>
@@ -130,32 +164,28 @@ const produtosVisiveis = produtos
                 </form>
 
                 <section className="flex gap-3 w-[80%]">
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
-                        onClick={() => setCategoriaSelecionada("Todos")}>
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Widget size={24} />
                         <h3>Todos</h3>
                     </button>
 
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
-                     onClick={() => setCategoriaSelecionada("Limpeza")}>
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Wand3 size={24} />
                         <h3>Limpeza</h3>
                     </button>
 
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
-                    onClick={() =>setCategoriaSelecionada("Higiene")}>
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Droplet size={24} />
                         <h3>Higiene</h3>
                     </button>
 
-                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2"
-                    onClick={()=> setCategoriaSelecionada("Estética")}>
+                    <button className="flex justify-center bg-white p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2">
                         <Leaf size={24} />
                         <h3>Estética</h3>
                     </button>
                 </section>
 
-                <section className="grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] ">
+                <section className={`grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] transition-opacity ${carregando ? "opacity-60" : ""}`}>
                     {produtosVisiveis.map((produto) => (
                         <CardCatalogo
                             key={produto.id}
@@ -174,11 +204,21 @@ const produtosVisiveis = produtos
 
                 {carregando && <p className="text-slate-500">Carregando produtos...</p>}
                 {erro && <p className="text-red-600">{erro}</p>}
-                {!carregando && !erro && produtos.length === 0 && (
+                {!carregando && !erro && total === 0 && (
                     <p className="text-slate-500">Nenhum produto cadastrado.</p>
                 )}
                 {!carregando && !erro && produtos.length > 0 && produtosVisiveis.length === 0 && (
-                    <p className="text-slate-500">Nenhum produto encontrado para "{busca}".</p>
+                    <p className="text-slate-500">Nenhum produto encontrado nesta página para "{busca}".</p>
+                )}
+
+                {ultimaPagina > 1 && !erro && (
+                    <Paginacao
+                        paginaAtual={pagina}
+                        ultimaPagina={ultimaPagina}
+                        total={total}
+                        onMudar={irParaPagina}
+                        desabilitado={carregando}
+                    />
                 )}
 
             </div>
