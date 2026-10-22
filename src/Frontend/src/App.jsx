@@ -9,6 +9,7 @@ import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
 import ProductPage from "./components/ProductPage";
+import SectionResumoCompra from "./components/SectionResumo";
 
 function App() {
     return (
@@ -18,6 +19,8 @@ function App() {
         <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={<LoginCard/>}/>
       <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/></ProtecaoRotas>}/>
+      
+      <Route path="/produto/:id" element={<ProtecaoRotas><ProductPage/></ProtecaoRotas>}/>
 
       <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
 
@@ -30,6 +33,8 @@ function App() {
       <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
 
       <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
+
+      <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
         </Routes>
       
      </div>
