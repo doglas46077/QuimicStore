@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-// TIVE QUE FAZER COM IA, MUITO SUPERIOR AOS MEUS CONHECIMENTOS
-
+use chillerlan\QRCode\QRCode;
+use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Common\EccLevel;
 
 class PixService
 {
@@ -20,7 +21,7 @@ class PixService
         $this->beneficiario = mb_substr(self::removerAcentos($beneficiario), 0, 25);
         $this->cidade = mb_substr(self::removerAcentos($cidade), 0, 15);
     }
-    
+
     public function gerarPayload(float $valor, string $txId = '***'): string
     {
         $valorStr = number_format($valor, 2, '.', '');
@@ -45,6 +46,17 @@ class PixService
             '6304';
 
         return $payload . $this->calcularCRC16($payload);
+    }
+
+    public function gerarQrCodeBase64(string $payload): string
+    {
+        $options = new QROptions([
+            'outputType'  => 'svg',
+            'imageBase64' => true,
+            'eccLevel'    => EccLevel::M,
+        ]);
+
+        return (new QRCode($options))->render($payload);
     }
 
     private function formatarCampo(string $id, string $valor): string

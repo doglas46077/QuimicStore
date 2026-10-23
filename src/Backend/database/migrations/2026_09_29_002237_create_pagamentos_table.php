@@ -16,7 +16,6 @@ return new class extends Migration
             $table->decimal('valor_pago', 10, 2);
             $table->string('txid')->nullable()->unique(); // Adicionado nullable()
             $table->text('pix_copia_cola')->nullable();  // Adicionado nullable()
-            $table->string('comprovante_path')->nullable();
             $table->timestamp('data_pagamento')->nullable();
             $table->timestamps();
         });
