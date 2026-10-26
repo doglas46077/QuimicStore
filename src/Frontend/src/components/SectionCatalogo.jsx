@@ -10,7 +10,7 @@ import HeaderLogin from './Header/HeaderLogin';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useCarrinho } from './JavaScript/carrinhoAnimacao';
-import { API_URL } from '../api';
+import { API_URL } from './api';
 
 const POR_PAGINA = 12 
 

@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from 'motion/react';
 import { CartLarge5 } from 'reicon-react';
 import { cesta } from './CestaCarrinho';
-import { resolverUrlImagem } from '../api';
+import { resolverUrlImagem } from './api';
 
 export function resolverImagem(imagem) {
     return resolverUrlImagem(imagem)

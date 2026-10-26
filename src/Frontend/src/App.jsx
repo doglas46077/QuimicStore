@@ -10,31 +10,27 @@ import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
 import ProductPage from "./components/ProductPage";
 import SectionResumoCompra from "./components/SectionResumo";
+import PagamentoPix from "./components/PaginaPagamento";
+import SectionStatus from "./components/PagamentoConfirmado";
 
 function App() {
     return (
         <>
         <div className="bg-olive-50 font-bold">
        <Routes>
-        <Route path="/" element={<SectionCadastro />} />
+      <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={<LoginCard/>}/>
-      <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/></ProtecaoRotas>}/>
-      
+      <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/>  </ProtecaoRotas>}/>
       <Route path="/produto/:id" element={<ProtecaoRotas><ProductPage/></ProtecaoRotas>}/>
-
       <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
-
       <Route path="/pedidos" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
-
       <Route path="/perfil" element={<ProtecaoRotas><SectionPerfil/></ProtecaoRotas> }/>
-
       <Route path="/pedidoDetalhe" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
-
       <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
-
       <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
-
       <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
+      <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>
+      <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>
         </Routes>
       
      </div>

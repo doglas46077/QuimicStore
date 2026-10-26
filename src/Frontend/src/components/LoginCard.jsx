@@ -2,7 +2,7 @@ import HeaderLogin from "./Header/HeaderLogin";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { API_URL } from "../api";
+import { API_URL } from "./api";
 
 function mensagemDeErro(dados, padrao) {
     if (dados?.errors) {

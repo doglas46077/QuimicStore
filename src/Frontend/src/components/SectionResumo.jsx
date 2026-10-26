@@ -7,7 +7,7 @@ import FooterCatalogo from "./FooterCatalogo";
 import { resolverImagem } from "./CardCatalogo";
 import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
 import { Buscarprodutos } from "./JavaScript/Buscarprodutos";
-import { API_URL } from "../api";
+import { API_URL } from "./api";
 
 const ROTA_CRIAR_PEDIDO = "/registrar-pedido"; 
 const METODO_PAGAMENTO = "pix";

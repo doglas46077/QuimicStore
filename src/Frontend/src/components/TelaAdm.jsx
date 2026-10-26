@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
-import { API_URL, resolverUrlImagem } from "../api";
+import { API_URL, resolverUrlImagem } from "./api";
 
 const FORM_VAZIO = {
   nome: "",

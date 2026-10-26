@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, ShoppingCart, Star, Info, Minus, Plus, Flask
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from "motion/react";
 import HeaderLogin from "./Header/HeaderLogin";
 import { useLocation, useNavigate } from "react-router-dom";
-import { resolverUrlImagem } from "../api";
+import { resolverUrlImagem } from "./api";
 import FooterCatalogo from "./FooterCatalogo";
 import { cesta } from "./CestaCarrinho";
 import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
