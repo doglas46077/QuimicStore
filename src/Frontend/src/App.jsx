@@ -12,10 +12,13 @@ import ProductPage from "./components/ProductPage";
 import SectionResumoCompra from "./components/SectionResumo";
 import PagamentoPix from "./components/PaginaPagamento";
 import SectionStatus from "./components/PagamentoConfirmado";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
     return (
         <>
+        <ToastContainer position="top-right" autoClose={3000} />
         <div className="bg-olive-50 font-bold">
        <Routes>
       <Route path="/" element={<SectionCadastro />} />
