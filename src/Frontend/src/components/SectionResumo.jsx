@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ClipboardList, ArrowLeft, ShieldCheck } from "reicon-react";
@@ -27,11 +27,10 @@ function mensagemDeErro(dados) {
 
 function SectionResumoCompra() {
   const navigate = useNavigate();
-  const { itens, total, totalItens, limpar, sincronizar } = useCarrinho();
+  const { itens, total, totalItens, sincronizar } = useCarrinho();
 
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
-  const finalizadoRef = useRef(false)
 
   function sessaoExpirada() {
     localStorage.removeItem("token");
@@ -55,7 +54,7 @@ function SectionResumoCompra() {
   }, []);
 
   useEffect(() => {
-    if (itens.length === 0 && !finalizadoRef.current) {
+    if (itens.length === 0) {
       navigate("/carrinho", { replace: true });
     }
   }, [itens.length]);
@@ -97,8 +96,6 @@ function SectionResumoCompra() {
 
       const pedido = dados.dados; 
 
-      finalizadoRef.current = true;
-      limpar();
       toast.success("Pedido criado com sucesso");
 
       sessionStorage.setItem(`pedido:${pedido.id}`, JSON.stringify(pedido));
@@ -113,7 +110,7 @@ function SectionResumoCompra() {
     }
   }
 
-  if (itens.length === 0 && !finalizadoRef.current) return null;
+  if (itens.length === 0) return null;
 
   return (
     <>

@@ -17,6 +17,7 @@ function LoginCard() {
 
 const [email, useEmail] = useState("")
 const [senha, useSenha] = useState("")
+const [mostrarSenha, setMostrarSenha] = useState(false)
 
 const [erro, useError] = useState("")
 const [carregando, isCarregando] = useState(false)
@@ -106,15 +107,39 @@ async function login(e) {
             <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
               Senha
             </label>
-            <input
-              type="password"
-              id="senha"
-              name="senha"
-              placeholder="Digite sua senha"
-              required
-              value={senha}
-              onChange={(e)=>useSenha(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+            <div className="relative">
+              <input
+                type={mostrarSenha ? "text" : "password"}
+                id="senha"
+                name="senha"
+                placeholder="Digite sua senha"
+                required
+                value={senha}
+                onChange={(e)=>useSenha(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 pr-11 text-sm outline-none"
+              />
+              {senha.length > 0 && <button
+                type="button"
+                onClick={() => setMostrarSenha((visivel) => !visivel)}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                aria-pressed={mostrarSenha}
+                className="absolute inset-y-0 right-0 z-10 flex w-10 items-center justify-center text-slate-500 hover:text-slate-800"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  {mostrarSenha ? (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.1-2.2 3.1M6.2 6.2C4.1 7.5 2.9 9.5 2.5 12c.8 2.1 3.7 7 9.5 7 1 0 2-.2 2.9-.5" />
+                    </>
+                  ) : (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>}
+            </div>
 
           <button className="text-sm text-emerald-700 underline  w-full text-right hover:transition hover:duration-100 hover:text-blue-800">
             Esqueci minha senha

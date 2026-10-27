@@ -32,8 +32,7 @@ export default function SectionCatalogo() {
     const pagina = Math.max(1, Number(params.get("page")) || 1)
 
     const [produtos, setProdutos] = useState([])
-    const [ultimaPagina, setUltimaPagina] = useState(1)
-    const [total, setTotal] = useState(0)
+    const [totalServidor, setTotalServidor] = useState(0)
     const [carregando, setCarregando] = useState(true)
     const [erro, setErro] = useState("")
     const [categorias, setCategorias] = useState({})
@@ -70,8 +69,8 @@ export default function SectionCatalogo() {
 
             try {
                 const token = localStorage.getItem("token")
-                const response = await fetch(
-                    `${API_URL}/mostrar-produtos?page=${pagina}&per_page=${POR_PAGINA}`,
+                const requisitarPagina = (numero) => fetch(
+                    `${API_URL}/mostrar-produtos?page=${numero}&per_page=${POR_PAGINA}`,
                     {
                         headers: {
                             "Accept": "application/json",
@@ -79,6 +78,7 @@ export default function SectionCatalogo() {
                         },
                     }
                 )
+                const response = await requisitarPagina(1)
                 if (cancelado) return
 
                 if (response.status === 401) {
@@ -96,17 +96,19 @@ export default function SectionCatalogo() {
                     return
                 }
 
-                const lista = Array.isArray(dados) ? dados : dados.data || dados.produtos || []
+                const primeiraPagina = Array.isArray(dados) ? dados : dados.data || dados.produtos || []
                 const ultima = dados.meta?.last_page || 1
-
-                if (pagina > ultima) {
-                    setParams({ page: ultima }, { replace: true })
-                    return
+                const todasPaginas = [primeiraPagina]
+                for (let numero = 2; numero <= ultima; numero += 1) {
+                    const paginaResponse = await requisitarPagina(numero)
+                    if (cancelado) return
+                    if (!paginaResponse.ok) throw new Error("Erro ao carregar produtos")
+                    const paginaDados = await paginaResponse.json()
+                    todasPaginas.push(Array.isArray(paginaDados) ? paginaDados : paginaDados.data || paginaDados.produtos || [])
                 }
-
-                setProdutos(lista)
-                setUltimaPagina(ultima)
-                setTotal(dados.meta?.total ?? lista.length)
+                if (cancelado) return
+                setProdutos(todasPaginas.flat())
+                setTotalServidor(dados.meta?.total ?? todasPaginas.flat().length)
             } catch (e) {
                 if (!cancelado) setErro("Não foi possível conectar ao servidor")
             } finally {
@@ -116,7 +118,7 @@ export default function SectionCatalogo() {
 
         carregarProdutos()
         return () => { cancelado = true }
-    }, [pagina])
+    }, [navigate])
 
     function irParaPagina(numero) {
         setParams(numero === 1 ? {} : { page: numero })
@@ -125,7 +127,12 @@ export default function SectionCatalogo() {
 
     function selecionarCategoria(categoria) {
         setFiltroCategoria(categoria)
-        if (pagina !== 1) setParams({})
+        setParams({})
+    }
+
+    function atualizarBusca(valor) {
+        setBusca(valor)
+        setParams({})
     }
 
     const termo = normalizar(busca.trim())
@@ -141,6 +148,16 @@ export default function SectionCatalogo() {
         .filter((produto) =>
             !filtroCategoria || normalizar(categorias[produto.categoria_id]).includes(normalizar(filtroCategoria))
         )
+
+    const ultimaPagina = Math.max(1, Math.ceil(produtosVisiveis.length / POR_PAGINA))
+    const produtosDaPagina = produtosVisiveis.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)
+    const paginaSegura = Math.min(pagina, ultimaPagina)
+
+    useEffect(() => {
+        if (pagina > ultimaPagina) {
+            setParams(ultimaPagina === 1 ? {} : { page: ultimaPagina }, { replace: true })
+        }
+    }, [pagina, ultimaPagina, setParams])
 
     const classeFiltro = (categoria) => `flex justify-center p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2 ${filtroCategoria === categoria ? "bg-emerald-950 text-white" : "bg-white"}`
 
@@ -170,7 +187,7 @@ export default function SectionCatalogo() {
                         type="text"
                         placeholder="Buscar Produto..."
                         value={busca}
-                        onChange={(e) => setBusca(e.target.value)}
+                        onChange={(e) => atualizarBusca(e.target.value)}
                     />
                 </form>
 
@@ -197,7 +214,7 @@ export default function SectionCatalogo() {
                 </section>
 
                 <section className={`grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] transition-opacity ${carregando ? "opacity-60" : ""}`}>
-                    {produtosVisiveis.map((produto) => (
+                    {produtosDaPagina.map((produto) => (
                         <CardCatalogo
                             key={produto.id}
                             onAbrir={() => navigate(`/produto/${produto.id}`, { state: { produto: { ...produto, categoria: categorias[produto.categoria_id] } } })}
@@ -216,7 +233,7 @@ export default function SectionCatalogo() {
 
                 {carregando && <p className="text-slate-500">Carregando produtos...</p>}
                 {erro && <p className="text-red-600">{erro}</p>}
-                {!carregando && !erro && total === 0 && (
+                {!carregando && !erro && totalServidor === 0 && (
                     <p className="text-slate-500">Nenhum produto cadastrado.</p>
                 )}
                 {!carregando && !erro && produtos.length > 0 && produtosVisiveis.length === 0 && (
@@ -225,9 +242,9 @@ export default function SectionCatalogo() {
 
                 {ultimaPagina > 1 && !erro && (
                     <Paginacao
-                        paginaAtual={pagina}
+                        paginaAtual={paginaSegura}
                         ultimaPagina={ultimaPagina}
-                        total={total}
+                        total={produtosVisiveis.length}
                         onMudar={irParaPagina}
                         desabilitado={carregando}
                     />

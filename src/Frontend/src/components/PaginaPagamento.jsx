@@ -5,6 +5,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { ShieldCheck } from "reicon-react";
 import HeaderLogin from "./Header/HeaderLogin";
 import FooterCatalogo from "./FooterCatalogo";
+import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
 
 function formatarPreco(valor) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -22,6 +23,7 @@ function PagamentoPix() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { state } = useLocation();
+  const { limpar } = useCarrinho();
 
   const pedido = state?.pedido || lerSalvo(`pedido:${id}`);
   const codigoPix = pedido?.pagamento?.pix_copia_cola;
@@ -126,7 +128,10 @@ function PagamentoPix() {
 
                   <button
                     type="button"
-                    onClick={() => navigate(`/pedido-realizado/${id}`)}
+                    onClick={() => {
+                      limpar();
+                      navigate(`/pedido-realizado/${id}`);
+                    }}
                     className="w-full cursor-pointer rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:bg-emerald-900"
                   >
                     Já paguei
