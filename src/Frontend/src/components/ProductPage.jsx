@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ShoppingCart, Star, Info, Minus, Plus, FlaskConical } from "lucide-react";
+import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from "motion/react";
 import HeaderLogin from "./Header/HeaderLogin";
+import { useLocation, useNavigate } from "react-router-dom";
+import { resolverUrlImagem } from "./api";
+import FooterCatalogo from "./FooterCatalogo";
+import { cesta } from "./CestaCarrinho";
+import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
 
 const THUMBS = [
   { id: 1, label: "frente" },
@@ -9,22 +15,86 @@ const THUMBS = [
 ];
 
 export default function ProductPage() {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const produto = state?.produto;
+  const [scope, animate] = useAnimate();
+  const imagemRef = useRef(null);
+  const produtoX = useMotionValue(0);
+  const produtoY = useMotionValue(0);
+  const reduzirMovimento = useReducedMotion();
+  const { adicionar, podeAdicionar } = useCarrinho();
   const [activeThumb, setActiveThumb] = useState(1);
   const [quantity, setQuantity] = useState(1);
-  const stock = 12;
+  const [adicionando, setAdicionando] = useState(false);
+  const [aviso, setAviso] = useState("");
+  const stock = Number(produto?.estoque ?? 0);
 
   const decrease = () => setQuantity((q) => Math.max(1, q - 1));
   const increase = () => setQuantity((q) => Math.min(stock, q + 1));
 
+  function mostrarAviso(texto) {
+    setAviso(texto);
+    window.setTimeout(() => setAviso(""), 1500);
+  }
+
+  async function adicionarAoCarrinho() {
+    if (!produto || adicionando) return;
+    if (!podeAdicionar(produto, quantity)) {
+      mostrarAviso("Limite");
+      return;
+    }
+
+    const imagem = imagemRef.current;
+    const { basket, ring } = cesta;
+    if (reduzirMovimento || !imagem || !basket || !ring) {
+      adicionar(produto, quantity);
+      mostrarAviso("Adicionado");
+      return;
+    }
+
+    setAdicionando(true);
+    const from = imagem.getBoundingClientRect();
+    const to = basket.getBoundingClientRect();
+    const container = scope.current;
+    const escalaContainer = container.getBoundingClientRect().width / container.offsetWidth;
+    const dx = (to.left + to.width / 2 - (from.left + from.width / 2)) / escalaContainer;
+    const dy = (to.top + to.height / 2 - (from.top + from.height / 2)) / escalaContainer;
+    const escala = Math.min(to.width / from.width, to.height / from.height) / escalaContainer;
+
+    await animate(imagem, { x: dx, y: dy, scale: escala, opacity: [1, 1, 0] }, {
+      duration: 0.45,
+      path: arc({ strength: 0.5, peak: 0.15, rotate: 0.9, direction: "cw" }),
+      ease: [0.74, 0.18, 0.93, 0.69],
+      opacity: { inherit: true, times: [0, 0.95, 1] },
+    });
+
+    const vx = produtoX.getVelocity() * 0.05;
+    const vy = produtoY.getVelocity() * 0.05;
+    adicionar(produto, quantity);
+    mostrarAviso("Adicionado");
+    animate(basket, { x: 0, y: 0 }, {
+      type: "spring", stiffness: 500, damping: 12,
+      x: { inherit: true, velocity: vx }, y: { inherit: true, velocity: vy },
+    });
+    animate(ring, { scale: [1, 2.2], opacity: [0.8, 0] }, { duration: 0.5, ease: "easeOut" });
+    animate(imagem, { x: 0, y: 0, scale: 0.9, rotate: 0, opacity: 0 }, { duration: 0 });
+    await animate(imagem, { opacity: 1, scale: 1 }, {
+      scale: { type: "spring", visualDuration: 0.4, bounce: 0.35 },
+      opacity: { duration: 0.25, ease: "easeOut" },
+    });
+    setAdicionando(false);
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+    <div ref={scope} className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-24">
       {/* Header */}
       <HeaderLogin />
       
 
       <main className="mx-auto max-w-5xl px-6 py-6 sm:px-10">
         {/* Back button */}
-        <button className="mb-4 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50">
+        <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50">
           <ChevronLeft className="h-4 w-4" />
           Voltar
         </button>
@@ -35,7 +105,9 @@ export default function ProductPage() {
             {/* Image column */}
             <div>
               <div className="flex h-96 items-center justify-center rounded-xl bg-gray-50">
-                <BottleIllustration className="h-72 w-auto" />
+                <motion.div ref={imagemRef} style={{ x: produtoX, y: produtoY, willChange: "transform, opacity" }} className="flex h-full w-full items-center justify-center">
+                  {produto?.imagem ? <img src={resolverUrlImagem(produto.imagem)} alt={produto.nome} className="h-full w-full rounded-xl object-contain" /> : <BottleIllustration className="h-72 w-auto" />}
+                </motion.div>
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <button className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
@@ -51,7 +123,7 @@ export default function ProductPage() {
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <BottleIllustration className="h-11 w-auto" simple />
+                    {produto?.imagem ? <img src={resolverUrlImagem(produto.imagem)} alt="" className="h-full w-full object-contain" /> : <BottleIllustration className="h-11 w-auto" simple />}
                   </button>
                 ))}
                 <button className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
@@ -67,11 +139,11 @@ export default function ProductPage() {
                   Estética
                 </span>
                 <span className="whitespace-nowrap text-2xl font-bold text-emerald-800 sm:text-3xl">
-                  R$ 12,00
+                  R$ {Number(produto?.preco ?? 12).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </span>
               </div>
 
-              <h1 className="mt-3 text-3xl font-bold text-gray-900">Shampoo Neutro</h1>
+              <h1 className="mt-3 text-3xl font-bold text-gray-900">{produto?.nome || "Shampoo Neutro"}</h1>
 
               <div className="mt-2 flex items-center gap-2">
                 <div className="flex text-amber-400">
@@ -83,8 +155,7 @@ export default function ProductPage() {
               </div>
 
               <p className="mt-4 text-gray-600">
-                Shampoo de fórmula neutra, suave para todos os tipos de cabelos. Fabricado
-                pelos alunos com controle do pH para uso diário.
+                {produto?.descricao || "Shampoo de fórmula neutra, suave para todos os tipos de cabelos. Fabricado pelos alunos com controle do pH para uso diário."}
               </p>
 
               <div className="mt-5 flex gap-3 rounded-xl bg-emerald-50 p-4">
@@ -123,9 +194,9 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              <button className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-emerald-700 py-4 text-lg font-semibold text-white shadow-sm transition hover:bg-emerald-800">
+              <button onClick={adicionarAoCarrinho} disabled={!produto || stock <= 0 || adicionando} title={aviso === "Limite" ? "Você já adicionou todo o estoque disponível" : undefined} className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-emerald-700 py-4 text-lg font-semibold text-white shadow-sm transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50">
                 <ShoppingCart className="h-5 w-5" />
-                Adicionar ao carrinho
+                {stock <= 0 ? "Esgotado" : aviso || "Adicionar ao carrinho"}
               </button>
             </div>
           </div>
@@ -161,6 +232,7 @@ export default function ProductPage() {
           </div>
         </div>
       </main>
+      <FooterCatalogo />
     </div>
   );
 }
