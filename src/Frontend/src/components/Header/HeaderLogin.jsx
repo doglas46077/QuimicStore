@@ -42,7 +42,7 @@ function HeaderLogin() {
 
         {aberto && (
           <div role="menu" className="absolute right-0 z-20 mt-3 w-60 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/20 ring-1 ring-black/5">
-            <div className="border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-white px-4 py-4">
+            <div className="border-b border-slate-100 bg-linear-to-r from-emerald-50 to-white px-4 py-4">
               <p className="text-xs font-medium uppercase tracking-wider text-emerald-800/65">Conta</p>
               <p className="mt-1 truncate text-sm font-semibold text-slate-900">{usuario?.nome || "Usuário"}</p>
               {usuario?.email && <p className="mt-0.5 truncate text-xs text-slate-500">{usuario.email}</p>}
@@ -53,7 +53,7 @@ function HeaderLogin() {
               className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-900"
             >
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-100 text-emerald-800">◎</span>
-              <span>Meu perfil</span>
+              <span>Meu perfil</span>g
             </button>
 
             <button
