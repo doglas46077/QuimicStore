@@ -15,14 +15,6 @@ class PedidosController extends Controller
 {
     public function store(Request $request)
     {
-        $userAutorizado = $request->user()->nivel_acesso;
-
-        if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
-            return response()->json([
-                "message" => 'Acesso restrito'
-            ], 403);
-        }
-
         $pedidoArmazenado = $request->validate([
             'itens' => 'required|array|min:1',
             'itens.*.produto_id' => 'required|integer|exists:produtos,id',
