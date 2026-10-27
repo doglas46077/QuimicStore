@@ -53,7 +53,7 @@ function HeaderLogin() {
               className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-emerald-50 hover:text-emerald-900"
             >
               <span className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-100 text-emerald-800">◎</span>
-              <span>Meu perfil</span>g
+              <span>Meu perfil</span>
             </button>
 
             <button
