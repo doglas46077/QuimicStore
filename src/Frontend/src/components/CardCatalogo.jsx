@@ -153,12 +153,17 @@ export default function CardCatalogo({ nome, descricao, preco, imagem, alt, cate
                 </div>
             </div>
             <div className="flex w-[90%] justify-between items-center mt-auto">
-                <h1 className='text-2xl'>R$ {precoFormatado}</h1>
+                <h1 className={`text-2xl ${esgotado ? "text-red-600 line-through decoration-red-600" : ""}`}>R$ {precoFormatado}</h1>
+                {estoque !== undefined && (
+                    <span className={`text-xs font-medium ${esgotado ? "text-red-600" : "text-slate-500"}`}>
+                        {esgotado ? "Sem estoque" : `${estoque} em estoque`}
+                    </span>
+                )}
                 <button
                     onClick={(event) => { event.stopPropagation(); adicionar() }}
                     disabled={esgotado || voando}
                     title={aviso === "Limite" ? "Você já adicionou todo o estoque disponível" : undefined}
-                    className='flex justify-center p-1 rounded-full w-30 border-3 border-emerald-700 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:pointer-events-none'
+                    className={`flex justify-center p-1 rounded-full w-30 border-3 hover:bg-emerald-700 hover:text-white disabled:opacity-50 disabled:pointer-events-none ${esgotado ? "border-red-600 text-red-600 line-through decoration-red-600" : "border-emerald-700"}`}
                 >
                     <CartLarge5 size={24} />
                     <p>{esgotado ? "Esgotado" : aviso || "Adicionar"}</p>
