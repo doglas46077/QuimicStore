@@ -39,7 +39,7 @@ class ProdutosController extends Controller
         if ($request->hasFile('imagem')) {
             $file = $request->file('imagem');
 
-            $nomeimg = time() . '-' . $file->hashName();
+            $nomeimg = time() . '-' . $file->getClientOriginalName();
 
             $file->move(public_path('img/produtosImgs'), $nomeimg);
 
@@ -60,20 +60,20 @@ class ProdutosController extends Controller
     // ===================================================================================================
     public function index(Request $request)
     {
-           $perPage = max(1, min((int) $request->query('per_page', 30), 50));
+        $perPage = max(1, min((int) $request->query('per_page', 30), 50));
 
-    $produtos = Produto::orderBy('id')->paginate($perPage);
+        $produtos = Produto::orderBy('id')->paginate($perPage);
 
-    return response()->json([
-        "message" => "Exibindo produtos",
-        "data" => $produtos->items(),
-        "meta" => [
-            "current_page" => $produtos->currentPage(),
-            "last_page"    => $produtos->lastPage(),
-            "per_page"     => $produtos->perPage(),
-            "total"        => $produtos->total(),
-        ],
-    ], 200);
+        return response()->json([
+            "message" => "Exibindo produtos",
+            "data" => $produtos->items(),
+            "meta" => [
+                "current_page" => $produtos->currentPage(),
+                "last_page"    => $produtos->lastPage(),
+                "per_page"     => $produtos->perPage(),
+                "total"        => $produtos->total(),
+            ],
+        ], 200);
     }
 
     // ===================================================================================================
@@ -158,7 +158,7 @@ class ProdutosController extends Controller
 
         if ($produto->imagem && file_exists(public_path($produto->imagem))) {
             unlink(public_path($produto->imagem));
-        }   
+        }
 
         $produto->delete();
 
