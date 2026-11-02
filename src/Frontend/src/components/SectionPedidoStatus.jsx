@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 
 const API_URL = "http://localhost:8000/api";
 
-// Ex.: #QS-2026-0042 (montado a partir do ano e do id do pedido)
 function numeroDoPedido(pedido) {
     const ano = pedido.created_at ? new Date(pedido.created_at).getFullYear() : new Date().getFullYear();
     return `#QS-${ano}-${String(pedido.id).padStart(4, "0")}`;
@@ -23,7 +22,6 @@ function formatarData(data) {
     return new Date(data).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
 }
 
-// "Detergente neutro" ou "Detergente neutro e mais 2"
 function resumoDosItens(pedido) {
     const itens = pedido.itens || [];
     if (itens.length === 0) return "Sem itens";
@@ -65,7 +63,6 @@ export default function SectionPedidoStatus() {
 
                 const dados = await response.json()
 
-                // o back responde 404 quando a pessoa ainda não tem nenhum pedido (isso não é erro)
                 if (response.status === 404 && dados.message?.startsWith("Nenhum pedido")) {
                     setPedidos([])
                     return
@@ -135,7 +132,7 @@ export default function SectionPedidoStatus() {
 
                             <div className="flex w-105 justify-end gap-40 h-35 items-center border-l-2 border-dashed border-zinc-300">
                                 <div className="flex flex-col gap-3">
-                                    {/* Status só visual por enquanto */}
+                                  
                                     <div className="flex justify-center text-white items-center gap-2 bg-zinc-500 rounded-2xl p-1">
                                         <div className="h-4 w-4 bg-white rounded-full"></div>
                                         <h1 className="">Status</h1>
@@ -147,7 +144,7 @@ export default function SectionPedidoStatus() {
                                 </div>
                                 <div className="mr-10">
                                     <div className="flex items-center justify-center h-15 w-15 bg-emerald-100 rounded-2xl hover:bg-emerald-200">
-                                        <button onClick={() => navigate("/pedidoDetalhe")}>
+                                        <button onClick={() => navigate(`/pedidoDetalhe/${pedido.id}`)}>
                                             <AngleRight size={34} />
                                         </button>
                                     </div>
