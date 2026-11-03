@@ -148,6 +148,7 @@ export default function SectionCatalogo() {
         .filter((produto) =>
             !filtroCategoria || normalizar(categorias[produto.categoria_id]).includes(normalizar(filtroCategoria))
         )
+        .sort((a, b) => Number(Number(a.estoque) <= 0) - Number(Number(b.estoque) <= 0))
 
     const ultimaPagina = Math.max(1, Math.ceil(produtosVisiveis.length / POR_PAGINA))
     const produtosDaPagina = produtosVisiveis.slice((pagina - 1) * POR_PAGINA, pagina * POR_PAGINA)

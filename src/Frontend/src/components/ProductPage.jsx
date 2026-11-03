@@ -30,8 +30,22 @@ export default function ProductPage() {
   const [aviso, setAviso] = useState("");
   const stock = Number(produto?.estoque ?? 0);
 
+  const quantidadeExibida = stock <= 0 ? 0 : quantity;
   const decrease = () => setQuantity((q) => Math.max(1, q - 1));
   const increase = () => setQuantity((q) => Math.min(stock, q + 1));
+  const changeQuantity = (value) => {
+    if (value === "") {
+      setQuantity("");
+      return;
+    }
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return;
+    setQuantity(Math.min(stock, Math.max(1, Math.floor(parsed))));
+  };
+  const normalizeQuantity = () => {
+    const parsed = Number(quantity);
+    setQuantity(stock > 0 && Number.isFinite(parsed) ? Math.min(stock, Math.max(1, Math.floor(parsed))) : 0);
+  };
 
   function mostrarAviso(texto) {
     setAviso(texto);
@@ -173,16 +187,29 @@ export default function ProductPage() {
                   <div className="flex items-center overflow-hidden rounded-lg border border-gray-200">
                     <button
                       onClick={decrease}
-                      className="flex h-11 w-11 items-center justify-center text-gray-600 hover:bg-gray-50"
+                      disabled={stock <= 0}
+                      className="flex h-11 w-11 items-center justify-center text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Minus className="h-4 w-4" />
                     </button>
-                    <span className="flex h-11 w-14 items-center justify-center border-x border-gray-200 text-lg font-medium">
-                      {quantity}
-                    </span>
+                    <input
+                      type="number"
+                      min={stock <= 0 ? 0 : 1}
+                      max={stock}
+                      step="1"
+                      value={quantidadeExibida}
+                      onChange={(event) => changeQuantity(event.target.value)}
+                      onBlur={normalizeQuantity}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.currentTarget.blur();
+                      }}
+                      aria-label="Quantidade do produto"
+                      className="h-11 w-14 border-x border-gray-200 text-center text-lg font-medium outline-none"
+                    />
                     <button
                       onClick={increase}
-                      className="flex h-11 w-11 items-center justify-center text-gray-600 hover:bg-gray-50"
+                      disabled={stock <= 0}
+                      className="flex h-11 w-11 items-center justify-center text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <Plus className="h-4 w-4" />
                     </button>

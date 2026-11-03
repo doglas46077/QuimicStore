@@ -28,7 +28,7 @@ function App() {
       <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
       <Route path="/pedidos" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
       <Route path="/perfil" element={<ProtecaoRotas><SectionPerfil/></ProtecaoRotas> }/>
-      <Route path="/pedidoDetalhe" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
+      <Route path="/pedidoDetalhe/:id" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
       <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
       <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
       <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
