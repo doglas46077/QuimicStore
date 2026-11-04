@@ -1,5 +1,4 @@
-const API_URL = "http://localhost:8000/api";
-
+import { API_URL } from "../api";
 
 export async function Buscarprodutos(itens) {
   const token = localStorage.getItem("token");

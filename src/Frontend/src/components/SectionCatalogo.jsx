@@ -222,7 +222,7 @@ export default function SectionCatalogo() {
                             nome={produto.nome}
                             descricao={produto.descricao}
                             preco={produto.preco}
-                            imagem={produto.imagem}
+                            imagem={produto.imagens}
                             alt={produto.nome}
                             categoria={categorias[produto.categoria_id]}
                             estoque={produto.estoque}

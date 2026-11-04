@@ -11,7 +11,7 @@ import { Star } from 'reicon-react';
 import { TruckFast } from 'reicon-react';
 import { Bill } from 'reicon-react';
 
-const API_URL = "http://localhost:8000/api";
+import { API_URL } from "./api";
 
 function numeroDoPedido(pedido) {
     const ano = pedido.created_at ? new Date(pedido.created_at).getFullYear() : new Date().getFullYear();
@@ -158,7 +158,7 @@ export default function SectionPedidoDetalhes() {
                                 </div>
 
                                 {itens.map((item) => {
-                                    const src = resolverImagem(item.produto?.imagem);
+                                    const src = resolverImagem(item.produto?.imagens);
                                     return (
                                         <div key={item.id} className="flex justify-between items-center p-2 bg-white w-full rounded-lg">
                                             <div className="flex items-center gap-2 min-w-0">

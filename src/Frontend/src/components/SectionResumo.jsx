@@ -143,7 +143,7 @@ function SectionResumoCompra() {
 
               <div className="divide-y divide-slate-100">
                 {itens.map((item) => {
-                  const src = resolverImagem(item.imagem);
+                  const src = resolverImagem(item.imagens ?? item.imagem);
                   return (
                     <div key={item.id} className="flex items-center gap-4 py-4">
                       <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-300">

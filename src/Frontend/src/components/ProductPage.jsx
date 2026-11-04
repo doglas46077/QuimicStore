@@ -5,14 +5,9 @@ import HeaderLogin from "./Header/HeaderLogin";
 import { useLocation, useNavigate } from "react-router-dom";
 import { resolverUrlImagem } from "./api";
 import FooterCatalogo from "./FooterCatalogo";
+import { listaDeImagens } from "./CardCatalogo";
 import { cesta } from "./CestaCarrinho";
 import { useCarrinho } from "./JavaScript/carrinhoAnimacao";
-
-const THUMBS = [
-  { id: 1, label: "frente" },
-  { id: 2, label: "verso" },
-  { id: 3, label: "válvula" },
-];
 
 export default function ProductPage() {
   const { state } = useLocation();
@@ -24,11 +19,16 @@ export default function ProductPage() {
   const produtoY = useMotionValue(0);
   const reduzirMovimento = useReducedMotion();
   const { adicionar, podeAdicionar } = useCarrinho();
-  const [activeThumb, setActiveThumb] = useState(1);
+  const [indice, setIndice] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [adicionando, setAdicionando] = useState(false);
   const [aviso, setAviso] = useState("");
   const stock = Number(produto?.estoque ?? 0);
+
+  const imagens = listaDeImagens(produto?.imagens);
+  const imagemAtual = imagens[indice] || imagens[0];
+  const anterior = () => setIndice((i) => (i - 1 + imagens.length) % imagens.length);
+  const proxima = () => setIndice((i) => (i + 1) % imagens.length);
 
   const quantidadeExibida = stock <= 0 ? 0 : quantity;
   const decrease = () => setQuantity((q) => Math.max(1, q - 1));
@@ -104,7 +104,6 @@ export default function ProductPage() {
     <div ref={scope} className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-24">
       {/* Header */}
       <HeaderLogin />
-      
 
       <main className="mx-auto max-w-5xl px-6 py-6 sm:px-10">
         {/* Back button */}
@@ -120,37 +119,44 @@ export default function ProductPage() {
             <div>
               <div className="flex h-96 items-center justify-center rounded-xl bg-gray-50">
                 <motion.div ref={imagemRef} style={{ x: produtoX, y: produtoY, willChange: "transform, opacity" }} className="flex h-full w-full items-center justify-center">
-                  {produto?.imagem ? <img src={resolverUrlImagem(produto.imagem)} alt={produto.nome} className="h-full w-full rounded-xl object-contain" /> : <BottleIllustration className="h-72 w-auto" />}
+                  {imagemAtual ? (
+                    <img src={resolverUrlImagem(imagemAtual)} alt={produto?.nome} className="h-full w-full rounded-xl object-contain" />
+                  ) : (
+                    <BottleIllustration className="h-72 w-auto" />
+                  )}
                 </motion.div>
               </div>
-              <div className="mt-3 flex items-center gap-2">
-                <button className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                {THUMBS.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setActiveThumb(t.id)}
-                    className={`flex h-14 flex-1 items-center justify-center rounded-lg border-2 bg-gray-50 p-1 transition ${
-                      activeThumb === t.id
-                        ? "border-emerald-600"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    {produto?.imagem ? <img src={resolverUrlImagem(produto.imagem)} alt="" className="h-full w-full object-contain" /> : <BottleIllustration className="h-11 w-auto" simple />}
+
+              {imagens.length > 1 && (
+                <div className="mt-3 flex items-center gap-2">
+                  <button onClick={anterior} className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                    <ChevronLeft className="h-4 w-4" />
                   </button>
-                ))}
-                <button className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
+                  {imagens.map((img, i) => (
+                    <button
+                      key={img}
+                      onClick={() => setIndice(i)}
+                      className={`flex h-14 flex-1 items-center justify-center rounded-lg border-2 bg-gray-50 p-1 transition ${
+                        indice === i
+                          ? "border-emerald-600"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <img src={resolverUrlImagem(img)} alt="" className="h-full w-full object-contain" />
+                    </button>
+                  ))}
+                  <button onClick={proxima} className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Details column */}
             <div className="flex flex-col">
               <div className="flex items-start justify-between gap-4">
                 <span className="inline-block rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-                  Estética
+                  {produto?.categoria || "Estética"}
                 </span>
                 <span className="whitespace-nowrap text-2xl font-bold text-emerald-800 sm:text-3xl">
                   R$ {Number(produto?.preco ?? 12).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
