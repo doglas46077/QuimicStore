@@ -2,8 +2,9 @@
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from 'motion/react';
 import { CartLarge5 } from 'reicon-react';
 import { cesta } from './CestaCarrinho';
-import { resolverUrlImagem } from './api';
+import { resolverUrlImagem, listaDeImagens } from './api';
 
+<<<<<<< HEAD
 // Aceita array, string simples ou string JSON e devolve sempre um array de caminhos
 export function listaDeImagens(imagens) {
     if (Array.isArray(imagens)) {
@@ -22,6 +23,10 @@ export function listaDeImagens(imagens) {
 
     return []
 }
+=======
+// Mantido aqui para os outros componentes que já importam daqui
+export { listaDeImagens };
+>>>>>>> arrumando_codigo
 
 // Resolve a URL da primeira imagem (capa)
 export function resolverImagem(imagem) {

@@ -8,5 +8,40 @@ export function resolverUrlImagem(imagem) {
   if (!imagem.includes(".") && imagem.length > 100) {
     return `data:image/jpeg;base64,${imagem}`;
   }
-  return `${API_BASE_URL}/${imagem.replace(/^\/+/, "")}`;
+  // codifica cada parte do caminho (espaços, #, % etc. quebravam a imagem)
+  const caminho = imagem
+    .replace(/^\/+/, "")
+    .split("/")
+    .map((parte) => encodeURIComponent(decodeURIComponentSeguro(parte)))
+    .join("/");
+  return `${API_BASE_URL}/${caminho}`;
+}
+
+function decodeURIComponentSeguro(texto) {
+  try {
+    return decodeURIComponent(texto);
+  } catch {
+    return texto;
+  }
+}
+
+// Aceita array, string simples ou string JSON e devolve sempre um array de caminhos.
+// Usado pelo catálogo, página do produto, carrinho, resumo e pedidos.
+export function listaDeImagens(imagens) {
+  if (Array.isArray(imagens)) {
+    return imagens.filter((i) => typeof i === "string" && i);
+  }
+
+  if (typeof imagens === "string" && imagens) {
+    try {
+      const dec = JSON.parse(imagens);
+      if (Array.isArray(dec)) return dec.filter((i) => typeof i === "string" && i);
+      if (typeof dec === "string" && dec) return [dec];
+    } catch {
+      // não era JSON: trata como caminho único
+    }
+    return [imagens];
+  }
+
+  return [];
 }
