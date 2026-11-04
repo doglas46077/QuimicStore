@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
@@ -10,13 +9,33 @@ const FORM_VAZIO = {
   categoria_id: "",
   preco: "",
   estoque: "",
-  imagem: null,
-  imagemAtual: "",
+  imagens: [],
+  imagensAtuais: [],
+  imagensRemovidas: [],
   ativo: true,
 };
 
 function resolverImagem(imagem) {
+  if (!imagem || typeof imagem !== "string") return "";
   return resolverUrlImagem(imagem);
+}
+
+function listaImagens(produto) {
+  const imagens = produto.imagens;
+
+  if (Array.isArray(imagens)) return imagens.filter((i) => typeof i === "string" && i);
+
+  if (typeof imagens === "string" && imagens) {
+    try {
+      const dec = JSON.parse(imagens);
+      if (Array.isArray(dec)) return dec.filter((i) => typeof i === "string" && i);
+    } catch (e) {
+      // não era JSON: caminho único
+    }
+    return [imagens];
+  }
+
+  return [];
 }
 
 function estaAtivo(produto) {
@@ -79,20 +98,15 @@ export default function TelaAdm() {
 
   const [ajustandoId, setAjustandoId] = useState(null);
 
-  const [previa, setPrevia] = useState("");
+  const [previas, setPrevias] = useState([]);
 
-  // Criar pré-visualização da imagem
+  // Criar pré-visualização das imagens novas
   useEffect(() => {
-    if (!form.imagem) {
-      setPrevia("");
-      return;
-    }
+    const urls = form.imagens.map((f) => URL.createObjectURL(f));
+    setPrevias(urls);
 
-    const url = URL.createObjectURL(form.imagem);
-    setPrevia(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [form.imagem]);
+    return () => urls.forEach((u) => URL.revokeObjectURL(u));
+  }, [form.imagens]);
 
   function cabecalhos(comCorpo = false) {
     const token = localStorage.getItem("token");
@@ -202,8 +216,9 @@ export default function TelaAdm() {
       categoria_id: produto.categoria_id,
       preco: String(produto.preco),
       estoque: String(produto.estoque),
-      imagem: null,
-      imagemAtual: produto.imagem || "",
+      imagens: [],
+      imagensAtuais: listaImagens(produto),
+      imagensRemovidas: [],
       ativo: estaAtivo(produto),
     });
 
@@ -214,6 +229,14 @@ export default function TelaAdm() {
   // Salvar produto
   async function salvarProduto(e) {
     e.preventDefault();
+
+    const mantidas =
+      form.imagensAtuais.length - form.imagensRemovidas.length;
+
+    if (mantidas + form.imagens.length === 0) {
+      setErroForm("O produto precisa ter pelo menos uma imagem");
+      return;
+    }
 
     setErroForm("");
     setSalvando(true);
@@ -227,9 +250,13 @@ export default function TelaAdm() {
     corpo.append("estoque", form.estoque);
     corpo.append("ativo", form.ativo ? "1" : "0");
 
-    if (form.imagem) {
-      corpo.append("imagem", form.imagem);
-    }
+    form.imagens.forEach((arquivo) => {
+      corpo.append("imagens[]", arquivo);
+    });
+
+    form.imagensRemovidas.forEach((caminho) => {
+      corpo.append("remover_imagens[]", caminho);
+    });
 
     if (idEditando) {
       corpo.append("_method", "PUT");
@@ -451,7 +478,7 @@ export default function TelaAdm() {
 
               <tbody className="divide-y divide-slate-100 font-normal">
                 {produtosFiltrados.map((p) => {
-                  const src = resolverImagem(p.imagem);
+                  const src = resolverImagem(listaImagens(p)[0]);
 
                   return (
                     <tr key={p.id} className="hover:bg-slate-50">
@@ -704,10 +731,10 @@ export default function TelaAdm() {
                 />
               </div>
 
-              {/* Campo de imagem personalizado */}
+              {/* Campo de imagens personalizado */}
               <div>
                 <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Imagem do produto
+                  Imagens do produto
                 </label>
 
                 <label
@@ -734,70 +761,116 @@ export default function TelaAdm() {
                   </div>
 
                   <span className="text-sm font-semibold text-emerald-900">
-                    Clique para selecionar uma imagem
+                    Clique para selecionar as imagens
                   </span>
 
                   <span className="text-xs text-slate-500">
-                    PNG, JPG ou WEBP • Máximo 2 MB
+                    PNG, JPG ou WEBP • Máximo 5 imagens, 2 MB cada
                   </span>
 
                   <span className="mt-1 rounded-lg bg-emerald-950 px-5 py-2 text-sm font-semibold text-white">
-                    Escolher imagem
+                    Escolher imagens
                   </span>
 
                   <input
                     id="imagem-produto"
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
-                    required={!idEditando}
                     className="sr-only"
+                    multiple
                     onChange={(e) => {
-                      const arquivo = e.target.files[0] || null;
+                      const novos = Array.from(e.target.files);
+                      e.target.value = "";
+
+                      if (novos.some((a) => a.size > 2 * 1024 * 1024)) {
+                        setErroForm("Cada imagem deve ter no máximo 2 MB");
+                        return;
+                      }
+
+                      const mantidas =
+                        form.imagensAtuais.length -
+                        form.imagensRemovidas.length;
 
                       if (
-                        arquivo &&
-                        arquivo.size > 2 * 1024 * 1024
+                        mantidas + form.imagens.length + novos.length >
+                        5
                       ) {
                         setErroForm(
-                          "A imagem deve ter no máximo 2 MB"
+                          "O produto pode ter no máximo 5 imagens"
                         );
-
-                        e.target.value = "";
                         return;
                       }
 
                       setErroForm("");
-                      setForm({ ...form, imagem: arquivo });
+                      setForm({
+                        ...form,
+                        imagens: [...form.imagens, ...novos],
+                      });
                     }}
                   />
                 </label>
 
-                {form.imagem && (
-                  <p className="mt-2 text-xs font-medium text-emerald-700">
-                    Imagem selecionada: {form.imagem.name}
-                  </p>
-                )}
-
                 {idEditando && (
                   <p className="mt-2 text-xs text-slate-400">
-                    Deixe em branco para manter a imagem atual.
+                    As novas imagens são adicionadas às atuais (máximo 5 no
+                    total). Clique no × para remover uma imagem.
                   </p>
                 )}
 
-                {(previa || form.imagemAtual) && (
-                  <div className="mt-3">
-                    <p className="mb-2 text-xs font-medium text-slate-600">
-                      Pré-visualização:
-                    </p>
+                {(previas.length > 0 || form.imagensAtuais.length > 0) && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {form.imagensAtuais
+                      .filter((img) => !form.imagensRemovidas.includes(img))
+                      .map((img) => (
+                        <div key={img} className="relative">
+                          <img
+                            src={resolverImagem(img)}
+                            alt="Imagem atual"
+                            className="h-24 w-24 rounded-xl border border-slate-200 object-cover"
+                          />
 
-                    <img
-                      src={
-                        previa ||
-                        resolverImagem(form.imagemAtual)
-                      }
-                      alt="Pré-visualização"
-                      className="h-28 w-28 rounded-xl border border-slate-200 object-cover"
-                    />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setForm({
+                                ...form,
+                                imagensRemovidas: [
+                                  ...form.imagensRemovidas,
+                                  img,
+                                ],
+                              })
+                            }
+                            className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs leading-none text-white"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      ))}
+
+                    {previas.map((src, i) => (
+                      <div key={src} className="relative">
+                        <img
+                          src={src}
+                          alt={`Nova imagem ${i + 1}`}
+                          className="h-24 w-24 rounded-xl border-2 border-emerald-600 object-cover"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              imagens: form.imagens.filter(
+                                (_, idx) => idx !== i
+                              ),
+                            })
+                          }
+                          className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs leading-none text-white"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

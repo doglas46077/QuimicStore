@@ -28,6 +28,13 @@ function estaAtivo(produto) {
     produto.ativo === true || produto.ativo === 1 || produto.ativo === "1";
 }
 
+// Devolve sempre um array de caminhos, aceitando o formato novo e o antigo
+function imagensDoProduto(produto) {
+  if (Array.isArray(produto.imagens)) return produto.imagens;
+  if (produto.imagem) return [produto.imagem];
+  return [];
+}
+
 // Devolve true se adicionou, false se bateu no limite do estoque
 function adicionar(produto, quantidade = 1) {
   const estoque = Number(produto.estoque);
@@ -40,12 +47,16 @@ function adicionar(produto, quantidade = 1) {
     if (existente.quantidade + quantidade > estoque) return false;
     existente.quantidade += quantidade;
     existente.estoque = estoque;
+
+    // conserta itens antigos que foram salvos sem imagem
+    const imagens = imagensDoProduto(produto);
+    if (imagens.length > 0) existente.imagens = imagens;
   } else {
     atual.push({
       id: produto.id,
       nome: produto.nome,
       preco: Number(produto.preco),
-      imagem: produto.imagem,
+      imagens: imagensDoProduto(produto),
       estoque,
       quantidade,
     });
@@ -81,13 +92,12 @@ function limpar() {
   salvarCarrinho([]);
 }
 
-// Atualiza preço e estoque com o que está no banco agora.
+// Atualiza preço, estoque e imagens com o que está no banco agora.
 // Tira do carrinho o que foi removido, desativado ou esgotou.
-
 function sincronizar(produtosDoBanco) {
   const atualizado = lerCarrinho()
     .map((item) => {
-    const produto = produtosDoBanco.find(
+      const produto = produtosDoBanco.find(
         (p) => String(p.id) === String(item.id)
       );
 
@@ -100,12 +110,16 @@ function sincronizar(produtosDoBanco) {
       }
 
       const estoque = Number(produto.estoque);
+      const imagens = imagensDoProduto(produto);
+
+      // remove o campo antigo `imagem` do item, se existir
+      const { imagem, ...resto } = item;
 
       return {
-        ...item,
+        ...resto,
         nome: produto.nome,
         preco: Number(produto.preco),
-        imagem: produto.imagem,
+        imagens: imagens.length > 0 ? imagens : (item.imagens ?? []),
         estoque,
         quantidade: Math.min(item.quantidade, estoque),
       };
