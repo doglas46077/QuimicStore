@@ -1,48 +1,72 @@
 import HeaderLogin from "./Header/HeaderLogin";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import { API_URL } from "./api";
+
+function mensagemDeErro(dados, padrao) {
+    if (dados?.errors) {
+        const primeiro = Object.values(dados.errors)[0];
+        if (primeiro?.[0]) return primeiro[0];
+    }
+    return dados?.mensagem || dados?.Mensagem || dados?.message || padrao;
+}
 
 function LoginCard() {
  const navigate = useNavigate()
 
 const [email, useEmail] = useState("")
 const [senha, useSenha] = useState("")
+const [mostrarSenha, setMostrarSenha] = useState(false)
 
 const [erro, useError] = useState("")
 const [carregando, isCarregando] = useState(false)
 
-async function login(e) { 
-        e.preventDefault()
-        useError("")
-        isCarregando(true)
+async function login(e) {
+    e.preventDefault()
+    useError("")
 
-        try{
-          const response= await fetch("http://localhost:8000/api/login", {
+    if (senha.length < 6) {
+        const aviso = "A senha precisa ter no mínimo 6 caracteres"
+        useError(aviso)
+        toast.error(aviso)
+        return
+    }
+
+    isCarregando(true)
+
+    try {
+        const response = await fetch(`${API_URL}/login`, {
             method: "POST",
-            headers: {"Content-Type": "application/json",
-              "Accept": "application/json",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
             },
-            body:JSON.stringify({email, senha}),
-          })
+            body: JSON.stringify({ email, senha }),
+        })
 
-          const guardar = await response.json()
+        const guardar = await response.json()
 
-          if(!response.ok) {
-            useError(guardar.mensagem || "Erro ao fazer o login")
+        if (!response.ok) {
+            const aviso = mensagemDeErro(guardar, "Erro ao fazer o login")
+            useError(aviso)
+            toast.error(aviso)
             return
-          }
-          localStorage.setItem("token", guardar.Token)
-          localStorage.setItem("usuario", JSON.stringify(guardar.usuario))
-          
-          navigate("/catalogo")
-        }catch(erro){
-          useError("Não foi possivel conectar ao servidor")
-        } finally{
-          isCarregando(false)
         }
-    
-}
 
+        localStorage.setItem("token", guardar.Token)
+        localStorage.setItem("usuario", JSON.stringify(guardar.usuario))
+
+        toast.success("Login efetuado com sucesso")
+        navigate("/catalogo")
+    } catch (falha) {
+        const aviso = "Não foi possível conectar ao servidor"
+        useError(aviso)
+        toast.error(aviso)
+    } finally {
+        isCarregando(false)
+    }
+}
   return (
 
     <main className="w-full h-screen flex justify-center flex-col gap-20 bg-olive-50"
@@ -71,29 +95,37 @@ async function login(e) {
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
               E-mail
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Digite seu email"
-              value={email}
-              onChange={(e) => useEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
-            <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
-              Senha
-            </label>
-            <input
-              type="password"
-              id="senha"
-              name="senha"
-              placeholder="Digite sua senha"
-              required
-              value={senha}
-              onChange={(e)=>useSenha(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+            <input type="email" id="email" name="email" placeholder="Digite seu email" value={email} onChange={(e) => useEmail(e.target.value)} required className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+            <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">Senha</label>
+            <div className="relative">
+              <input type={mostrarSenha ? "text" : "password"} id="senha" name="senha" placeholder="Digite sua senha" required value={senha} onChange={(e)=>useSenha(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 pr-11 text-sm outline-none"/>
+              {senha.length > 0 && <button
+                type="button"
+                onClick={() => setMostrarSenha((visivel) => !visivel)}
+                aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                aria-pressed={mostrarSenha}
+                className="absolute inset-y-0 right-0 z-10 flex w-10 items-center justify-center text-slate-500 hover:text-slate-800"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+                  {mostrarSenha ? (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.9 5.2A10.8 10.8 0 0112 5c5 0 8.5 4.5 9.5 7-.4 1-1.2 2.1-2.2 3.1M6.2 6.2C4.1 7.5 2.9 9.5 2.5 12c.8 2.1 3.7 7 9.5 7 1 0 2-.2 2.9-.5" />
+                    </>
+                  ) : (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12s3.5-7 9.5-7 9.5 7 9.5 7-3.5 7-9.5 7-9.5-7-9.5-7z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>}
+            </div>
 
-          <button className="text-sm text-emerald-700 underline  w-full text-right hover:transition hover:duration-100 hover:text-blue-800">
+          <button
+            type="button"
+            onClick={() => navigate("/esqueci-senha")}
+            className="text-sm text-emerald-700 underline  w-full text-right hover:transition hover:duration-100 hover:text-blue-800">
             Esqueci minha senha
           </button>
                {erro && <p className="mt-3 text-sm text-red-600">{erro}</p>}
@@ -107,8 +139,6 @@ async function login(e) {
           </form>
 
 
-          
-          
           <div className="mt-8 flex justify-center items-center gap-1">
             <span>Não tem conta?</span>
           <button onClick={() => navigate("/")}
