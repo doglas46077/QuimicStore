@@ -11,9 +11,9 @@ import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
 import ProductPage from "./components/ProductPage";
-import SectionResumoCompra from "./components/SectionResumo";
-import PagamentoPix from "./components/PaginaPagamento";
-import SectionStatus from "./components/PagamentoConfirmado";
+{/*import SectionResumoCompra from "./components/SectionResumo";*/}
+{/*import PagamentoPix from "./components/PaginaPagamento";*/}
+{/*import SectionStatus from "./components/PagamentoConfirmado";*/}
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -35,9 +35,9 @@ function App() {
       <Route path="/pedidoDetalhe" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
       <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
       <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
-      <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
-      <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>
-      <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>
+      {/*<Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>*/}
+     {/* <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>*/}
+    {/*<Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>*/}
         </Routes>
       
      </div>
