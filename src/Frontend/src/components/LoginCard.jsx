@@ -95,29 +95,10 @@ async function login(e) {
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
               E-mail
             </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="Digite seu email"
-              value={email}
-              onChange={(e) => useEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
-            <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
-              Senha
-            </label>
+            <input type="email" id="email" name="email" placeholder="Digite seu email" value={email} onChange={(e) => useEmail(e.target.value)} required className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"/>
+            <label htmlFor="senha" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">Senha</label>
             <div className="relative">
-              <input
-                type={mostrarSenha ? "text" : "password"}
-                id="senha"
-                name="senha"
-                placeholder="Digite sua senha"
-                required
-                value={senha}
-                onChange={(e)=>useSenha(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2.5 pr-11 text-sm outline-none"
-              />
+              <input type={mostrarSenha ? "text" : "password"} id="senha" name="senha" placeholder="Digite sua senha" required value={senha} onChange={(e)=>useSenha(e.target.value)} className="w-full rounded-lg border border-slate-200 px-3 py-2.5 pr-11 text-sm outline-none"/>
               {senha.length > 0 && <button
                 type="button"
                 onClick={() => setMostrarSenha((visivel) => !visivel)}
@@ -141,7 +122,10 @@ async function login(e) {
               </button>}
             </div>
 
-          <button className="text-sm text-emerald-700 underline  w-full text-right hover:transition hover:duration-100 hover:text-blue-800">
+          <button
+            type="button"
+            onClick={() => navigate("/esqueci-senha")}
+            className="text-sm text-emerald-700 underline  w-full text-right hover:transition hover:duration-100 hover:text-blue-800">
             Esqueci minha senha
           </button>
                {erro && <p className="mt-3 text-sm text-red-600">{erro}</p>}
@@ -155,8 +139,6 @@ async function login(e) {
           </form>
 
 
-          
-          
           <div className="mt-8 flex justify-center items-center gap-1">
             <span>Não tem conta?</span>
           <button onClick={() => navigate("/")}
