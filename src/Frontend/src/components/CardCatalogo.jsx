@@ -4,29 +4,8 @@ import { CartLarge5 } from 'reicon-react';
 import { cesta } from './CestaCarrinho';
 import { resolverUrlImagem, listaDeImagens } from './api';
 
-<<<<<<< HEAD
-// Aceita array, string simples ou string JSON e devolve sempre um array de caminhos
-export function listaDeImagens(imagens) {
-    if (Array.isArray(imagens)) {
-        return imagens.filter((i) => typeof i === "string" && i)
-    }
-
-    if (typeof imagens === "string" && imagens) {
-        try {
-            const dec = JSON.parse(imagens)
-            if (Array.isArray(dec)) return dec.filter((i) => typeof i === "string" && i)
-        } catch (e) {
-            // não era JSON: trata como caminho único
-        }
-        return [imagens]
-    }
-
-    return []
-}
-=======
 // Mantido aqui para os outros componentes que já importam daqui
 export { listaDeImagens };
->>>>>>> arrumando_codigo
 
 // Resolve a URL da primeira imagem (capa)
 export function resolverImagem(imagem) {

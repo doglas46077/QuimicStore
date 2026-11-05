@@ -30,18 +30,11 @@ function estaAtivo(produto) {
 }
 
 // Devolve sempre um array de caminhos, aceitando o formato novo e o antigo
-<<<<<<< HEAD
-function imagensDoProduto(produto) {
-  if (Array.isArray(produto.imagens)) return produto.imagens;
-  if (produto.imagem) return [produto.imagem];
-  return [];
-=======
 // (o banco/API pode mandar array, string simples ou string JSON)
 function imagensDoProduto(produto) {
   const imagens = listaDeImagens(produto.imagens);
   if (imagens.length > 0) return imagens;
   return listaDeImagens(produto.imagem);
->>>>>>> arrumando_codigo
 }
 
 // Devolve true se adicionou, false se bateu no limite do estoque
@@ -128,11 +121,7 @@ function sincronizar(produtosDoBanco) {
         ...resto,
         nome: produto.nome,
         preco: Number(produto.preco),
-<<<<<<< HEAD
-        imagens: imagens.length > 0 ? imagens : (item.imagens ?? []),
-=======
         imagens: imagens.length > 0 ? imagens : imagensDoProduto(item),
->>>>>>> arrumando_codigo
         estoque,
         quantidade: Math.min(item.quantidade, estoque),
       };

@@ -14,8 +14,13 @@ import PagamentoPix from "./components/PaginaPagamento";
 import SectionStatus from "./components/PagamentoConfirmado";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
 
 function App() {
+    useEffect(() => {
+      document.documentElement.classList.toggle("dark", localStorage.getItem("modoEscuro") === "true")
+    }, [])
+
     return (
         <>
         <ToastContainer position="top-right" autoClose={3000} />
