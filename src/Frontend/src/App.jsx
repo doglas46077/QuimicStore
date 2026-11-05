@@ -18,35 +18,35 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
-    return (
-        <>
-        <ToastContainer position="top-right" autoClose={3000} />
-        <div className="bg-olive-50 font-bold">
-       <Routes>
-      <Route path="/" element={<SectionCadastro />} />
-      <Route path="/login" element={<LoginCard/>}/>
-      <Route path="/esqueci-senha" element={<SectionEsqueciSenha/>}/>
-      <Route path="/redefinir-senha" element={<SectionRedefinirSenha/>}/>
-      <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/>  </ProtecaoRotas>}/>
-      <Route path="/produto/:id" element={<ProtecaoRotas><ProductPage/></ProtecaoRotas>}/>
-      <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
-      <Route path="/pedidos" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
-      <Route path="/perfil" element={<ProtecaoRotas><SectionPerfil/></ProtecaoRotas> }/>
-      <Route path="/pedidoDetalhe/:id" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
-      <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
-      <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
-      <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
-      <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>
-      <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>
-      <Route path="/pedidoDetalhe" element={<ProtecaoRotas><SectionPedidoDetalhes/></ProtecaoRotas> }/>
-      <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus/></ProtecaoRotas> }/>
-      <Route path="/adm" element={<ProtecaoRotas><TelaAdm/></ProtecaoRotas>}/>
-      <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
-     <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>
-   <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>
+  return (
+    <>
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="bg-olive-50 font-bold">
+        <Routes>
+          <Route path="/" element={<SectionCadastro />} />
+          <Route path="/login" element={<LoginCard />} />
+          <Route path="/esqueci-senha" element={<SectionEsqueciSenha />} />
+          <Route path="/redefinir-senha" element={<SectionRedefinirSenha />} />
+          <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo />  </ProtecaoRotas>} />
+          <Route path="/produto/:id" element={<ProtecaoRotas><ProductPage /></ProtecaoRotas>} />
+          <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho /></ProtecaoRotas>} />
+          <Route path="/pedidos" element={<ProtecaoRotas><SectionPedidoStatus /></ProtecaoRotas>} />
+          <Route path="/perfil" element={<ProtecaoRotas><SectionPerfil /></ProtecaoRotas>} />
+          <Route path="/pedidoDetalhe/:id" element={<ProtecaoRotas><SectionPedidoDetalhes /></ProtecaoRotas>} />
+          <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus /></ProtecaoRotas>} />
+          <Route path="/adm" element={<ProtecaoRotas><TelaAdm /></ProtecaoRotas>} />
+          <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra /></ProtecaoRotas>} />
+          <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix /></ProtecaoRotas>} />
+          <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus /></ProtecaoRotas>} />
+          <Route path="/pedidoDetalhe" element={<ProtecaoRotas><SectionPedidoDetalhes /></ProtecaoRotas>} />
+          <Route path="/pedidoStatus" element={<ProtecaoRotas><SectionPedidoStatus /></ProtecaoRotas>} />
+          <Route path="/adm" element={<ProtecaoRotas><TelaAdm /></ProtecaoRotas>} />
+          <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra /></ProtecaoRotas>} />
+          <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix /></ProtecaoRotas>} />
+          <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus /></ProtecaoRotas>} />
         </Routes>
-      
-     </div>
+
+      </div>
     </>
   )
 }

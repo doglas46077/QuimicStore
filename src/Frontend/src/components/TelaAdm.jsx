@@ -15,6 +15,15 @@ const FORM_VAZIO = {
   ativo: true,
 };
 
+const OPCAO_STATUS_PEDIDO = [
+  { value: "pendente", label: "Pendente" },
+  { value: "aprovado", label: "Aprovado" },
+  { value: "em_preparo", label: "Em preparo" },
+  { value: "enviado", label: "Enviado" },
+  { value: "entregue", label: "Entregue" },
+  { value: "cancelado", label: "Cancelado" },
+];
+
 function resolverImagem(imagem) {
   if (!imagem || typeof imagem !== "string") return "";
   return resolverUrlImagem(imagem);
@@ -68,6 +77,23 @@ function mensagemDeErro(dados, padrao) {
   return dados?.message || dados?.mensagem || padrao;
 }
 
+function listaPedidosPossivel(dados) {
+  if (Array.isArray(dados)) return dados;
+  if (Array.isArray(dados?.data)) return dados.data;
+  if (Array.isArray(dados?.dados)) return dados.dados;
+  if (Array.isArray(dados?.pedidos)) return dados.pedidos;
+  return [];
+}
+
+function statusDoPedido(pedido) {
+  return String(pedido?.status ?? pedido?.status_pedido ?? "pendente").toLowerCase();
+}
+
+function nomeStatusPedido(status) {
+  const opcao = OPCAO_STATUS_PEDIDO.find((item) => item.value === status);
+  return opcao ? opcao.label : status || "Pendente";
+}
+
 export default function TelaAdm() {
   const navigate = useNavigate();
 
@@ -99,6 +125,11 @@ export default function TelaAdm() {
   const [ajustandoId, setAjustandoId] = useState(null);
 
   const [previas, setPrevias] = useState([]);
+  const [statusVendaAberto, setStatusVendaAberto] = useState(false);
+  const [pedidosStatus, setPedidosStatus] = useState([]);
+  const [carregandoStatus, setCarregandoStatus] = useState(false);
+  const [erroStatus, setErroStatus] = useState("");
+  const [atualizandoStatusId, setAtualizandoStatusId] = useState(null);
 
   // Criar pré-visualização das imagens novas
   useEffect(() => {
@@ -107,6 +138,128 @@ export default function TelaAdm() {
 
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [form.imagens]);
+
+  useEffect(() => {
+    if (!statusVendaAberto) return;
+
+    async function carregarPedidosStatus() {
+      setCarregandoStatus(true);
+      setErroStatus("");
+
+      try {
+        const rotas = [
+          `${API_URL}/mostrar-pedido`,
+          `${API_URL}/mostrar-pedidos`,
+          `${API_URL}/pedidos`,
+        ];
+
+        let pedidos = [];
+
+        for (const url of rotas) {
+          try {
+            const response = await fetch(url, {
+              headers: cabecalhos(),
+            });
+
+            if (response.status === 401) {
+              sessaoExpirada();
+              return;
+            }
+
+            if (response.ok) {
+              const dados = await response.json();
+              const lista = listaPedidosPossivel(dados);
+
+              if (lista.length > 0 || response.status === 200) {
+                setPedidosStatus(lista);
+                return;
+              }
+
+              pedidos = lista;
+            }
+          } catch (e) {
+            // tenta a próxima rota
+          }
+        }
+
+        setPedidosStatus(pedidos);
+      } catch (e) {
+        setErroStatus("Não foi possível carregar os pedidos para alterar o status.");
+      } finally {
+        setCarregandoStatus(false);
+      }
+    }
+
+    carregarPedidosStatus();
+  }, [statusVendaAberto]);
+
+  async function alterarStatusPedido(pedidoId, novoStatus) {
+    setAtualizandoStatusId(pedidoId);
+    setErroStatus("");
+
+    const payload = {
+      status: novoStatus,
+      status_pedido: novoStatus,
+    };
+
+    const rotas = [
+      `${API_URL}/atualizar-pedido/${pedidoId}/pedido`,
+      `${API_URL}/pedido/${pedidoId}/status`,
+      `${API_URL}/pedidos/${pedidoId}/status`,
+      `${API_URL}/atualizar-status-pedido/${pedidoId}`,
+    ];
+
+    let ultimoErro = "Não foi possível alterar o status do pedido.";
+
+    for (const url of rotas) {
+      try {
+        const response = await fetch(url, {
+          method: "PUT",
+          headers: cabecalhos(true),
+          body: JSON.stringify(payload),
+        });
+
+        if (response.status === 401) {
+          sessaoExpirada();
+          return;
+        }
+
+        if (response.ok) {
+          const dados = await response.json().catch(() => ({}));
+          const statusAtualizado =
+            dados?.data?.status ??
+            dados?.status ??
+            dados?.status_pedido ??
+            novoStatus;
+
+          setPedidosStatus((atual) =>
+            atual.map((pedido) =>
+              Number(pedido.id) === Number(pedidoId)
+                ? {
+                    ...pedido,
+                    status: statusAtualizado,
+                    status_pedido: statusAtualizado,
+                  }
+                : pedido
+            )
+          );
+
+          setAtualizandoStatusId(null);
+          return;
+        }
+
+        if (response.status !== 404 && response.status !== 405) {
+          const dados = await response.json().catch(() => ({}));
+          ultimoErro = mensagemDeErro(dados, "Não foi possível alterar o status do pedido.");
+        }
+      } catch (e) {
+        ultimoErro = "Não foi possível conectar ao servidor.";
+      }
+    }
+
+    setErroStatus(ultimoErro);
+    setAtualizandoStatusId(null);
+  }
 
   function cabecalhos(comCorpo = false) {
     const token = localStorage.getItem("token");
@@ -454,6 +607,20 @@ export default function TelaAdm() {
               >
                 Novo produto
               </button>
+
+              <button
+                onClick={() => setStatusVendaAberto(true)}
+                className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300"
+              >
+                Status De Venda
+              </button>
+
+              <button
+                className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300 disabled:opacity-50"
+              >
+                Perfil de Usuário  
+              </button>
+            
             </div>
           </div>
 
@@ -464,7 +631,7 @@ export default function TelaAdm() {
           )}
 
           <div className="overflow-x-auto rounded-xl bg-white shadow">
-            <table className="w-full min-w-[700px] text-sm">
+            <table className="w-full min-w-175 text-sm">
               <thead className="bg-slate-50 text-left text-slate-500">
                 <tr>
                   <th className="px-4 py-3 font-medium">Produto</th>
@@ -947,6 +1114,115 @@ export default function TelaAdm() {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Modal de status de venda */}
+      {statusVendaAberto && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-emerald-950/40 px-4 py-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">
+                Alterar status de venda
+              </h2>
+
+              <button
+                onClick={() => setStatusVendaAberto(false)}
+                className="text-xl leading-none text-slate-400 hover:text-slate-700"
+              >
+                &times;
+              </button>
+            </div>
+
+            {erroStatus && (
+              <p className="mb-4 text-sm text-red-600">
+                {erroStatus}
+              </p>
+            )}
+
+            <div className="mb-4 max-h-[60vh] overflow-y-auto">
+              {carregandoStatus ? (
+                <p className="py-12 text-center text-sm font-normal text-slate-500">
+                  Carregando pedidos...
+                </p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-left text-slate-500">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">Pedido</th>
+                      <th className="px-4 py-3 font-medium">Cliente</th>
+                      <th className="px-4 py-3 font-medium">Data</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 text-right font-medium">Ações</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-100 font-normal">
+                    {pedidosStatus.map((pedido) => (
+                      <tr key={pedido.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3">
+                          <span className="font-semibold text-slate-800">
+                            {pedido.id}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          {pedido.cliente_nome || "Cliente desconhecido"}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          {new Date(pedido.created_at).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-xs ${
+                              pedido.status === "pendente"
+                                ? "bg-amber-50 text-amber-700"
+                                : pedido.status === "aprovado"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : pedido.status === "cancelado"
+                                ? "bg-red-50 text-red-700"
+                                : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            {nomeStatusPedido(pedido.status)}
+                          </span>
+                        </td>
+
+                        <td className="whitespace-nowrap px-4 py-3 text-right">
+                          <button
+                            onClick={() => {
+                              alterarStatusPedido(
+                                pedido.id,
+                                pedido.status === "aprovado"
+                                  ? "cancelado"
+                                  : "aprovado"
+                              );
+                            }}
+                            className="text-sm text-emerald-700 hover:underline"
+                          >
+                            {pedido.status === "aprovado" ? "Cancelar" : "Aprovar"}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <button
+              onClick={() => setStatusVendaAberto(false)}
+              className="w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-[1.02] hover:transition hover:duration-300"
+            >
+              Fechar
+            </button>
           </div>
         </div>
       )}
