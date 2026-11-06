@@ -144,6 +144,15 @@ export default function TelaAdm() {
   const [erroStatus, setErroStatus] = useState("");
   const [atualizandoStatusId, setAtualizandoStatusId] = useState(null);
 
+  const [perfisAberto, setPerfisAberto] = useState(false);
+  const [usuarios, setUsuarios] = useState([]);
+  const [carregandoUsuarios, setCarregandoUsuarios] = useState(false);
+  const [erroUsuarios, setErroUsuarios] = useState("");
+  const [sucessoUsuario, setSucessoUsuario] = useState("");
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [formUsuario, setFormUsuario] = useState({ nome: "", email: "", senha: "" });
+  const [salvandoUsuario, setSalvandoUsuario] = useState(false);
+
   // Criar pré-visualização das imagens novas
   useEffect(() => {
     const urls = form.imagens.map((f) => URL.createObjectURL(f));
@@ -273,6 +282,101 @@ export default function TelaAdm() {
     );
     setErroStatus(ultimoErro);
     setAtualizandoStatusId(null);
+  }
+
+  async function abrirPerfisUsuarios() {
+    setPerfisAberto(true);
+    setCarregandoUsuarios(true);
+    setErroUsuarios("");
+    setSucessoUsuario("");
+    setUsuarioEditando(null);
+
+    try {
+      const response = await fetch(`${API_URL}/mostrar-usuarios`, {
+        headers: cabecalhos(),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErroUsuarios(mensagemDeErro(dados, "Não foi possível carregar os usuários."));
+        return;
+      }
+
+      setUsuarios(Array.isArray(dados?.usuarios) ? dados.usuarios : []);
+    } catch {
+      setErroUsuarios("Não foi possível conectar ao servidor.");
+    } finally {
+      setCarregandoUsuarios(false);
+    }
+  }
+
+  function editarUsuario(usuario) {
+    setUsuarioEditando(usuario);
+    setFormUsuario({ nome: usuario.nome || "", email: usuario.email || "", senha: "" });
+    setErroUsuarios("");
+    setSucessoUsuario("");
+  }
+
+  async function salvarPerfilUsuario(event) {
+    event.preventDefault();
+    if (!usuarioEditando || salvandoUsuario) return;
+
+    setSalvandoUsuario(true);
+    setErroUsuarios("");
+    setSucessoUsuario("");
+
+    const payload = {
+      nome: formUsuario.nome.trim(),
+      email: formUsuario.email.trim(),
+    };
+    if (formUsuario.senha.trim()) payload.senha = formUsuario.senha;
+
+    try {
+      const response = await fetch(`${API_URL}/atualizar-informacoes/${usuarioEditando.id}/usuario`, {
+        method: "PUT",
+        headers: cabecalhos(true),
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErroUsuarios(mensagemDeErro(dados, "Não foi possível atualizar o perfil."));
+        return;
+      }
+
+      const atualizado = dados?.dados || { ...usuarioEditando, ...payload };
+      setUsuarios((lista) => lista.map((usuario) =>
+        Number(usuario.id) === Number(usuarioEditando.id)
+          ? { ...usuario, nome: atualizado.nome, email: atualizado.email }
+          : usuario
+      ));
+
+      const usuarioLogado = JSON.parse(localStorage.getItem("usuario") || "null");
+      if (Number(usuarioLogado?.id) === Number(usuarioEditando.id)) {
+        localStorage.setItem("usuario", JSON.stringify({
+          ...usuarioLogado,
+          nome: atualizado.nome,
+          email: atualizado.email,
+        }));
+      }
+
+      setUsuarioEditando(null);
+      setSucessoUsuario("Perfil atualizado com sucesso.");
+    } catch {
+      setErroUsuarios("Não foi possível conectar ao servidor.");
+    } finally {
+      setSalvandoUsuario(false);
+    }
   }
 
   function cabecalhos(comCorpo = false) {
@@ -629,11 +733,14 @@ export default function TelaAdm() {
                 Status De Venda
               </button>
 
-              <button
-                className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300 disabled:opacity-50"
-              >
-                Perfil de Usuário  
-              </button>
+              {ehProfessor && (
+                <button
+                  onClick={abrirPerfisUsuarios}
+                  className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300"
+                >
+                  Perfil de Usuário
+                </button>
+              )}
             
             </div>
           </div>
@@ -1128,6 +1235,144 @@ export default function TelaAdm() {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Modal de perfis de usuário */}
+      {perfisAberto && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-emerald-950/40 px-4 py-4">
+          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white p-5 shadow-xl sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">
+                  {usuarioEditando ? "Editar perfil" : "Perfis de usuário"}
+                </h2>
+                {usuarioEditando && (
+                  <p className="mt-1 text-sm text-slate-500">Usuário #{usuarioEditando.id}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => !salvandoUsuario && setPerfisAberto(false)}
+                disabled={salvandoUsuario}
+                aria-label="Fechar perfis de usuário"
+                className="text-xl leading-none text-slate-400 hover:text-slate-700 disabled:opacity-50"
+              >
+                &times;
+              </button>
+            </div>
+
+            {erroUsuarios && <p className="mb-4 text-sm text-red-600">{erroUsuarios}</p>}
+            {sucessoUsuario && <p className="mb-4 text-sm text-emerald-700">{sucessoUsuario}</p>}
+
+            {carregandoUsuarios ? (
+              <p className="py-12 text-center text-sm text-slate-500">Carregando usuários...</p>
+            ) : usuarioEditando ? (
+              <form onSubmit={salvarPerfilUsuario} className="flex flex-col gap-4 overflow-y-auto">
+                <label className="text-sm font-medium text-slate-700">
+                  Nome
+                  <input
+                    type="text"
+                    name="nome"
+                    required
+                    minLength={3}
+                    value={formUsuario.nome}
+                    onChange={(e) => setFormUsuario((form) => ({ ...form, nome: e.target.value }))}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
+                  />
+                </label>
+
+                <label className="text-sm font-medium text-slate-700">
+                  E-mail
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formUsuario.email}
+                    onChange={(e) => setFormUsuario((form) => ({ ...form, email: e.target.value }))}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
+                  />
+                </label>
+
+                <label className="text-sm font-medium text-slate-700">
+                  Nova senha
+                  <input
+                    type="password"
+                    name="senha"
+                    minLength={6}
+                    autoComplete="new-password"
+                    value={formUsuario.senha}
+                    onChange={(e) => setFormUsuario((form) => ({ ...form, senha: e.target.value }))}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
+                  />
+                </label>
+
+                <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    disabled={salvandoUsuario}
+                    onClick={() => setUsuarioEditando(null)}
+                    className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={salvandoUsuario}
+                    className="rounded-lg bg-emerald-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-900 disabled:opacity-60"
+                  >
+                    {salvandoUsuario ? "Salvando..." : "Salvar alterações"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="min-h-0 overflow-y-auto">
+                {usuarios.length === 0 ? (
+                  <p className="py-10 text-center text-sm text-slate-500">Nenhum usuário encontrado.</p>
+                ) : (
+                  <table className="w-full min-w-136 text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-3 py-3 font-medium">Usuário</th>
+                        <th className="px-3 py-3 font-medium">Acesso</th>
+                        <th className="px-3 py-3 text-right font-medium">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {usuarios.map((usuario) => (
+                        <tr key={usuario.id} className="hover:bg-slate-50">
+                          <td className="max-w-0 px-3 py-3">
+                            <p className="truncate font-semibold text-slate-800">{usuario.nome}</p>
+                            <p className="truncate text-xs text-slate-500">{usuario.email}</p>
+                          </td>
+                          <td className="px-3 py-3 text-slate-600">{usuario.nivel_acesso}</td>
+                          <td className="px-3 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => editarUsuario(usuario)}
+                              className="rounded-md px-3 py-2 font-semibold text-emerald-800 hover:bg-emerald-50"
+                            >
+                              Editar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {!usuarioEditando && (
+              <button
+                type="button"
+                onClick={() => setPerfisAberto(false)}
+                className="mt-4 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:bg-emerald-900"
+              >
+                Fechar
+              </button>
+            )}
           </div>
         </div>
       )}
