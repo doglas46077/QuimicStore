@@ -16,11 +16,7 @@ const FORM_VAZIO = {
 };
 
 const OPCAO_STATUS_PEDIDO = [
-  { value: "pendente", label: "Pendente" },
   { value: "aprovado", label: "Aprovado" },
-  { value: "em_preparo", label: "Em preparo" },
-  { value: "enviado", label: "Enviado" },
-  { value: "entregue", label: "Entregue" },
   { value: "cancelado", label: "Cancelado" },
 ];
 
@@ -90,8 +86,25 @@ function statusDoPedido(pedido) {
 }
 
 function nomeStatusPedido(status) {
-  const opcao = OPCAO_STATUS_PEDIDO.find((item) => item.value === status);
-  return opcao ? opcao.label : status || "Pendente";
+  const valor = statusDoPedido({ status });
+  const rotulos = {
+    pendente: "Aguardando",
+    aguardando: "Aguardando",
+    aprovado: "Aprovado",
+    cancelado: "Cancelado",
+    em_preparo: "Em preparo",
+    enviado: "Enviado",
+    entregue: "Entregue",
+    pronto_para_retirada: "Pronto pra Retirada",
+  };
+  return rotulos[valor] || valor;
+}
+
+function prepararPedidosStatus(pedidos) {
+  return pedidos.map((pedido) => {
+    const status = statusDoPedido(pedido);
+    return { ...pedido, status, status_pedido: status };
+  });
 }
 
 export default function TelaAdm() {
@@ -171,7 +184,7 @@ export default function TelaAdm() {
               const lista = listaPedidosPossivel(dados);
 
               if (lista.length > 0 || response.status === 200) {
-                setPedidosStatus(lista);
+                setPedidosStatus(prepararPedidosStatus(lista));
                 return;
               }
 
@@ -182,7 +195,7 @@ export default function TelaAdm() {
           }
         }
 
-        setPedidosStatus(pedidos);
+        setPedidosStatus(prepararPedidosStatus(pedidos));
       } catch (e) {
         setErroStatus("Não foi possível carregar os pedidos para alterar o status.");
       } finally {
@@ -194,69 +207,70 @@ export default function TelaAdm() {
   }, [statusVendaAberto]);
 
   async function alterarStatusPedido(pedidoId, novoStatus) {
+    const pedidoAnterior = pedidosStatus.find((pedido) => Number(pedido.id) === Number(pedidoId));
+    const pagamentoId = pedidoAnterior?.pagamento?.id ?? pedidoAnterior?.pagamento_id;
+
+    if (!pagamentoId) {
+      setErroStatus("Este pedido não possui pagamento associado para alterar o status.");
+      return;
+    }
+
+    const statusAnterior = statusDoPedido(pedidoAnterior);
+
+    setPedidosStatus((atual) =>
+      atual.map((pedido) =>
+        Number(pedido.id) === Number(pedidoId)
+          ? { ...pedido, status: novoStatus, status_pedido: novoStatus }
+          : pedido
+      )
+    );
     setAtualizandoStatusId(pedidoId);
     setErroStatus("");
 
-    const payload = {
-      status: novoStatus,
-      status_pedido: novoStatus,
-    };
-
-    const rotas = [
-      `${API_URL}/atualizar-pedido/${pedidoId}/pedido`,
-      `${API_URL}/pedido/${pedidoId}/status`,
-      `${API_URL}/pedidos/${pedidoId}/status`,
-      `${API_URL}/atualizar-status-pedido/${pedidoId}`,
-    ];
-
     let ultimoErro = "Não foi possível alterar o status do pedido.";
 
-    for (const url of rotas) {
-      try {
-        const response = await fetch(url, {
-          method: "PUT",
-          headers: cabecalhos(true),
-          body: JSON.stringify(payload),
-        });
+    try {
+      const response = await fetch(`${API_URL}/pagamentos/${pagamentoId}/status`, {
+        method: "PUT",
+        headers: cabecalhos(true),
+        body: JSON.stringify({ status: novoStatus }),
+      });
 
-        if (response.status === 401) {
-          sessaoExpirada();
-          return;
-        }
-
-        if (response.ok) {
-          const dados = await response.json().catch(() => ({}));
-          const statusAtualizado =
-            dados?.data?.status ??
-            dados?.status ??
-            dados?.status_pedido ??
-            novoStatus;
-
-          setPedidosStatus((atual) =>
-            atual.map((pedido) =>
-              Number(pedido.id) === Number(pedidoId)
-                ? {
-                    ...pedido,
-                    status: statusAtualizado,
-                    status_pedido: statusAtualizado,
-                  }
-                : pedido
-            )
-          );
-
-          setAtualizandoStatusId(null);
-          return;
-        }
-
-        if (response.status !== 404 && response.status !== 405) {
-          const dados = await response.json().catch(() => ({}));
-          ultimoErro = mensagemDeErro(dados, "Não foi possível alterar o status do pedido.");
-        }
-      } catch (e) {
-        ultimoErro = "Não foi possível conectar ao servidor.";
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
       }
+
+      const dados = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        const statusAtualizado = dados?.dados?.pedido?.status ?? dados?.dados?.status ?? novoStatus;
+        const statusFinal = statusDoPedido({ status: statusAtualizado });
+
+        setPedidosStatus((atual) =>
+          atual.map((pedido) =>
+            Number(pedido.id) === Number(pedidoId)
+              ? { ...pedido, status: statusFinal, status_pedido: statusFinal }
+              : pedido
+          )
+        );
+        return;
+      }
+
+      ultimoErro = mensagemDeErro(dados, ultimoErro);
+    } catch {
+      ultimoErro = "Não foi possível conectar ao servidor.";
+    } finally {
+      setAtualizandoStatusId(null);
     }
 
+    setPedidosStatus((atual) =>
+      atual.map((pedido) =>
+        Number(pedido.id) === Number(pedidoId)
+          ? { ...pedido, status: statusAnterior, status_pedido: statusAnterior }
+          : pedido
+      )
+    );
     setErroStatus(ultimoErro);
     setAtualizandoStatusId(null);
   }
@@ -1121,7 +1135,7 @@ export default function TelaAdm() {
       {/* Modal de status de venda */}
       {statusVendaAberto && (
         <div className="fixed inset-0 z-30 flex items-center justify-center bg-emerald-950/40 px-4 py-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white p-5 shadow-xl sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
                 Alterar status de venda
@@ -1141,20 +1155,27 @@ export default function TelaAdm() {
               </p>
             )}
 
-            <div className="mb-4 max-h-[60vh] overflow-y-auto">
+            <div className="mb-4 min-h-0 overflow-y-auto">
               {carregandoStatus ? (
                 <p className="py-12 text-center text-sm font-normal text-slate-500">
                   Carregando pedidos...
                 </p>
               ) : (
-                <table className="w-full text-sm">
+                <table className="w-full table-fixed text-xs sm:text-sm">
+                  <colgroup>
+                    <col className="w-[10%]" />
+                    <col className="w-[22%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[20%]" />
+                    <col className="w-[32%]" />
+                  </colgroup>
                   <thead className="bg-slate-50 text-left text-slate-500">
                     <tr>
                       <th className="px-4 py-3 font-medium">Pedido</th>
                       <th className="px-4 py-3 font-medium">Cliente</th>
                       <th className="px-4 py-3 font-medium">Data</th>
                       <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 text-right font-medium">Ações</th>
+                      <th className="px-4 py-3 font-medium">Novo status</th>
                     </tr>
                   </thead>
 
@@ -1168,7 +1189,7 @@ export default function TelaAdm() {
                         </td>
 
                         <td className="px-4 py-3">
-                          {pedido.cliente_nome || "Cliente desconhecido"}
+                          <span className="wrap-break-word">{pedido.cliente_nome || "Cliente desconhecido"}</span>
                         </td>
 
                         <td className="px-4 py-3">
@@ -1182,33 +1203,34 @@ export default function TelaAdm() {
                         <td className="px-4 py-3">
                           <span
                             className={`rounded-full px-2.5 py-0.5 text-xs ${
-                              pedido.status === "pendente"
+                              ["pendente", "aguardando"].includes(statusDoPedido(pedido))
                                 ? "bg-amber-50 text-amber-700"
-                                : pedido.status === "aprovado"
+                                : statusDoPedido(pedido) === "aprovado"
                                 ? "bg-emerald-50 text-emerald-700"
-                                : pedido.status === "cancelado"
+                                : statusDoPedido(pedido) === "cancelado"
                                 ? "bg-red-50 text-red-700"
                                 : "bg-slate-100 text-slate-500"
                             }`}
                           >
-                            {nomeStatusPedido(pedido.status)}
+                            {nomeStatusPedido(statusDoPedido(pedido))}
                           </span>
                         </td>
 
-                        <td className="whitespace-nowrap px-4 py-3 text-right">
-                          <button
-                            onClick={() => {
-                              alterarStatusPedido(
-                                pedido.id,
-                                pedido.status === "aprovado"
-                                  ? "cancelado"
-                                  : "aprovado"
-                              );
-                            }}
-                            className="text-sm text-emerald-700 hover:underline"
+                        <td className="px-3 py-3 sm:px-4">
+                              <select
+                                value={OPCAO_STATUS_PEDIDO.some((opcao) => opcao.value === statusDoPedido(pedido)) ? statusDoPedido(pedido) : ""}
+                            disabled={atualizandoStatusId === pedido.id}
+                            aria-label={`Alterar status do pedido ${pedido.id}`}
+                            onChange={(e) => alterarStatusPedido(pedido.id, e.target.value)}
+                            className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:cursor-wait disabled:opacity-60 sm:text-sm"
                           >
-                            {pedido.status === "aprovado" ? "Cancelar" : "Aprovar"}
-                          </button>
+                            <option value="" disabled>Selecionar status</option>
+                            {OPCAO_STATUS_PEDIDO.map((opcao) => (
+                              <option key={opcao.value} value={opcao.value}>
+                                {opcao.label}
+                              </option>
+                            ))}
+                          </select>
                         </td>
                       </tr>
                     ))}
