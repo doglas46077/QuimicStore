@@ -686,7 +686,17 @@ export default function TelaAdm() {
       <HeaderLogin />
 
       <div className="min-h-screen bg-olive-50">
-        <main className="mx-auto max-w-6xl px-4 py-6">
+        <div className="flex min-h-screen flex-col md:flex-row">
+          <aside className="w-full shrink-0 bg-emerald-950 px-4 py-5 text-white md:min-h-screen md:w-64 md:px-5">
+            <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-emerald-200/70">Administração</p>
+            <nav aria-label="Navegação administrativa" className="flex gap-2 overflow-x-auto md:flex-col">
+              <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Ver catálogo</button>
+              <button onClick={abrirNovo} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
+              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Status de venda</button>
+              {ehProfessor && <button onClick={abrirPerfisUsuarios} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Perfil de usuário</button>}
+            </nav>
+          </aside>
+          <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
 
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -711,37 +721,6 @@ export default function TelaAdm() {
                 className="w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700"
               />
 
-              <button
-                onClick={() => navigate("/catalogo")}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Ver catálogo
-              </button>
-
-              <button
-                onClick={abrirNovo}
-                disabled={categorias.length === 0}
-                className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300 disabled:opacity-50"
-              >
-                Novo produto
-              </button>
-
-              <button
-                onClick={() => setStatusVendaAberto(true)}
-                className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300"
-              >
-                Status De Venda
-              </button>
-
-              {ehProfessor && (
-                <button
-                  onClick={abrirPerfisUsuarios}
-                  className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300"
-                >
-                  Perfil de Usuário
-                </button>
-              )}
-            
             </div>
           </div>
 
@@ -894,7 +873,8 @@ export default function TelaAdm() {
                 </p>
               )}
           </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       {/* Modal de cadastro e edição */}
