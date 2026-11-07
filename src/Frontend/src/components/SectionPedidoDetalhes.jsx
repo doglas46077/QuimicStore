@@ -9,11 +9,11 @@ import { X } from 'reicon-react';
 import { Calendar } from 'reicon-react';
 import { BagShopping } from 'reicon-react';
 import { LocationAlt } from 'reicon-react';
-import { Star } from 'reicon-react';
 import { TruckFast } from 'reicon-react';
 import { Bill } from 'reicon-react';
-
+import { Star } from 'reicon-react';
 import { API_URL } from "./api";
+import ModalAvaliacaoPedido, { EstrelasFixas } from "./AvaliarPedido";
 
 function numeroDoPedido(pedido) {
     const ano = pedido.created_at ? new Date(pedido.created_at).getFullYear() : new Date().getFullYear();
@@ -32,9 +32,27 @@ function formatarDataHora(valor) {
     return `${dia} às ${hora}`;
 }
 
+// O back só guarda avaliação de produto, então o progresso da avaliação do pedido
+// (experiência, produtos avaliados e "concluir") fica no navegador, por usuário e pedido.
+function chaveAvaliacao(pedidoId) {
+    const usuario = JSON.parse(localStorage.getItem("usuario") || "null");
+    return `avaliacao-pedido:${usuario?.id ?? "anonimo"}:${pedidoId}`;
+}
+
+function lerAvaliacao(pedidoId) {
+    const vazio = { experiencia: null, produtos: [], concluida: false };
+
+    try {
+        const guardado = JSON.parse(localStorage.getItem(chaveAvaliacao(pedidoId)) || "null");
+        return guardado ? { ...vazio, ...guardado } : vazio;
+    } catch {
+        return vazio;
+    }
+}
+
 export default function SectionPedidoDetalhes() {
     const navigate = useNavigate();
-    const { id } = useParams(); 
+    const { id } = useParams();
 
     const [pedido, setPedido] = useState(null);
     const [carregando, setCarregando] = useState(true);
@@ -48,6 +66,9 @@ export default function SectionPedidoDetalhes() {
             ? { fundo: "bg-emerald-200", texto: "text-emerald-600", badge: "bg-emerald-600", Icone: CheckCircle }
             : { fundo: "bg-red-200", texto: "text-red-600", badge: "bg-red-600", Icone: X };
     const dataStatus = pedido?.status_atualizado_em ?? pedido?.status_updated_at ?? pedido?.updated_at;
+    // avaliação do pedido: { experiencia, produtos, concluida } (null = ainda carregando)
+    const [avaliacao, setAvaliacao] = useState(null);
+    const [avaliando, setAvaliando] = useState(false);
 
     useEffect(() => {
         if (!id) {
@@ -97,6 +118,7 @@ export default function SectionPedidoDetalhes() {
                 }
 
                 setPedido(atual);
+                setAvaliacao(lerAvaliacao(atual.id));
             } catch (e) {
                 setErro("Não foi possível conectar ao servidor");
             } finally {
@@ -109,7 +131,28 @@ export default function SectionPedidoDetalhes() {
         return () => window.clearInterval(atualizador);
     }, [id]);
 
+    // Salva a cada mudança
+    useEffect(() => {
+        if (!pedido?.id || !avaliacao) return;
+
+        try {
+            localStorage.setItem(chaveAvaliacao(pedido.id), JSON.stringify(avaliacao));
+        } catch {
+            // sem espaço/sem permissão: segue sem salvar
+        }
+    }, [avaliacao, pedido?.id]);
+
+    function sessaoExpirada() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+        navigate("/login");
+    }
+
     const itens = pedido?.itens || [];
+    const totalProdutos = new Set(itens.map((item) => item.produto_id)).size;
+    const produtosAvaliados = avaliacao?.produtos?.length ?? 0;
+    const avaliacaoConcluida = !!avaliacao?.concluida;
+    const avaliacaoEmAndamento = !!avaliacao?.experiencia || produtosAvaliados > 0;
     const subtotal = itens.reduce((soma, item) => soma + item.quantidade * item.preco_unitario_na_hora_da_compra, 0);
 
     return (
@@ -264,7 +307,7 @@ export default function SectionPedidoDetalhes() {
                                         return <div key={status} className="flex items-center gap-2">
                                             <span className={`h-3 w-3 rounded-full border-2 ${ativo ? (status === "cancelado" ? "bg-red-500 border-red-500" : "bg-emerald-600 border-emerald-600") : "bg-white border-gray-300"}`} />
                                             <p className="flex-1">{rotulo}</p>
-                                            <p className="font-light">{data ? formatarDataHora(data) : "�"}</p>
+                                            <p className="font-light">{data ? formatarDataHora(data) : "�"}</p>
                                         </div>;
                                     })}
                                 </div>
@@ -276,27 +319,55 @@ export default function SectionPedidoDetalhes() {
                                         <div className="flex justify-center items-center rounded-full text-emerald-700 bg-emerald-200 h-8 w-8">
                                             <Star size={20} />
                                         </div>
-                                        <p>Avalie seu pedido</p>
+                                        <p>{avaliacaoConcluida ? "Pedido avaliado" : "Avalie seu pedido"}</p>
                                     </div>
-                                    <div className="flex flex-col w-full justify-center text-zinc-600 gap-1">
-                                        <div className="flex gap-7 justify-center">
-                                            <Star size={25} />
-                                            <Star size={25} />
-                                            <Star size={25} />
-                                            <Star size={25} />
-                                            <Star size={25} />
+
+                                    {avaliacaoConcluida ? (
+                                        <div className="flex flex-col w-full justify-center text-zinc-600 gap-1">
+                                            <p className="flex justify-center text-center font-light">
+                                                Obrigado! Sua avaliação ajuda a melhorar a QuimicStore.
+                                            </p>
+                                            <button
+                                                disabled
+                                                className="bg-slate-100 text-slate-400 p-1 rounded-lg cursor-not-allowed"
+                                            >
+                                                Avaliação enviada
+                                            </button>
                                         </div>
-                                        <p className="flex justify-center font-light">Conte-nos sobre sua experiência com a QuimicStore.</p>
-                                        <button className="bg-emerald-200 text-emerald-800 p-1 rounded-lg hover:scale-101 hover:transition-transform">
-                                            Avaliar pedido
-                                        </button>
-                                    </div>
+                                    ) : (
+                                        <div className="flex flex-col w-full justify-center text-zinc-600 gap-1">
+                                            <EstrelasFixas nota={0} tam={24} className="justify-center gap-5" />
+                                            <p className="flex justify-center text-center font-light">
+                                                {avaliacaoEmAndamento
+                                                    ? `Você já avaliou ${produtosAvaliados} de ${totalProdutos} produtos.`
+                                                    : "Conte-nos sobre sua experiência com a QuimicStore."}
+                                            </p>
+                                            <button
+                                                onClick={() => setAvaliando(true)}
+                                                disabled={avaliacao === null}
+                                                className="bg-emerald-200 text-emerald-800 p-1 rounded-lg hover:scale-101 hover:transition-transform disabled:opacity-60 disabled:hover:scale-100"
+                                            >
+                                                {avaliacaoEmAndamento ? "Continuar avaliação" : "Avaliar pedido"}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                         </div>
                     </div>
                 </>
+            )}
+
+            {pedido && avaliacao && (
+                <ModalAvaliacaoPedido
+                    aberto={avaliando}
+                    onFechar={() => setAvaliando(false)}
+                    pedido={pedido}
+                    avaliacao={avaliacao}
+                    onAtualizar={setAvaliacao}
+                    onSessaoExpirada={sessaoExpirada}
+                />
             )}
 
             <FooterCatalogo />
