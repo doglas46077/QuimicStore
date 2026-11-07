@@ -4,6 +4,8 @@ import HeaderPedidoStatus from "./Header/HeaderPedido";
 import FooterCatalogo from "./FooterCatalogo";
 import { resolverImagem } from "./CardCatalogo";
 import { ClockCircle } from 'reicon-react';
+import { CheckCircle } from 'reicon-react';
+import { X } from 'reicon-react';
 import { Calendar } from 'reicon-react';
 import { BagShopping } from 'reicon-react';
 import { LocationAlt } from 'reicon-react';
@@ -23,6 +25,7 @@ function formatarPreco(valor) {
 }
 
 function formatarDataHora(valor) {
+    if (!valor) return "Aguardando atualização";
     const data = new Date(valor);
     const dia = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
     const hora = data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
@@ -36,6 +39,15 @@ export default function SectionPedidoDetalhes() {
     const [pedido, setPedido] = useState(null);
     const [carregando, setCarregando] = useState(true);
     const [erro, setErro] = useState("");
+
+    const statusAtual = String(pedido?.status ?? pedido?.status_pedido ?? pedido?.pagamento?.status ?? "aguardando").toLowerCase();
+    const statusNormalizado = statusAtual.includes("cancel") ? "cancelado" : statusAtual.includes("aprov") ? "aprovado" : "aguardando";
+    const estiloStatus = statusNormalizado === "aguardando"
+        ? { fundo: "bg-amber-200", texto: "text-amber-600", badge: "bg-amber-600", Icone: ClockCircle }
+        : statusNormalizado === "aprovado"
+            ? { fundo: "bg-emerald-200", texto: "text-emerald-600", badge: "bg-emerald-600", Icone: CheckCircle }
+            : { fundo: "bg-red-200", texto: "text-red-600", badge: "bg-red-600", Icone: X };
+    const dataStatus = pedido?.status_atualizado_em ?? pedido?.status_updated_at ?? pedido?.updated_at;
 
     useEffect(() => {
         if (!id) {
@@ -93,6 +105,8 @@ export default function SectionPedidoDetalhes() {
         }
 
         carregar();
+        const atualizador = window.setInterval(carregar, 5000);
+        return () => window.clearInterval(atualizador);
     }, [id]);
 
     const itens = pedido?.itens || [];
@@ -110,8 +124,8 @@ export default function SectionPedidoDetalhes() {
                     <div className="flex justify-center w-full">
                         <div className="flex w-[90%] justify-between">
                             <div className="flex gap-7 justify-baseline items-center w-[50%]">
-                                <div className="bg-yellow-200 text-yellow-500 rounded-full p-3">
-                                    <ClockCircle size={44} />
+                                <div className={`${estiloStatus.fundo} ${estiloStatus.texto} rounded-full p-3`}>
+                                    <estiloStatus.Icone size={44} />
                                 </div>
                                 <div >
                                     <p className="text-2xl text-emerald-700">Pedido {numeroDoPedido(pedido)}</p>
@@ -121,9 +135,9 @@ export default function SectionPedidoDetalhes() {
 
                             <div className="flex flex-col justify-center items-end w-[25%]">
                                 <div className="flex justify-center w-full">
-                                    <div className="flex justify-center text-white items-center w-[35%] gap-2 bg-zinc-500 rounded-2xl p-1">
-                                        <div className="h-4 w-4 bg-white rounded-full"></div>
-                                        <h1 className="">Status</h1>
+                                    <div className={`flex justify-center text-white items-center w-[35%] gap-2 ${estiloStatus.badge} rounded-2xl p-1`}>
+                                        <estiloStatus.Icone size={16} />
+                                        <h1>{statusNormalizado === "aguardando" ? "Aguardando" : statusNormalizado === "aprovado" ? "Aprovado" : "Cancelado"}</h1>
                                     </div>
                                 </div>
                                 <div>
@@ -242,39 +256,17 @@ export default function SectionPedidoDetalhes() {
                                     </div>
                                 </div>
 
-                                <div className="flex gap-7 justify- w-[94%]">
-                                    <div>
-                                        {[1, 2, 3, 4].map((item, index) => (
-                                            <div key={item} className="flex flex-col items-center">
-                                                <div className={`w-4 h-4 rounded-full border-2 ${
-                                                    index === 0 ? "bg-orange-400 border-orange-400" : "bg-white border-gray-300"
-                                                }`} />
-                                                {index < 3 && <div className="w-0.5 h-1 bg-gray-300" />}
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                    <div className="w-full text-sm text-zinc-600">
-                                        <div className="flex justify-between w-full">
-                                            <p>Pedido realizado</p>
-                                            <p className="font-light">data e horario</p>
-                                        </div>
-
-                                        <div className="flex justify-between w-full">
-                                            <p>Em preparação</p>
-                                            <p className="font-light">data e horario</p>
-                                        </div>
-
-                                        <div className="flex justify-between w-full">
-                                            <p>Pronto para retirada</p>
-                                            <p className="font-light">data e horario</p>
-                                        </div>
-
-                                        <div className="flex justify-between w-full">
-                                            <p>Retirado</p>
-                                            <p className="font-light">data e horario</p>
-                                        </div>
-                                    </div>
+                                <div className="flex flex-col gap-2 w-[94%] text-sm text-zinc-600">
+                                    {["aguardando", "aprovado", "cancelado"].map((status) => {
+                                        const ativo = statusNormalizado === status;
+                                        const rotulo = status === "aguardando" ? "Aguardando" : status === "aprovado" ? "Aprovado" : "Cancelado";
+                                        const data = ativo ? (status === "aguardando" ? (dataStatus || pedido.created_at) : dataStatus) : null;
+                                        return <div key={status} className="flex items-center gap-2">
+                                            <span className={`h-3 w-3 rounded-full border-2 ${ativo ? (status === "cancelado" ? "bg-red-500 border-red-500" : "bg-emerald-600 border-emerald-600") : "bg-white border-gray-300"}`} />
+                                            <p className="flex-1">{rotulo}</p>
+                                            <p className="font-light">{data ? formatarDataHora(data) : "�"}</p>
+                                        </div>;
+                                    })}
                                 </div>
                             </div>
 

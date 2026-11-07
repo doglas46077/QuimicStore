@@ -82,6 +82,8 @@ export default function SectionPedidoStatus() {
         }
 
         carregar()
+        const atualizador = window.setInterval(carregar, 5000)
+        return () => window.clearInterval(atualizador)
     }, [])
 
     return (
@@ -133,9 +135,9 @@ export default function SectionPedidoStatus() {
                             <div className="flex w-105 justify-end gap-40 h-35 items-center border-l-2 border-dashed border-zinc-300">
                                 <div className="flex flex-col gap-3">
                                   
-                                    <div className="flex justify-center text-white items-center gap-2 bg-zinc-500 rounded-2xl p-1">
+                                    <div className={`flex justify-center text-white items-center gap-2 rounded-2xl p-1 ${String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase().includes("cancel") ? "bg-red-600" : String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase().includes("aprov") ? "bg-emerald-700" : "bg-amber-600"}`}>
                                         <div className="h-4 w-4 bg-white rounded-full"></div>
-                                        <h1 className="">Status</h1>
+                                        <h1>{String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase().includes("cancel") ? "Cancelado" : String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase().includes("aprov") ? "Aprovado" : "Aguardando"}</h1>
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <p>Total do pedido</p>

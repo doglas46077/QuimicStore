@@ -103,7 +103,14 @@ function nomeStatusPedido(status) {
 function prepararPedidosStatus(pedidos) {
   return pedidos.map((pedido) => {
     const status = statusDoPedido(pedido);
-    return { ...pedido, status, status_pedido: status };
+    const clienteNome =
+      pedido?.cliente_nome ||
+      pedido?.usuario?.nome ||
+      pedido?.cliente?.nome ||
+      pedido?.nome_cliente ||
+      "";
+
+    return { ...pedido, cliente_nome: clienteNome, status, status_pedido: status };
   });
 }
 
@@ -150,7 +157,7 @@ export default function TelaAdm() {
   const [erroUsuarios, setErroUsuarios] = useState("");
   const [sucessoUsuario, setSucessoUsuario] = useState("");
   const [usuarioEditando, setUsuarioEditando] = useState(null);
-  const [formUsuario, setFormUsuario] = useState({ nome: "", email: "", senha: "" });
+  const [formUsuario, setFormUsuario] = useState({ nome: "", email: "", nivel_acesso: "cliente" });
   const [salvandoUsuario, setSalvandoUsuario] = useState(false);
 
   // Criar pré-visualização das imagens novas
@@ -229,7 +236,7 @@ export default function TelaAdm() {
     setPedidosStatus((atual) =>
       atual.map((pedido) =>
         Number(pedido.id) === Number(pedidoId)
-          ? { ...pedido, status: novoStatus, status_pedido: novoStatus }
+          ? { ...pedido, status: novoStatus, status_pedido: novoStatus, status_atualizado_em: new Date().toISOString() }
           : pedido
       )
     );
@@ -259,7 +266,7 @@ export default function TelaAdm() {
         setPedidosStatus((atual) =>
           atual.map((pedido) =>
             Number(pedido.id) === Number(pedidoId)
-              ? { ...pedido, status: statusFinal, status_pedido: statusFinal }
+              ? { ...pedido, status: statusFinal, status_pedido: statusFinal, status_atualizado_em: dados?.dados?.pedido?.status_atualizado_em ?? dados?.dados?.pedido?.updated_at ?? dados?.dados?.status_atualizado_em ?? new Date().toISOString() }
               : pedido
           )
         );
@@ -317,7 +324,7 @@ export default function TelaAdm() {
 
   function editarUsuario(usuario) {
     setUsuarioEditando(usuario);
-    setFormUsuario({ nome: usuario.nome || "", email: usuario.email || "", senha: "" });
+    setFormUsuario({ nome: usuario.nome || "", email: usuario.email || "", nivel_acesso: usuario.nivel_acesso || "cliente" });
     setErroUsuarios("");
     setSucessoUsuario("");
   }
@@ -331,10 +338,8 @@ export default function TelaAdm() {
     setSucessoUsuario("");
 
     const payload = {
-      nome: formUsuario.nome.trim(),
-      email: formUsuario.email.trim(),
+      nivel_acesso: formUsuario.nivel_acesso,
     };
-    if (formUsuario.senha.trim()) payload.senha = formUsuario.senha;
 
     try {
       const response = await fetch(`${API_URL}/atualizar-informacoes/${usuarioEditando.id}/usuario`, {
@@ -355,9 +360,13 @@ export default function TelaAdm() {
       }
 
       const atualizado = dados?.dados || { ...usuarioEditando, ...payload };
+      if (atualizado.nivel_acesso !== payload.nivel_acesso) {
+        setErroUsuarios("O backend atual n�o permite alterar o acesso do usu�rio.");
+        return;
+      }
       setUsuarios((lista) => lista.map((usuario) =>
         Number(usuario.id) === Number(usuarioEditando.id)
-          ? { ...usuario, nome: atualizado.nome, email: atualizado.email }
+          ? { ...usuario, nivel_acesso: atualizado.nivel_acesso ?? payload.nivel_acesso }
           : usuario
       ));
 
@@ -365,8 +374,7 @@ export default function TelaAdm() {
       if (Number(usuarioLogado?.id) === Number(usuarioEditando.id)) {
         localStorage.setItem("usuario", JSON.stringify({
           ...usuarioLogado,
-          nome: atualizado.nome,
-          email: atualizado.email,
+          nivel_acesso: atualizado.nivel_acesso ?? payload.nivel_acesso,
         }));
       }
 
@@ -690,9 +698,9 @@ export default function TelaAdm() {
           <aside className="w-full shrink-0 bg-emerald-950 px-4 py-5 text-white md:min-h-screen md:w-64 md:px-5">
             <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-emerald-200/70">Administração</p>
             <nav aria-label="Navegação administrativa" className="flex gap-2 overflow-x-auto md:flex-col">
-              <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Ver catálogo</button>
+              <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Volta para catálogo</button>
               <button onClick={abrirNovo} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
-              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Status de venda</button>
+              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Mudar status</button>
               {ehProfessor && <button onClick={abrirPerfisUsuarios} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Perfil de usuário</button>}
             </nav>
           </aside>
@@ -1252,40 +1260,26 @@ export default function TelaAdm() {
               <form onSubmit={salvarPerfilUsuario} className="flex flex-col gap-4 overflow-y-auto">
                 <label className="text-sm font-medium text-slate-700">
                   Nome
-                  <input
-                    type="text"
-                    name="nome"
-                    required
-                    minLength={3}
-                    value={formUsuario.nome}
-                    onChange={(e) => setFormUsuario((form) => ({ ...form, nome: e.target.value }))}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
-                  />
+                  <input type="text" value={formUsuario.nome} readOnly className="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-normal text-slate-600" />
                 </label>
 
                 <label className="text-sm font-medium text-slate-700">
                   E-mail
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formUsuario.email}
-                    onChange={(e) => setFormUsuario((form) => ({ ...form, email: e.target.value }))}
-                    className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
-                  />
+                  <input type="email" value={formUsuario.email} readOnly className="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-normal text-slate-600" />
                 </label>
 
                 <label className="text-sm font-medium text-slate-700">
-                  Nova senha
-                  <input
-                    type="password"
-                    name="senha"
-                    minLength={6}
-                    autoComplete="new-password"
-                    value={formUsuario.senha}
-                    onChange={(e) => setFormUsuario((form) => ({ ...form, senha: e.target.value }))}
+                  Acesso
+                  <select
+                    name="nivel_acesso"
+                    value={formUsuario.nivel_acesso}
+                    onChange={(e) => setFormUsuario((form) => ({ ...form, nivel_acesso: e.target.value }))}
+                    disabled={salvandoUsuario}
                     className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
-                  />
+                  >
+                    <option value="cliente">Cliente</option>
+                    <option value="estagiario">Estagiário</option>
+                  </select>
                 </label>
 
                 <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -1363,7 +1357,7 @@ export default function TelaAdm() {
           <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white p-5 shadow-xl sm:p-6">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-900">
-                Alterar status de venda
+                Alterar status do pedido
               </h2>
 
               <button
