@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart, ArrowLeft, X, ShieldCheck, Package, Truck, Headphones, Store } from "reicon-react";
 import HeaderLogin from "./Header/HeaderLogin";
@@ -18,9 +18,42 @@ function formatarPreco(valor) {
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function CampoQuantidade({ item, definirQuantidade }) {
+  const [valor, setValor] = useState(String(item.quantidade));
+
+  useEffect(() => setValor(String(item.quantidade)), [item.quantidade]);
+
+  function confirmar() {
+    const numero = Number(valor);
+    const quantidade = Number.isFinite(numero) && valor.trim() !== ""
+      ? Math.min(item.estoque, Math.max(1, Math.floor(numero)))
+      : item.quantidade;
+    definirQuantidade(item.id, quantidade);
+    setValor(String(quantidade));
+  }
+
+  return (
+    <input
+      aria-label={`Quantidade de ${item.nome}`}
+      type="number"
+      inputMode="numeric"
+      min={1}
+      max={item.estoque}
+      step={1}
+      value={valor}
+      onChange={(evento) => setValor(evento.target.value)}
+      onBlur={confirmar}
+      onKeyDown={(evento) => {
+        if (evento.key === "Enter") evento.currentTarget.blur();
+      }}
+      className="h-7 w-12 rounded border border-slate-200 text-center text-sm font-semibold text-slate-900"
+    />
+  );
+}
+
 function SectionCarrinho() {
   const navigate = useNavigate();
-  const { itens, total, totalItens, alterarQuantidade, remover, limpar, sincronizar } = useCarrinho();
+  const { itens, total, totalItens, alterarQuantidade, definirQuantidade, remover, limpar, sincronizar } = useCarrinho();
 
   const carrinhoVazio = itens.length === 0;
 
@@ -128,9 +161,7 @@ function SectionCarrinho() {
                               >
                                 −
                               </button>
-                              <span className="w-8 text-center text-sm font-semibold text-slate-900">
-                                {item.quantidade}
-                              </span>
+                              <CampoQuantidade item={item} definirQuantidade={definirQuantidade} />
                               <button
                                 onClick={() => alterarQuantidade(item.id, 1)}
                                 disabled={item.quantidade >= item.estoque}

@@ -86,6 +86,19 @@ function alterarQuantidade(id, delta) {
   salvarCarrinho(atual);
 }
 
+function definirQuantidade(id, quantidade) {
+  const valor = Number(quantidade);
+  if (!Number.isFinite(valor)) return;
+
+  const atual = lerCarrinho().map((item) => {
+    if (String(item.id) !== String(id)) return item;
+    const estoque = Math.max(0, Math.floor(Number(item.estoque) || 0));
+    if (estoque < 1) return item;
+    return { ...item, quantidade: Math.min(estoque, Math.max(1, Math.floor(valor))) };
+  });
+  salvarCarrinho(atual);
+}
+
 function remover(id) {
   salvarCarrinho(lerCarrinho().filter((item) => String(item.id) !== String(id)));
 }
@@ -147,5 +160,5 @@ export function useCarrinho() {
   const totalItens = itens.reduce((soma, item) => soma + item.quantidade, 0);
   const total = itens.reduce((soma, item) => soma + item.preco * item.quantidade, 0);
 
-  return { itens, totalItens, total, adicionar, podeAdicionar, alterarQuantidade, remover, limpar, sincronizar };
+  return { itens, totalItens, total, adicionar, podeAdicionar, alterarQuantidade, definirQuantidade, remover, limpar, sincronizar };
 }

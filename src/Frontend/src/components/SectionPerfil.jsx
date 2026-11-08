@@ -3,13 +3,20 @@ import { User, Package } from "reicon-react";
 import FooterCatalogo from "./FooterCatalogo"
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "./api";
 
 function SectionPerfil() {
 const navigate = useNavigate()
 
 const [nome, setNome] = useState("")
 const [email, setEmail] = useState("")
+const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false)
+const [mensagemRecuperacao, setMensagemRecuperacao] = useState("")
+const [erroRecuperacao, setErroRecuperacao] = useState("")
 const [modoEscuro, setModoEscuro] = useState(() => localStorage.getItem("modoEscuro") === "true")
+const [pedidos, setPedidos] = useState([])
+const [carregandoPedidos, setCarregandoPedidos] = useState(true)
+const [erroPedidos, setErroPedidos] = useState("")
 
     useEffect(() => {
       document.documentElement.classList.toggle("dark", modoEscuro)
@@ -29,7 +36,81 @@ const [modoEscuro, setModoEscuro] = useState(() => localStorage.getItem("modoEsc
       setEmail(usuarioSalvo.email)
     }, [])
 
+    useEffect(() => {
+      let ativo = true
+      async function carregarPedidos() {
+        const usuario = JSON.parse(localStorage.getItem("usuario") || "null")
+        const token = localStorage.getItem("token")
+        if (!usuario?.id || !token) { setCarregandoPedidos(false); return }
+        try {
+          const response = await fetch(`${API_URL}/mostrar-pedido/${usuario.id}/usuario`, {
+            headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+          })
+          const dados = await response.json().catch(() => ({}))
+          if (!ativo) return
+          if (response.status === 401) {
+            localStorage.removeItem("token")
+            localStorage.removeItem("usuario")
+            navigate("/login")
+            return
+          }
+          if (response.status === 404 && dados.message?.startsWith("Nenhum pedido")) { setPedidos([]); return }
+          if (!response.ok) throw new Error(dados.message || "Não foi possível carregar suas compras.")
+          const lista = Array.isArray(dados.dados) ? dados.dados : []
+          setPedidos(lista.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 3))
+          setErroPedidos("")
+        } catch (erro) {
+          if (ativo) setErroPedidos(erro.message || "Não foi possível conectar ao servidor.")
+        } finally {
+          if (ativo) setCarregandoPedidos(false)
+        }
+      }
+      carregarPedidos()
+      return () => { ativo = false }
+    }, [navigate])
+
+    function formatarData(data) {
+      if (!data) return "Data indisponível"
+      const valor = new Date(data)
+      return Number.isNaN(valor.getTime()) ? "Data indisponível" : valor.toLocaleDateString("pt-BR")
+    }
+
+    function formatarPreco(valor) {
+      const numero = Number(valor)
+      return Number.isFinite(numero) ? numero.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "Valor indisponível"
+    }
+
+    function nomeStatus(pedido) {
+      const status = String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase()
+      if (status.includes("cancel")) return { texto: "Cancelado", classe: "bg-red-50 text-red-700" }
+      if (status.includes("aprov") || status.includes("entreg")) return { texto: status.includes("entreg") ? "Entregue" : "Aprovado", classe: "bg-emerald-50 text-emerald-700" }
+      return { texto: "Aguardando", classe: "bg-amber-50 text-amber-700" }
+    }
+
     const inicial = nome ? nome.charAt(0).toUpperCase() : "?"
+
+    async function solicitarRedefinicaoSenha() {
+      if (!email || enviandoRecuperacao) return
+      setEnviandoRecuperacao(true)
+      setErroRecuperacao("")
+      setMensagemRecuperacao("")
+      try {
+        const response = await fetch(`${API_URL}/esqueceu-senha`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ email }),
+        })
+        const dados = await response.json().catch(() => ({}))
+        if (!response.ok) {
+          throw new Error(dados?.mensagem || dados?.message || "Não foi possível enviar o e-mail de recuperação.")
+        }
+        setMensagemRecuperacao(`Se o e-mail ${email} estiver cadastrado, você receberá um link para redefinir sua senha.`)
+      } catch (falha) {
+        setErroRecuperacao(falha.message || "Não foi possível conectar ao servidor.")
+      } finally {
+        setEnviandoRecuperacao(false)
+      }
+    }
 
     return(
         <>
@@ -102,69 +183,43 @@ const [modoEscuro, setModoEscuro] = useState(() => localStorage.getItem("modoEsc
             className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
           />
  
-          <label htmlFor="telefone" className="mb-1.5 mt-4 block text-sm font-medium text-slate-700">
-            senha
-          </label>
-          <input
-            type="password"
-            id="senha"
-            name="senha"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none"
-          />
- 
+          {erroRecuperacao && <p role="alert" className="mt-4 text-sm text-red-600">{erroRecuperacao}</p>}
+          {mensagemRecuperacao && <p role="status" className="mt-4 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">{mensagemRecuperacao}</p>}
           <button
             type="button"
-            className="mt-5 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white"
+            onClick={solicitarRedefinicaoSenha}
+            disabled={enviandoRecuperacao}
+            className="mt-5 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white disabled:opacity-60"
           >
-            Salvar alterações
+            {enviandoRecuperacao ? "Enviando..." : "Fazer alterações"}
           </button>
         </div>
  
        
         <div className="mt-4 rounded-xl bg-white p-7 shadow-sm">
           <p className="mb-4 text-sm font-bold text-slate-900">Últimas compras</p>
- 
-          
-          <div className="mb-3 flex items-center justify-between rounded-lg border border-slate-200 p-4">
-            <div className="flex items-center gap-3">
-              <Package size={16} />
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Pedido #4521</p>
-                <p className="text-xs text-slate-500">12/08/2026 · R$ 189,90</p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              Entregue
-            </span>
-          </div>
- 
-        
-          <div className="mb-3 flex items-center justify-between rounded-lg border border-slate-200 p-4">
-            <div className="flex items-center gap-3">
-              <Package size={16} />
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Pedido #4498</p>
-                <p className="text-xs text-slate-500">30/07/2026 · R$ 76,50</p>
-              </div>
-            </div>
-            <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-              A caminho
-            </span>
-          </div>
- 
-         
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 p-4">
-            <div className="flex items-center gap-3">
-              <Package size={16} />
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Pedido #4470</p>
-                <p className="text-xs text-slate-500">18/07/2026 · R$ 312,00</p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              Entregue
-            </span>
-          </div>
+          {carregandoPedidos && <p className="text-sm text-slate-500">Carregando compras...</p>}
+          {erroPedidos && <p role="alert" className="text-sm text-red-600">{erroPedidos}</p>}
+          {!carregandoPedidos && !erroPedidos && pedidos.length === 0 && (
+            <p className="rounded-lg border border-slate-200 p-4 text-sm text-slate-500">Você ainda não fez nenhuma compra.</p>
+          )}
+          {pedidos.map((pedido, indice) => {
+            const status = nomeStatus(pedido)
+            const ano = pedido.created_at ? new Date(pedido.created_at).getFullYear() : ""
+            return (
+              <button key={pedido.id} type="button" onClick={() => navigate(`/pedidoDetalhe/${pedido.id}`)}
+                className={`flex w-full items-center justify-between rounded-lg border border-slate-200 p-4 text-left transition hover:bg-slate-50 ${indice < pedidos.length - 1 ? "mb-3" : ""}`}>
+                <span className="flex items-center gap-3">
+                  <Package size={16} />
+                  <span>
+                    <span className="block text-sm font-semibold text-slate-900">Pedido #QS-{ano}-{String(pedido.id).padStart(4, "0")}</span>
+                    <span className="block text-xs text-slate-500">{formatarData(pedido.created_at)} · {formatarPreco(pedido.valor_total)}</span>
+                  </span>
+                </span>
+                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.classe}`}>{status.texto}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
       <FooterCatalogo/>

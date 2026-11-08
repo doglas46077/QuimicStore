@@ -30,6 +30,8 @@ function App() {
        <Routes>
       <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={<LoginCard/>}/>
+      <Route path="/esqueci-senha" element={<SectionEsqueciSenha/>}/>
+      <Route path="/redefinir-senha" element={<SectionRedefinirSenha/>}/>
       <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/>  </ProtecaoRotas>}/>
       <Route path="/produto/:id" element={<ProtecaoRotas><ProductPage/></ProtecaoRotas>}/>
       <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
@@ -41,6 +43,7 @@ function App() {
       <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
       <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>
       <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>
+      
         </Routes>
 
       </div>
