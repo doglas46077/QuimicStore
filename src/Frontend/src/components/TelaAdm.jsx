@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
 import { API_URL, resolverUrlImagem } from "./api";
+import TelaVendas from "./vendas/TelaVenda";
 
 const FORM_VAZIO = {
   nome: "",
@@ -137,6 +138,7 @@ export default function TelaAdm() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
+  const [tela, setTela] = useState("produtos"); // "produtos" | "vendas"
 
   const [modalAberto, setModalAberto] = useState(false);
   const [idEditando, setIdEditando] = useState(null);
@@ -368,7 +370,7 @@ export default function TelaAdm() {
 
       const atualizado = dados?.dados || { ...usuarioEditando, ...payload };
       if (atualizado.nivel_acesso !== payload.nivel_acesso) {
-        setErroUsuarios("O backend atual n�o permite alterar o acesso do usu�rio.");
+        setErroUsuarios("O backend atual não permite alterar o acesso do usuário.");
         return;
       }
       setUsuarios((lista) => lista.map((usuario) =>
@@ -706,12 +708,25 @@ export default function TelaAdm() {
             <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-emerald-200/70">Administração</p>
             <nav aria-label="Navegação administrativa" className="flex gap-2 overflow-x-auto md:flex-col">
               <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Volta para catálogo</button>
-              <button onClick={abrirNovo} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
+              <button onClick={() => { setTela("produtos"); abrirNovo(); }} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
               <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Mudar status</button>
+              <button
+                onClick={() => setTela("vendas")}
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 ${tela === "vendas" ? "bg-emerald-700" : "bg-emerald-900"}`}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+                </svg>
+                Vendas
+              </button>
               {ehProfessor && <button onClick={abrirPerfisUsuarios} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Perfil de usuário</button>}
             </nav>
           </aside>
           <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          {tela === "vendas" ? (
+            <TelaVendas onVoltar={() => setTela("produtos")} onSessaoExpirada={sessaoExpirada} />
+          ) : (
+          <>
 
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -888,6 +903,8 @@ export default function TelaAdm() {
                 </p>
               )}
           </div>
+          </>
+          )}
           </main>
         </div>
       </div>
