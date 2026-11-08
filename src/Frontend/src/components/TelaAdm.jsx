@@ -114,6 +114,12 @@ function prepararPedidosStatus(pedidos) {
   });
 }
 
+function dataParaInput(valor) {
+  if (!valor) return "";
+  const data = String(valor).slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : "";
+}
+
 export default function TelaAdm() {
   const navigate = useNavigate();
 
@@ -225,6 +231,7 @@ export default function TelaAdm() {
   async function alterarStatusPedido(pedidoId, novoStatus) {
     const pedidoAnterior = pedidosStatus.find((pedido) => Number(pedido.id) === Number(pedidoId));
     const pagamentoId = pedidoAnterior?.pagamento?.id ?? pedidoAnterior?.pagamento_id;
+    const dataRetirada = pedidoAnterior?.data_retirada || "";
 
     if (!pagamentoId) {
       setErroStatus("Este pedido não possui pagamento associado para alterar o status.");
@@ -249,7 +256,7 @@ export default function TelaAdm() {
       const response = await fetch(`${API_URL}/pagamentos/${pagamentoId}/status`, {
         method: "PUT",
         headers: cabecalhos(true),
-        body: JSON.stringify({ status: novoStatus }),
+        body: JSON.stringify({ status: novoStatus, data_retirada: dataRetirada || null }),
       });
 
       if (response.status === 401) {
@@ -266,7 +273,7 @@ export default function TelaAdm() {
         setPedidosStatus((atual) =>
           atual.map((pedido) =>
             Number(pedido.id) === Number(pedidoId)
-              ? { ...pedido, status: statusFinal, status_pedido: statusFinal, status_atualizado_em: dados?.dados?.pedido?.status_atualizado_em ?? dados?.dados?.pedido?.updated_at ?? dados?.dados?.status_atualizado_em ?? new Date().toISOString() }
+              ? { ...pedido, status: statusFinal, status_pedido: statusFinal, data_retirada: dados?.dados?.pedido?.data_retirada ?? dados?.dados?.data_retirada ?? dataRetirada, status_atualizado_em: dados?.dados?.pedido?.status_atualizado_em ?? dados?.dados?.pedido?.updated_at ?? dados?.dados?.status_atualizado_em ?? new Date().toISOString() }
               : pedido
           )
         );
@@ -695,13 +702,13 @@ export default function TelaAdm() {
 
       <div className="min-h-screen bg-olive-50">
         <div className="flex min-h-screen flex-col md:flex-row">
-          <aside className="w-full shrink-0 bg-emerald-950 px-4 py-5 text-white md:min-h-screen md:w-64 md:px-5">
+          <aside className="mx-4 mt-4 h-fit w-[calc(100%-2rem)] shrink-0 self-start rounded-xl bg-emerald-950 px-4 py-5 text-white md:ml-4 md:mr-0 md:mt-4 md:w-64 md:px-5">
             <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-emerald-200/70">Administração</p>
             <nav aria-label="Navegação administrativa" className="flex gap-2 overflow-x-auto md:flex-col">
-              <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Volta para catálogo</button>
+              <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Volta para catálogo</button>
               <button onClick={abrirNovo} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
-              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Mudar status</button>
-              {ehProfessor && <button onClick={abrirPerfisUsuarios} className="shrink-0 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-white/10">Perfil de usuário</button>}
+              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Mudar status</button>
+              {ehProfessor && <button onClick={abrirPerfisUsuarios} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Perfil de usuário</button>}
             </nav>
           </aside>
           <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
@@ -1394,7 +1401,7 @@ export default function TelaAdm() {
                       <th className="px-4 py-3 font-medium">Cliente</th>
                       <th className="px-4 py-3 font-medium">Data</th>
                       <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Novo status</th>
+                      <th className="px-4 py-3 font-medium">Data de retirada / novo status</th>
                     </tr>
                   </thead>
 
@@ -1436,6 +1443,15 @@ export default function TelaAdm() {
                         </td>
 
                         <td className="px-3 py-3 sm:px-4">
+                          <div className="flex flex-col gap-2">
+                          <input
+                            type="date"
+                            value={dataParaInput(pedido.data_retirada)}
+                            disabled={atualizandoStatusId === pedido.id}
+                            aria-label={`Data de retirada do pedido ${pedido.id}`}
+                            onChange={(e) => setPedidosStatus((atual) => atual.map((item) => Number(item.id) === Number(pedido.id) ? { ...item, data_retirada: e.target.value } : item))}
+                            className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:opacity-60"
+                          />
                               <select
                                 value={OPCAO_STATUS_PEDIDO.some((opcao) => opcao.value === statusDoPedido(pedido)) ? statusDoPedido(pedido) : ""}
                             disabled={atualizandoStatusId === pedido.id}
@@ -1450,6 +1466,7 @@ export default function TelaAdm() {
                               </option>
                             ))}
                           </select>
+                          </div>
                         </td>
                       </tr>
                     ))}

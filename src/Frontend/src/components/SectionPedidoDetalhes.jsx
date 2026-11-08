@@ -32,6 +32,14 @@ function formatarDataHora(valor) {
     return `${dia} às ${hora}`;
 }
 
+function formatarDataRetirada(valor) {
+    if (!valor) return "A definir";
+    const data = String(valor).slice(0, 10);
+    const partes = data.split("-");
+    if (partes.length !== 3) return "A definir";
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
 // O back só guarda avaliação de produto, então o progresso da avaliação do pedido
 // (experiência, produtos avaliados e "concluir") fica no navegador, por usuário e pedido.
 function chaveAvaliacao(pedidoId) {
@@ -187,7 +195,7 @@ export default function SectionPedidoDetalhes() {
                                     <p>Seu pedido está sendo preparado</p>
                                     <div className="flex gap-2 items-center">
                                         <p>Data de retirada:</p>
-                                        <p className="text-lg text-emerald-700">00/00/0000</p>
+                                        <p className="text-lg text-emerald-700">{formatarDataRetirada(pedido.data_retirada ?? pedido.data_de_retirada ?? pedido.retirada_em)}</p>
                                         <Calendar size={24} />
                                     </div>
                                 </div>
