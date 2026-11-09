@@ -150,12 +150,14 @@ class LoginController extends Controller
 
 
     // ATUALIZAR ALGO DO LOGIN NO BANCO
-    public function update(Request $request, int $id)
+   public function update(Request $request, int $id)
     {
         $usuarioLogado = $request->user();
 
+
         $donoDaConta = $usuarioLogado->id === $id;
         $administrador = $usuarioLogado->nivel_acesso === "professor";
+
 
         // Se o usuário do ID 5 estiver tentando excluir a conta do usuário do ID 7 ou se nao for o professor responsavel pelo site, a aplicação quebra retornando erro
         if (!$donoDaConta && !$administrador) {
@@ -164,17 +166,31 @@ class LoginController extends Controller
             ], 403); // acesso negado
         }
 
+
+        if ($request->exists('nivel_acesso') && !$administrador) {
+            return response()->json([
+                "mensagem" => "Acesso não autorizado para alterar o nível de acesso"
+            ], 403);
+        }
+
+
         $usuario = Usuario::findOrFail($id);
+
 
         $request->validate([
             "nome" => "string",
             "email" => "email|unique:usuarios,email," . $id, // Tipo email | caso o usuario atualize outros campos e envie a requisicao deixando o mesmo email, evita a falsa duplicidade no banco de dados. unique:usuarios,email . $id. ignora o próprio $id do usuário 
-            "senha" => "nullable|string|min:6" // evitar envio de campo nullo (" ") | do tipo string | no minimo 6 caracteres
+            "senha" => "nullable|string|min:6", // evitar envio de campo nullo (" ") | do tipo string | no minimo 6 caracteres
+            "nivel_acesso" => "sometimes|required|in:professor,estagiario,cliente"
         ]);
+
 
         $nome = $request->input('nome');
         $email = $request->input('email');
         $senha = $request->input('senha');
+        $nivelAcesso = $request->input('nivel_acesso');
+
+
 
 
         // filled, verifica se realmente há um valor vindo dentro do campo da requisição, evitando sobrescrever o campo com valor vazio ("")
@@ -182,15 +198,24 @@ class LoginController extends Controller
             $usuario->nome = $nome;
         }
 
+
         if ($request->filled('email')) {
             $usuario->email = $email;
         }
+
 
         if ($request->filled('senha')) {
             $usuario->senha = Hash::make($senha);
         }
 
+
+        if ($request->filled('nivel_acesso')) {
+            $usuario->nivel_acesso = $nivelAcesso;
+        }
+
+
         $usuario->save();
+
 
         return response()->json([
             "status" => true,
