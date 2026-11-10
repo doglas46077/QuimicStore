@@ -191,7 +191,7 @@ class LoginController extends Controller
         $nivelAcesso = $request->input('nivel_acesso');
 
 
-
+// AS VEZES NAO É SOBRE O PEIXE E SIM SOBRE A VARA 
 
         // filled, verifica se realmente há um valor vindo dentro do campo da requisição, evitando sobrescrever o campo com valor vazio ("")
         if ($request->filled('nome')) {

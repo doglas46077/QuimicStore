@@ -57,7 +57,7 @@ class PixService
         ]);
 
         return (new QRCode($options))->render($payload);
-    }
+    }   
 
     private function formatarCampo(string $id, string $valor): string
     {

@@ -24,7 +24,7 @@ class ProdutoFactory extends Factory
             "preco" => fake()->randomFloat(2, 10, 500),
             "estoque" => fake()->numberBetween(1, 100),
             "ativo" => fake()->boolean(),
-            "imagem"=> fake()->imageUrl()
+            "imagens"=> fake()->imageUrl()
         ];
     }
 }
