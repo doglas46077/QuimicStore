@@ -2,14 +2,15 @@
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from 'motion/react';
 import { CartLarge5 } from 'reicon-react';
 import { cesta } from './CestaCarrinho';
-import { resolverUrlImagem, listaDeImagens } from './api';
+import { resolverUrlImagem, listaDeImagens, imagensDoProduto } from './api';
 
 // Mantido aqui para os outros componentes que já importam daqui
 export { listaDeImagens };
+export { imagensDoProduto };
 
 // Resolve a URL da primeira imagem (capa)
 export function resolverImagem(imagem) {
-    const primeira = listaDeImagens(imagem)[0]
+    const primeira = (imagem && typeof imagem === "object" ? imagensDoProduto(imagem) : listaDeImagens(imagem))[0]
     return primeira ? resolverUrlImagem(primeira) : ""
 }
 

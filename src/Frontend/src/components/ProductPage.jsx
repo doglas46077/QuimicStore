@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, ShoppingCart, Star, Info, Minus, Plus, X } f
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from "motion/react";
 import HeaderLogin from "./Header/HeaderLogin";
 import { useLocation, useNavigate } from "react-router-dom";
-import { API_URL, resolverUrlImagem } from "./api";
+import { API_URL, resolverUrlImagem, imagensDoProduto } from "./api";
 import FooterCatalogo from "./FooterCatalogo";
 import { listaDeImagens } from "./CardCatalogo";
 import { cesta } from "./CestaCarrinho";
@@ -49,7 +49,7 @@ export default function ProductPage() {
 
   const stock = Number(produto?.estoque ?? 0);
 
-  const imagens = listaDeImagens(produto?.imagens);
+  const imagens = imagensDoProduto(produto);
   const imagemAtual = imagens[indice] || imagens[0];
   const anterior = () => setIndice((i) => (i - 1 + imagens.length) % imagens.length);
   const proxima = () => setIndice((i) => (i + 1) % imagens.length);
@@ -151,11 +151,11 @@ export default function ProductPage() {
                 </motion.div>
               </div>
 
-              {imagens.length > 1 && (
+              {imagens.length > 0 && (
                 <div className="mt-3 flex items-center gap-2">
-                  <button onClick={anterior} className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                  {imagens.length > 1 && <button onClick={anterior} className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
                     <ChevronLeft className="h-4 w-4" />
-                  </button>
+                  </button>}
                   {imagens.map((img, i) => (
                     <button
                       key={img}
@@ -169,9 +169,9 @@ export default function ProductPage() {
                       <img src={resolverUrlImagem(img)} alt="" className="h-full w-full object-contain" />
                     </button>
                   ))}
-                  <button onClick={proxima} className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
+                  {imagens.length > 1 && <button onClick={proxima} className="flex h-14 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50">
                     <ChevronRight className="h-4 w-4" />
-                  </button>
+                  </button>}
                 </div>
               )}
             </div>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
-import { API_URL, resolverUrlImagem } from "./api";
+import { API_URL, resolverUrlImagem, imagensDoProduto as normalizarImagens } from "./api";
 import TelaVendas from "./vendas/TelaVenda";
+
+const MAX_IMAGENS = 5;
 
 const FORM_VAZIO = {
   nome: "",
@@ -27,21 +29,7 @@ function resolverImagem(imagem) {
 }
 
 function listaImagens(produto) {
-  const imagens = produto.imagens;
-
-  if (Array.isArray(imagens)) return imagens.filter((i) => typeof i === "string" && i);
-
-  if (typeof imagens === "string" && imagens) {
-    try {
-      const dec = JSON.parse(imagens);
-      if (Array.isArray(dec)) return dec.filter((i) => typeof i === "string" && i);
-    } catch (e) {
-      // não era JSON: caminho único
-    }
-    return [imagens];
-  }
-
-  return [];
+  return normalizarImagens(produto);
 }
 
 function estaAtivo(produto) {
@@ -526,6 +514,11 @@ export default function TelaAdm() {
       return;
     }
 
+    if (mantidas + form.imagens.length > MAX_IMAGENS) {
+      setErroForm(`O produto pode ter no máximo ${MAX_IMAGENS} imagens`);
+      return;
+    }
+
     setErroForm("");
     setSalvando(true);
 
@@ -538,13 +531,11 @@ export default function TelaAdm() {
     corpo.append("estoque", form.estoque);
     corpo.append("ativo", form.ativo ? "1" : "0");
 
-    form.imagens.forEach((arquivo) => {
-      corpo.append("imagens[]", arquivo);
-    });
-
-    form.imagensRemovidas.forEach((caminho) => {
-      corpo.append("remover_imagens[]", caminho);
-    });
+    // Envia TODAS as imagens novas e quais das atuais foram removidas
+    form.imagens.forEach((arquivo) => corpo.append("imagens[]", arquivo));
+    form.imagensRemovidas.forEach((caminho) =>
+      corpo.append("imagens_removidas[]", caminho)
+    );
 
     if (idEditando) {
       corpo.append("_method", "PUT");
@@ -1061,11 +1052,11 @@ export default function TelaAdm() {
                   </div>
 
                   <span className="text-sm font-semibold text-emerald-900">
-                    Clique para selecionar as imagens
+                    Clique para selecionar as imagens (a primeira é a capa)
                   </span>
 
                   <span className="text-xs text-slate-500">
-                    PNG, JPG ou WEBP • Máximo 5 imagens, 2 MB cada
+                    PNG, JPG ou WEBP • Máximo 2 MB cada • Até 5 imagens
                   </span>
 
                   <span className="mt-1 rounded-lg bg-emerald-950 px-5 py-2 text-sm font-semibold text-white">
@@ -1076,46 +1067,48 @@ export default function TelaAdm() {
                     id="imagem-produto"
                     type="file"
                     accept="image/png,image/jpeg,image/webp"
-                    className="sr-only"
                     multiple
+                    className="sr-only"
                     onChange={(e) => {
-                      const novos = Array.from(e.target.files);
+                      const arquivos = Array.from(e.target.files || []);
                       e.target.value = "";
+                      if (arquivos.length === 0) return;
 
-                      if (novos.some((a) => a.size > 2 * 1024 * 1024)) {
-                        setErroForm("Cada imagem deve ter no máximo 2 MB");
-                        return;
+                      const validos = arquivos.filter((arquivo) => arquivo.size <= 2 * 1024 * 1024);
+                      let erro = "";
+                      if (validos.length !== arquivos.length) {
+                        erro = "Cada imagem deve ter no máximo 2 MB";
                       }
 
+                      // Quantas vagas ainda restam (atuais mantidas + novas já escolhidas)
                       const mantidas =
-                        form.imagensAtuais.length -
-                        form.imagensRemovidas.length;
+                        form.imagensAtuais.length - form.imagensRemovidas.length;
+                      const vagas = Math.max(
+                        0,
+                        MAX_IMAGENS - mantidas - form.imagens.length
+                      );
 
-                      if (
-                        mantidas + form.imagens.length + novos.length >
-                        5
-                      ) {
-                        setErroForm(
-                          "O produto pode ter no máximo 5 imagens"
-                        );
-                        return;
+                      if (validos.length > vagas) {
+                        erro = `O produto pode ter no máximo ${MAX_IMAGENS} imagens`;
                       }
 
-                      setErroForm("");
-                      setForm({
-                        ...form,
-                        imagens: [...form.imagens, ...novos],
-                      });
+                      setErroForm(erro);
+
+                      // ADICIONA às imagens já escolhidas, em vez de substituir
+                      setForm((atual) => ({
+                        ...atual,
+                        imagens: [...atual.imagens, ...validos.slice(0, vagas)],
+                      }));
                     }}
                   />
                 </label>
 
-                {idEditando && (
-                  <p className="mt-2 text-xs text-slate-400">
-                    As novas imagens são adicionadas às atuais (máximo 5 no
-                    total). Clique no × para remover uma imagem.
-                  </p>
-                )}
+                <p className="mt-2 text-xs text-slate-400">
+                  {idEditando
+                    ? "As novas imagens são adicionadas às atuais (máximo 5 no total). "
+                    : "Você pode escolher várias imagens (máximo 5 no total). "}
+                  Clique no × para remover uma imagem.
+                </p>
 
                 {(previas.length > 0 || form.imagensAtuais.length > 0) && (
                   <div className="mt-3 flex flex-wrap gap-2">

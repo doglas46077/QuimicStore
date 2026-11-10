@@ -4,6 +4,7 @@ export const API_URL = `${API_BASE_URL}/api`;
 
 export function resolverUrlImagem(imagem) {
   if (!imagem) return null;
+  if (typeof imagem !== "string") return null;
   if (/^(https?:|data:|blob:)/i.test(imagem)) return imagem;
   if (!imagem.includes(".") && imagem.length > 100) {
     return `data:image/jpeg;base64,${imagem}`;
@@ -41,6 +42,19 @@ export function listaDeImagens(imagens) {
       // não era JSON: trata como caminho único
     }
     return [imagens];
+  }
+
+  return [];
+}
+
+// Normaliza os formatos usados pela API e pelas telas do carrinho/pedidos.
+export function imagensDoProduto(produto) {
+  if (!produto) return [];
+
+  const fontes = [produto.imagens, produto.imagem, produto.imagem_url];
+  for (const fonte of fontes) {
+    const imagens = listaDeImagens(fonte);
+    if (imagens.length) return imagens;
   }
 
   return [];

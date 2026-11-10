@@ -223,7 +223,7 @@ export default function SectionPedidoDetalhes() {
                                 </div>
 
                                 {itens.map((item) => {
-                                    const src = resolverImagem(item.produto?.imagens);
+                                    const src = resolverImagem(item.produto);
                                     return (
                                         <div key={item.id} className="flex justify-between items-center p-2 bg-white w-full rounded-lg">
                                             <div className="flex items-center gap-2 min-w-0">

@@ -34,7 +34,9 @@ function estaAtivo(produto) {
 function imagensDoProduto(produto) {
   const imagens = listaDeImagens(produto.imagens);
   if (imagens.length > 0) return imagens;
-  return listaDeImagens(produto.imagem);
+  const imagem = listaDeImagens(produto.imagem);
+  if (imagem.length > 0) return imagem;
+  return listaDeImagens(produto.imagem_url);
 }
 
 // Devolve true se adicionou, false se bateu no limite do estoque

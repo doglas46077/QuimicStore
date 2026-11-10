@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { API_URL } from "./api";
+import { API_URL, imagensDoProduto } from "./api";
 import { resolverImagem } from "./CardCatalogo";
 const MAX = 500;
 
@@ -148,7 +148,7 @@ export default function ModalAvaliacaoPedido({ aberto, onFechar, pedido, avaliac
             lista.push({
                 id: item.produto_id,
                 nome: item.produto?.nome || `Produto #${item.produto_id}`,
-                src: resolverImagem(item.produto?.imagens),
+                src: resolverImagem(imagensDoProduto(item.produto)[0]),
             });
         }
         return lista;
