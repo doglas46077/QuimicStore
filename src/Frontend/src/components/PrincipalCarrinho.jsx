@@ -227,15 +227,15 @@ function SectionCarrinho() {
             )}
           </div>
 
-          <div className="mx-10 mt-10 flex justify-between rounded-xl bg-white p-6 shadow-sm">
+          <div className="mx-4 mt-8 grid grid-cols-1 gap-5 rounded-xl bg-white p-5 shadow-sm sm:mx-10 sm:grid-cols-2 lg:grid-cols-4">
             {beneficios.map(({ Icone, titulo, texto }) => (
-              <div key={titulo} className="flex items-center gap-3">
+              <div key={titulo} className="flex min-w-0 items-start gap-3">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50">
                   <Icone className="h-5 w-5 text-emerald-800" />
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-slate-900">{titulo}</p>
-                  <p className="text-xs text-slate-500">{texto}</p>
+                  <p className="text-xs leading-relaxed text-slate-500">{texto}</p>
                 </div>
               </div>
             ))}

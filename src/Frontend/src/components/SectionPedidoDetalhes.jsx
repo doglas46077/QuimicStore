@@ -172,28 +172,28 @@ export default function SectionPedidoDetalhes() {
 
             {pedido && (
                 <>
-                    <div className="flex justify-center w-full">
-                        <div className="flex w-[90%] justify-between">
-                            <div className="flex gap-7 justify-baseline items-center w-[50%]">
+                    <div className="flex w-full justify-center px-4">
+                        <div className="flex w-full max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex min-w-0 items-center gap-3 sm:gap-7 sm:w-[50%]">
                                 <div className={`${estiloStatus.fundo} ${estiloStatus.texto} rounded-full p-3`}>
                                     <estiloStatus.Icone size={44} />
                                 </div>
                                 <div >
-                                    <p className="text-2xl text-emerald-700">Pedido {numeroDoPedido(pedido)}</p>
+                                    <p className="break-words text-xl text-emerald-700 sm:text-2xl">Pedido {numeroDoPedido(pedido)}</p>
                                     <p className="text-sm">Realizado em {formatarDataHora(pedido.created_at)}</p>
                                 </div>
                             </div>
 
-                            <div className="flex flex-col justify-center items-end w-[25%]">
+                            <div className="flex min-w-0 flex-col justify-center items-start sm:items-end sm:w-[40%]">
                                 <div className="flex justify-center w-full">
-                                    <div className={`flex justify-center text-white items-center w-[35%] gap-2 ${estiloStatus.badge} rounded-2xl p-1`}>
+                                    <div className={`flex max-w-full justify-center text-white items-center gap-2 ${estiloStatus.badge} rounded-2xl px-3 py-1`}>
                                         <estiloStatus.Icone size={16} />
                                         <h1>{statusNormalizado === "aguardando" ? "Aguardando" : statusNormalizado === "aprovado" ? "Aprovado" : "Cancelado"}</h1>
                                     </div>
                                 </div>
                                 <div>
                                     <p>Seu pedido está sendo preparado</p>
-                                    <div className="flex gap-2 items-center">
+                                    <div className="flex flex-wrap gap-2 items-center">
                                         <p>Data de retirada:</p>
                                         <p className="text-lg text-emerald-700">{formatarDataRetirada(pedido.data_retirada ?? pedido.data_de_retirada ?? pedido.retirada_em)}</p>
                                         <Calendar size={24} />

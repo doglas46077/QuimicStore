@@ -706,10 +706,10 @@ export default function TelaAdm() {
         <div className="flex min-h-screen flex-col md:flex-row">
           <aside className="mx-4 mt-4 h-fit w-[calc(100%-2rem)] shrink-0 self-start rounded-xl bg-emerald-950 px-4 py-5 text-white md:ml-4 md:mr-0 md:mt-4 md:w-64 md:px-5">
             <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-emerald-200/70">Administração</p>
-            <nav aria-label="Navegação administrativa" className="flex gap-2 overflow-x-auto md:flex-col">
-              <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Volta para catálogo</button>
-              <button onClick={() => { setTela("produtos"); abrirNovo(); }} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
-              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Mudar status</button>
+            <nav aria-label="Navegação administrativa" className="flex flex-wrap gap-2 md:flex-col">
+              <button onClick={() => navigate("/catalogo")} className="min-w-0 flex-1 break-words rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 md:flex-none">Volta para catálogo</button>
+              <button onClick={() => { setTela("produtos"); abrirNovo(); }} disabled={categorias.length === 0} className="min-w-0 flex-1 break-words rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50 md:flex-none">+ Novo produto</button>
+              <button onClick={() => setStatusVendaAberto(true)} className="min-w-0 flex-1 break-words rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 md:flex-none">Mudar status</button>
               <button
                 onClick={() => setTela("vendas")}
                 className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 ${tela === "vendas" ? "bg-emerald-700" : "bg-emerald-900"}`}

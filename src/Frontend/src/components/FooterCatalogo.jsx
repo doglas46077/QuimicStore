@@ -27,7 +27,7 @@ export default function FooterCatalogo() {
 
     return (
         <footer className="fixed bottom-0 left-0 z-50 h-20 w-full bg-white">
-            <div className="flex h-full justify-center items-center gap-[15%]">
+            <div className="flex h-full items-center justify-around gap-1 px-2 sm:gap-4">
                 <div className={classeDoItem(inicioAtivo)}>
                     <button onClick={() => navigate("/catalogo")} aria-current={inicioAtivo ? "page" : undefined}>
                         <Home3 size={30} />

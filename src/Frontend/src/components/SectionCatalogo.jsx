@@ -160,16 +160,16 @@ export default function SectionCatalogo() {
         }
     }, [pagina, ultimaPagina, setParams])
 
-    const classeFiltro = (categoria) => `flex justify-center p-1.5 w-30 rounded-full hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2 ${filtroCategoria === categoria ? "bg-emerald-950 text-white" : "bg-white"}`
+    const classeFiltro = (categoria) => `flex min-w-0 flex-1 basis-[calc(50%-0.5rem)] justify-center p-1.5 rounded-full sm:w-30 sm:flex-none hover:bg-emerald-950 hover:text-white hover:scale-105 hover:transition hover:duration-300 shadow gap-2 ${filtroCategoria === categoria ? "bg-emerald-950 text-white" : "bg-white"}`
 
     return (
         <>
             <HeaderLogin />
             <div className="flex flex-col gap-5 items-center mt-4 mb-6 min-h-screen bg-olive-50 pb-24">
-                <header className="flex flex-col justify-center items-baseline truncate bg-emerald-950  rounded-xl w-[80%] h-30">
-                    <div className="flex flex-col ml-8 gap-1 font-sans">
+                <header className="flex w-[92%] max-w-6xl flex-col justify-center rounded-xl bg-emerald-950 py-5 sm:w-[80%] sm:h-30">
+                    <div className="flex min-w-0 flex-col gap-1 px-4 font-sans sm:ml-8 sm:px-0">
                         <p className="flex justify-baseline text-green-400">FÁBRICA ESCOLA - FIEC</p>
-                        <div className="w-200 text-white">
+                        <div className="w-full min-w-0 text-white">
                             <h1 className="flex justify-baseline text-md sm:text-2xl md:text-3xl overflow-hidden text-truncate text-ellipsis">Produtos feitos por alunos de Química</h1>
                             <p className="flex justify-baseline">Limpeza, higiene e cosméticos fabricados na instituição.</p>
                         </div>
@@ -180,7 +180,7 @@ export default function SectionCatalogo() {
 
                 <form
                     onSubmit={(e) => e.preventDefault()}
-                    className="flex bg-white rounded-xl w-[80%] h-10 items-center shadow"
+                    className="flex h-10 w-[92%] items-center rounded-xl bg-white shadow sm:w-[80%]"
                 >
                     <button className="flex w-10 h-10 items-center justify-center hover:text-green-600" type='submit'><Search4 size={24} /></button>
                     <input
@@ -192,7 +192,7 @@ export default function SectionCatalogo() {
                     />
                 </form>
 
-                <section className="flex gap-3 w-[80%]">
+                <section className="flex w-[92%] flex-wrap gap-2 sm:w-[80%]">
                     <button type="button" aria-pressed={!filtroCategoria} onClick={() => selecionarCategoria("")} className={classeFiltro("")}>
                         <Widget size={24} />
                         <h3>Todos</h3>
@@ -214,7 +214,7 @@ export default function SectionCatalogo() {
                     </button>
                 </section>
 
-                <section className={`grid lg:grid-cols-4 md:grid-cols-2 gap-4 w-[80%] transition-opacity ${carregando ? "opacity-60" : ""}`}>
+                <section className={`grid w-[92%] grid-cols-1 gap-4 transition-opacity sm:w-[80%] md:grid-cols-2 lg:grid-cols-4 ${carregando ? "opacity-60" : ""}`}>
                     {produtosDaPagina.map((produto) => (
                         <CardCatalogo
                             key={produto.id}
