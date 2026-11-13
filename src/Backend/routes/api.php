@@ -75,5 +75,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // pix
     Route::post('/pagamentos/pix', [PagamentoController::class, 'gerarPix']);
-    Route::put('/pagamentos/{id}/status', [PagamentoController::class, 'aprovarPagamento']);
+    Route::put('/pagamentos/{id}/status', [PagamentoController::class, 'atualizarStatus']);
 });

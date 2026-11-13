@@ -85,4 +85,39 @@ class PagamentoController extends Controller
             'dados' => $pagamento->load('pedido')
         ]);
     }
+
+public function atualizarStatus(Request $request, $id)
+{
+    $usuarioLogado = $request->user();
+
+    if ($usuarioLogado->nivel_acesso !== 'professor' && $usuarioLogado->nivel_acesso !== 'estagiario') {
+        return response()->json([
+            'mensagem' => 'Acesso não autorizado.'
+        ], 403);
+    }
+
+    $dados = $request->validate([
+        'status' => 'required|in:pendente,aprovado,cancelado',
+        'data_retirada' => 'nullable|date',
+    ]);
+
+    $pagamento = Pagamento::with('pedido')->findOrFail($id);
+
+    $pagamento->update([
+        'status' => $dados['status'],
+        'data_pagamento' => $dados['status'] === 'aprovado' ? now() : $pagamento->data_pagamento,
+    ]);
+
+    if ($pagamento->pedido) {
+        $pagamento->pedido->update([
+            'status' => $dados['status'],
+            'data_retirada' => $dados['data_retirada'] ?? $pagamento->pedido->data_retirada,
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Status e data de retirada atualizados com sucesso!',
+        'dados' => $pagamento->fresh('pedido'),
+    ], 200);
+}
 }

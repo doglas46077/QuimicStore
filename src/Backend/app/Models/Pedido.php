@@ -16,7 +16,8 @@ class Pedido extends Model
     protected $fillable = [
         'usuario_id',
         'valor_total',
-        'status'
+        'status',
+        'data_retirada'
     ];
 
     public function pagamento(): HasOne

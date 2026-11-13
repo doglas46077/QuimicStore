@@ -245,57 +245,67 @@ class PedidosController extends Controller
     }
 
     public function fecharPedido(Request $request, int $id)
-    {
-        $userAutorizado = $request->user()->nivel_acesso;
+{
+    $userAutorizado = $request->user()->nivel_acesso;
 
-        if ($userAutorizado !== 'professor') {
-            return response()->json([
-                "message" => 'Acesso restrito'
-            ], 403);
-        }
-
-        DB::beginTransaction();
-
-        try {
-            $pedido = Pedido::with(['pagamento', 'itens.produto'])->findOrFail($id);
-
-            if ($pedido->status === 'aprovado') {
-                return response()->json([
-                    "message" => "Este pedido já foi aprovado."
-                ], 400);
-            }
-
-            if ($pedido->status === 'cancelado') {
-                return response()->json([
-                    "message" => "Pedido cancelado não pode ser fechado!"
-                ], 400);
-            }
-
-            $pedido->update([
-                'status' => 'aprovado'
-            ]);
-
-            if ($pedido->pagamento) {
-                $pedido->pagamento->update([
-                    'status' => 'aprovado',
-                    'data_pagamento' => now()
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                "message" => "Pedido finalizado com sucesso!",
-                "dados" => $pedido->fresh(['pagamento', 'itens.produto'])
-            ], 200);
-
-        } catch (Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                "message" => "Erro ao finalizar o pedido no banco de dados",
-                "erro" => $e->getMessage()
-            ], 500);
-        }
+    if ($userAutorizado !== 'professor' && $userAutorizado !== 'estagiario') {
+        return response()->json([
+            "message" => 'Acesso restrito'
+        ], 403);
     }
+
+    $dados = $request->validate([
+        'status' => 'nullable|in:pendente,aprovado,cancelado',
+        'data_retirada' => 'nullable|date'
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $pedido = Pedido::with(['pagamento', 'itens.produto'])->findOrFail($id);
+
+        if ($pedido->status === 'cancelado' && ($dados['status'] ?? null) === 'aprovado') {
+            return response()->json([
+                "message" => "Pedido cancelado não pode ser aprovado!"
+            ], 400);
+        }
+
+        // Se o frontend não enviou 'status' (ex: alterou só a data), mantém o atual ou aprova
+        $novoStatus = $dados['status'] ?? ($pedido->status === 'pendente' ? 'aprovado' : $pedido->status);
+
+        // Se cancelou agora e antes não estava cancelado, devolve o estoque
+        if ($novoStatus === 'cancelado' && $pedido->status !== 'cancelado') {
+            foreach ($pedido->itens as $item) {
+                $item->produto->increment('estoque', $item->quantidade);
+            }
+        }
+
+        $pedido->update([
+            'status' => $novoStatus,
+            'data_retirada' => $dados['data_retirada'] ?? $pedido->data_retirada,
+        ]);
+
+        if ($pedido->pagamento && $novoStatus === 'aprovado') {
+            $pedido->pagamento->update([
+                'status' => 'aprovado',
+                'data_pagamento' => now()
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            "message" => "Pedido atualizado com sucesso!",
+            "dados" => $pedido->fresh(['pagamento', 'itens.produto'])
+        ], 200);
+
+    } catch (Exception $e) {
+        DB::rollBack();
+
+        return response()->json([
+            "message" => "Erro ao atualizar o pedido no banco de dados",
+            "erro" => $e->getMessage()
+        ], 500);
+    }
+}
 }
