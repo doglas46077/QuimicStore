@@ -300,6 +300,44 @@ export default function TelaAdm() {
     setAtualizandoStatusId(null);
   }
 
+  async function salvarDataRetirada(pedidoId) {
+    const pedido = pedidosStatus.find((item) => Number(item.id) === Number(pedidoId));
+    if (!pedido) return;
+
+    const pagamentoId = pedido.pagamento?.id ?? pedido.pagamento_id;
+    if (!pagamentoId) {
+      setErroStatus("Este pedido não possui pagamento associado para salvar a data de retirada.");
+      return;
+    }
+
+    setAtualizandoStatusId(pedidoId);
+    setErroStatus("");
+    try {
+      const response = await fetch(`${API_URL}/pagamentos/${pagamentoId}/status`, {
+        method: "PUT",
+        headers: cabecalhos(true),
+        body: JSON.stringify({
+          status: statusDoPedido(pedido),
+          data_retirada: pedido.data_retirada || null,
+        }),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErroStatus(mensagemDeErro(dados, "Não foi possível salvar a data de retirada."));
+      }
+    } catch {
+      setErroStatus("Não foi possível conectar ao servidor.");
+    } finally {
+      setAtualizandoStatusId(null);
+    }
+  }
+
   async function abrirPerfisUsuarios() {
     setPerfisAberto(true);
     setCarregandoUsuarios(true);
@@ -709,7 +747,7 @@ export default function TelaAdm() {
             <nav aria-label="Navegação administrativa" className="flex gap-2 overflow-x-auto md:flex-col">
               <button onClick={() => navigate("/catalogo")} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Volta para catálogo</button>
               <button onClick={() => { setTela("produtos"); abrirNovo(); }} disabled={categorias.length === 0} className="shrink-0 rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50">+ Novo produto</button>
-              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Mudar status</button>
+              <button onClick={() => setStatusVendaAberto(true)} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Pedidos</button>
               <button
                 onClick={() => setTela("vendas")}
                 className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 ${tela === "vendas" ? "bg-emerald-700" : "bg-emerald-900"}`}
@@ -723,188 +761,186 @@ export default function TelaAdm() {
             </nav>
           </aside>
           <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          {tela === "vendas" ? (
-            <TelaVendas onVoltar={() => setTela("produtos")} onSessaoExpirada={sessaoExpirada} />
-          ) : (
-          <>
+            {tela === "vendas" ? (
+              <TelaVendas onVoltar={() => setTela("produtos")} onSessaoExpirada={sessaoExpirada} />
+            ) : (
+              <>
 
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                Gerenciar produtos
-              </h1>
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h1 className="text-2xl font-bold text-slate-900">
+                      Gerenciar produtos
+                    </h1>
 
-              <p className="text-sm font-normal text-slate-500">
-                {produtos.length}{" "}
-                {produtos.length === 1
-                  ? "produto cadastrado"
-                  : "produtos cadastrados"}
-              </p>
-            </div>
+                    <p className="text-sm font-normal text-slate-500">
+                      {produtos.length}{" "}
+                      {produtos.length === 1
+                        ? "produto cadastrado"
+                        : "produtos cadastrados"}
+                    </p>
+                  </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                type="text"
-                placeholder="Buscar produto..."
-                className="w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700"
-              />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      type="text"
+                      placeholder="Buscar produto..."
+                      className="w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700"
+                    />
 
-            </div>
-          </div>
+                  </div>
+                </div>
 
-          {erro && (
-            <p className="mb-4 text-sm text-red-600">
-              {erro}
-            </p>
-          )}
+                {erro && (
+                  <p className="mb-4 text-sm text-red-600">
+                    {erro}
+                  </p>
+                )}
 
-          <div className="overflow-x-auto rounded-xl bg-white shadow">
-            <table className="w-full min-w-175 text-sm">
-              <thead className="bg-slate-50 text-left text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Produto</th>
-                  <th className="px-4 py-3 font-medium">Categoria</th>
-                  <th className="px-4 py-3 font-medium">Preço</th>
-                  <th className="px-4 py-3 font-medium">Estoque</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 text-right font-medium">Ações</th>
-                </tr>
-              </thead>
+                <div className="overflow-x-auto rounded-xl bg-white shadow">
+                  <table className="w-full min-w-175 text-sm">
+                    <thead className="bg-slate-50 text-left text-slate-500">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Produto</th>
+                        <th className="px-4 py-3 font-medium">Categoria</th>
+                        <th className="px-4 py-3 font-medium">Preço</th>
+                        <th className="px-4 py-3 font-medium">Estoque</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 text-right font-medium">Ações</th>
+                      </tr>
+                    </thead>
 
-              <tbody className="divide-y divide-slate-100 font-normal">
-                {produtosFiltrados.map((p) => {
-                  const src = resolverImagem(listaImagens(p)[0]);
+                    <tbody className="divide-y divide-slate-100 font-normal">
+                      {produtosFiltrados.map((p) => {
+                        const src = resolverImagem(listaImagens(p)[0]);
 
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-300">
-                            {src && (
-                              <img
-                                src={src}
-                                alt={p.nome}
-                                className="h-full w-full object-cover"
-                              />
-                            )}
-                          </div>
+                        return (
+                          <tr key={p.id} className="hover:bg-slate-50">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-300">
+                                  {src && (
+                                    <img
+                                      src={src}
+                                      alt={p.nome}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  )}
+                                </div>
 
-                          <div>
-                            <p className="font-semibold text-slate-800">
-                              {p.nome}
-                            </p>
+                                <div>
+                                  <p className="font-semibold text-slate-800">
+                                    {p.nome}
+                                  </p>
 
-                            <p className="max-w-xs truncate text-xs text-slate-400">
-                              {p.descricao}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+                                  <p className="max-w-xs truncate text-xs text-slate-400">
+                                    {p.descricao}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
 
-                      <td className="px-4 py-3 text-emerald-700">
-                        {nomeCategoria(p.categoria_id)}
-                      </td>
+                            <td className="px-4 py-3 text-emerald-700">
+                              {nomeCategoria(p.categoria_id)}
+                            </td>
 
-                      <td className="px-4 py-3 text-slate-700">
-                        {formatarPreco(p.preco)}
-                      </td>
+                            <td className="px-4 py-3 text-slate-700">
+                              {formatarPreco(p.preco)}
+                            </td>
 
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => ajustarEstoque(p, -1)}
-                            disabled={ajustandoId === p.id}
-                            className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
-                          >
-                            −
-                          </button>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => ajustarEstoque(p, -1)}
+                                  disabled={ajustandoId === p.id}
+                                  className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
+                                >
+                                  −
+                                </button>
 
-                          <span
-                            className={`w-16 text-center ${
-                              p.estoque === 0
-                                ? "font-bold text-red-700"
-                                : p.estoque < 10
-                                ? "font-semibold text-amber-700"
-                                : "text-slate-700"
-                            }`}
-                          >
-                            {p.estoque === 0
-                              ? "Esgotado"
-                              : p.estoque}
-                          </span>
+                                <span
+                                  className={`w-16 text-center ${p.estoque === 0
+                                    ? "font-bold text-red-700"
+                                    : p.estoque < 10
+                                      ? "font-semibold text-amber-700"
+                                      : "text-slate-700"
+                                    }`}
+                                >
+                                  {p.estoque === 0
+                                    ? "Esgotado"
+                                    : p.estoque}
+                                </span>
 
-                          <button
-                            onClick={() => ajustarEstoque(p, 1)}
-                            disabled={ajustandoId === p.id}
-                            className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
+                                <button
+                                  onClick={() => ajustarEstoque(p, 1)}
+                                  disabled={ajustandoId === p.id}
+                                  className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
 
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs ${
-                            estaAtivo(p)
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {estaAtivo(p) ? "Ativo" : "Inativo"}
-                        </span>
-                      </td>
+                            <td className="px-4 py-3">
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-xs ${estaAtivo(p)
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-slate-100 text-slate-500"
+                                  }`}
+                              >
+                                {estaAtivo(p) ? "Ativo" : "Inativo"}
+                              </span>
+                            </td>
 
-                      <td className="whitespace-nowrap px-4 py-3 text-right">
-                        <button
-                          onClick={() => abrirEdicao(p)}
-                          className="mr-3 text-sm text-emerald-700 hover:underline"
-                        >
-                          Editar
-                        </button>
+                            <td className="whitespace-nowrap px-4 py-3 text-right">
+                              <button
+                                onClick={() => abrirEdicao(p)}
+                                className="mr-3 text-sm text-emerald-700 hover:underline"
+                              >
+                                Editar
+                              </button>
 
-                        {ehProfessor && (
-                          <button
-                            onClick={() => {
-                              setErroExcluir("");
-                              setProdutoParaExcluir(p);
-                            }}
-                            className="text-sm text-red-600 hover:underline"
-                          >
-                            Remover
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                              {ehProfessor && (
+                                <button
+                                  onClick={() => {
+                                    setErroExcluir("");
+                                    setProdutoParaExcluir(p);
+                                  }}
+                                  className="text-sm text-red-600 hover:underline"
+                                >
+                                  Remover
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
 
-            {carregando && (
-              <p className="py-12 text-center text-sm font-normal text-slate-500">
-                Carregando produtos...
-              </p>
+                  {carregando && (
+                    <p className="py-12 text-center text-sm font-normal text-slate-500">
+                      Carregando produtos...
+                    </p>
+                  )}
+
+                  {!carregando && produtos.length === 0 && !erro && (
+                    <p className="py-12 text-center text-sm font-normal text-slate-500">
+                      Nenhum produto cadastrado. Use "Novo produto" para adicionar o primeiro.
+                    </p>
+                  )}
+
+                  {!carregando &&
+                    produtos.length > 0 &&
+                    produtosFiltrados.length === 0 && (
+                      <p className="py-12 text-center text-sm font-normal text-slate-500">
+                        Nenhum produto encontrado para essa busca.
+                      </p>
+                    )}
+                </div>
+              </>
             )}
-
-            {!carregando && produtos.length === 0 && !erro && (
-              <p className="py-12 text-center text-sm font-normal text-slate-500">
-                Nenhum produto cadastrado. Use "Novo produto" para adicionar o primeiro.
-              </p>
-            )}
-
-            {!carregando &&
-              produtos.length > 0 &&
-              produtosFiltrados.length === 0 && (
-                <p className="py-12 text-center text-sm font-normal text-slate-500">
-                  Nenhum produto encontrado para essa busca.
-                </p>
-              )}
-          </div>
-          </>
-          )}
           </main>
         </div>
       </div>
@@ -1445,15 +1481,14 @@ export default function TelaAdm() {
 
                         <td className="px-4 py-3">
                           <span
-                            className={`rounded-full px-2.5 py-0.5 text-xs ${
-                              ["pendente", "aguardando"].includes(statusDoPedido(pedido))
-                                ? "bg-amber-50 text-amber-700"
-                                : statusDoPedido(pedido) === "aprovado"
+                            className={`rounded-full px-2.5 py-0.5 text-xs ${["pendente", "aguardando"].includes(statusDoPedido(pedido))
+                              ? "bg-amber-50 text-amber-700"
+                              : statusDoPedido(pedido) === "aprovado"
                                 ? "bg-emerald-50 text-emerald-700"
                                 : statusDoPedido(pedido) === "cancelado"
-                                ? "bg-red-50 text-red-700"
-                                : "bg-slate-100 text-slate-500"
-                            }`}
+                                  ? "bg-red-50 text-red-700"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}
                           >
                             {nomeStatusPedido(statusDoPedido(pedido))}
                           </span>
@@ -1461,28 +1496,29 @@ export default function TelaAdm() {
 
                         <td className="px-3 py-3 sm:px-4">
                           <div className="flex flex-col gap-2">
-                          <input
-                            type="date"
-                            value={dataParaInput(pedido.data_retirada)}
-                            disabled={atualizandoStatusId === pedido.id}
-                            aria-label={`Data de retirada do pedido ${pedido.id}`}
-                            onChange={(e) => setPedidosStatus((atual) => atual.map((item) => Number(item.id) === Number(pedido.id) ? { ...item, data_retirada: e.target.value } : item))}
-                            className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:opacity-60"
-                          />
-                              <select
-                                value={OPCAO_STATUS_PEDIDO.some((opcao) => opcao.value === statusDoPedido(pedido)) ? statusDoPedido(pedido) : ""}
-                            disabled={atualizandoStatusId === pedido.id}
-                            aria-label={`Alterar status do pedido ${pedido.id}`}
-                            onChange={(e) => alterarStatusPedido(pedido.id, e.target.value)}
-                            className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:cursor-wait disabled:opacity-60 sm:text-sm"
-                          >
-                            <option value="" disabled>Selecionar status</option>
-                            {OPCAO_STATUS_PEDIDO.map((opcao) => (
-                              <option key={opcao.value} value={opcao.value}>
-                                {opcao.label}
-                              </option>
-                            ))}
-                          </select>
+                            <input
+                              type="date"
+                              value={dataParaInput(pedido.data_retirada)}
+                              disabled={atualizandoStatusId === pedido.id}
+                              aria-label={`Data de retirada do pedido ${pedido.id}`}
+                              onChange={(e) => setPedidosStatus((atual) => atual.map((item) => Number(item.id) === Number(pedido.id) ? { ...item, data_retirada: e.target.value } : item))}
+                              onBlur={() => salvarDataRetirada(pedido.id)}
+                              className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:opacity-60"
+                            />
+                            <select
+                              value={OPCAO_STATUS_PEDIDO.some((opcao) => opcao.value === statusDoPedido(pedido)) ? statusDoPedido(pedido) : ""}
+                              disabled={atualizandoStatusId === pedido.id}
+                              aria-label={`Alterar status do pedido ${pedido.id}`}
+                              onChange={(e) => alterarStatusPedido(pedido.id, e.target.value)}
+                              className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:cursor-wait disabled:opacity-60 sm:text-sm"
+                            >
+                              <option value="" disabled>Selecionar status</option>
+                              {OPCAO_STATUS_PEDIDO.map((opcao) => (
+                                <option key={opcao.value} value={opcao.value}>
+                                  {opcao.label}
+                                </option>
+                              ))}
+                            </select>
                           </div>
                         </td>
                       </tr>
