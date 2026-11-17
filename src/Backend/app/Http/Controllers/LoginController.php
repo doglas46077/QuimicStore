@@ -21,6 +21,8 @@ class LoginController extends Controller
             "nome" => 'required|min:3|string',
             "email" => 'required|email|unique:usuarios,email',
             "senha" => 'required|string|min:6'
+        ], [
+            "email.unique" => "Este endereço de e-mail já esta sendo utilizado"
         ]);
 
         $email = $request->input('email');
