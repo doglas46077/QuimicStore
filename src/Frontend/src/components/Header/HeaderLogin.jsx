@@ -61,7 +61,7 @@ function HeaderLogin() {
                 aria-label="Acessibilidade"
                 className="absolute right-0 top-full z-20 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-2xl"
               >
-                <h2 className="text-sm font-semibold">Aumentar fonte</h2>
+                <h2 className="text-sm font-semibold">Aumentar fonte  </h2>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <button
                     type="button"
