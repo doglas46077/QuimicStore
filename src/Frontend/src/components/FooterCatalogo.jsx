@@ -29,21 +29,21 @@ export default function FooterCatalogo() {
         <footer className="fixed bottom-0 left-0 z-50 h-20 w-full bg-white">
             <div className="flex h-full items-center justify-around gap-1 px-2 sm:gap-4">
                 <div className={classeDoItem(inicioAtivo)}>
-                    <button onClick={() => navigate("/catalogo")} aria-current={inicioAtivo ? "page" : undefined}>
+                    <button className="flex flex-col items-center justify-center gap-1" onClick={() => navigate("/catalogo")} aria-current={inicioAtivo ? "page" : undefined}>
                         <Home3 size={30} />
                         <h1>Início</h1>
                     </button>
                 </div>
 
                 <div className={classeDoItem(carrinhoAtivo)}>
-                    <button onClick={() => navigate("/carrinho")} aria-current={carrinhoAtivo ? "page" : undefined}>
-                        <CestaCarrinho size={30} />
+                    <button className="flex flex-col items-center justify-center gap-1" onClick={() => navigate("/carrinho")} aria-current={carrinhoAtivo ? "page" : undefined}>
+                        <CestaCarrinho className="flex justify-center items-center" size={30} />
                         <h1>Carrinho</h1>
                     </button>
                 </div>
 
                 <div className={classeDoItem(pedidosAtivo)}>
-                    <button onClick={() => navigate("/pedidos")} aria-current={pedidosAtivo ? "page" : undefined}>
+                    <button className="flex flex-col items-center justify-center gap-1" onClick={() => navigate("/pedidos")} aria-current={pedidosAtivo ? "page" : undefined}>
                         <ClipboardList size={30} />
                         <h1>Pedidos</h1>
                     </button>
@@ -51,7 +51,7 @@ export default function FooterCatalogo() {
 
                 {ehEquipe && (
                     <div className={classeDoItem(adminAtivo)}>
-                        <button onClick={() => navigate("/adm")} aria-current={adminAtivo ? "page" : undefined}>
+                        <button className="flex flex-col items-center justify-center gap-1" onClick={() => navigate("/adm")} aria-current={adminAtivo ? "page" : undefined}>
                             <Gear size={30} />
                             <h1>Admin</h1>
                         </button>
