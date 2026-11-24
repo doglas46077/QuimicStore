@@ -120,9 +120,9 @@ export default function SectionPedidoStatus() {
 
                 <div className="flex flex-col gap-4 w-full items-center">
                     {pedidos.map((pedido) => (
-                        <div key={pedido.id} className="flex bg-white h-45 w-[90%] shadow rounded-xl hover:scale-101 hover:duration-300 items-center justify-between">
-                            <div className="flex gap-8 pl-8">
-                                <div className="flex flex-col w-70 justify-center gap-2">
+                        <div key={pedido.id} className="flex w-[92%] flex-col gap-4 rounded-xl bg-white p-4 shadow transition hover:shadow-md sm:w-[90%] sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                            <div className="flex min-w-0 gap-4 sm:gap-8 sm:pl-2">
+                                <div className="flex min-w-0 flex-1 flex-col justify-center gap-2">
                                     <h1 className="text-2xl text-emerald-700">{numeroDoPedido(pedido)}</h1>
                                     <p className="truncate">{resumoDosItens(pedido)}</p>
                                     <div className="flex gap-2 text-zinc-600">
@@ -132,7 +132,7 @@ export default function SectionPedidoStatus() {
                                 </div>
                             </div>
 
-                            <div className="flex w-105 justify-end gap-40 h-35 items-center border-l-2 border-dashed border-zinc-300">
+                            <div className="flex w-full items-center justify-between gap-4 border-t-2 border-dashed border-zinc-300 pt-4 sm:w-auto sm:justify-end sm:gap-8 sm:border-l-2 sm:border-t-0 sm:pl-6 sm:pt-0">
                                 <div className="flex flex-col gap-3">
                                   
                                     <div className={`flex justify-center text-white items-center gap-2 rounded-2xl p-1 ${String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase().includes("cancel") ? "bg-red-600" : String(pedido.status ?? pedido.status_pedido ?? pedido.pagamento?.status ?? "aguardando").toLowerCase().includes("aprov") ? "bg-emerald-700" : "bg-amber-600"}`}>
@@ -144,7 +144,7 @@ export default function SectionPedidoStatus() {
                                         <h1 className="text-2xl text-emerald-700">{formatarPreco(pedido.valor_total)}</h1>
                                     </div>
                                 </div>
-                                <div className="mr-10">
+                                <div className="shrink-0 sm:mr-2">
                                     <div className="flex items-center justify-center h-15 w-15 bg-emerald-100 rounded-2xl hover:bg-emerald-200">
                                         <button onClick={() => navigate(`/pedidoDetalhe/${pedido.id}`)}>
                                             <AngleRight size={34} />
