@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaCircleUser,
   FaMagnifyingGlassMinus,
@@ -12,6 +12,12 @@ function HeaderLogin() {
   const [aberto, setAberto] = useState(false);
   const [acessibilidadeAberta, setAcessibilidadeAberta] = useState(false);
   const [escalaFonte, setEscalaFonte] = useState(100);
+  const [modoEscuro, setModoEscuro] = useState(() => localStorage.getItem("modoEscuro") === "true",);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", modoEscuro);
+    localStorage.setItem("modoEscuro", String(modoEscuro));
+  }, [modoEscuro]);
 
   function alterarFonte(novaEscala) {
     const escalaLimitada = Math.min(150, Math.max(80, novaEscala));
@@ -43,25 +49,23 @@ function HeaderLogin() {
 
       <div className="flex items-center gap-2 sm:gap-4">
         <div className="relative">
-            <button
-              type="button"
-              aria-expanded={acessibilidadeAberta}
-              aria-controls="menu-acessibilidade"
-              onClick={() => setAcessibilidadeAberta(!acessibilidadeAberta)}
-              className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
-            >
-              <FaPerson className="text-amber-300" size={20} />
-              <span className="hidden sm:inline">Acessibilidade</span>
-            </button>
+          <button
+            type="button"
+            aria-expanded={acessibilidadeAberta}
+            aria-controls="menu-acessibilidade"
+            onClick={() => setAcessibilidadeAberta(!acessibilidadeAberta)}
+            className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+          >
+            <FaPerson className="text-amber-300" size={20} />
+            <span className="hidden sm:inline">Acessibilidade</span>
+          </button>
 
-            {acessibilidadeAberta && (
-              <div
-                id="menu-acessibilidade"
-                role="region"
-                aria-label="Acessibilidade"
-                className="absolute right-0 top-full z-20 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-2xl"
-              >
-                <h2 className="text-sm font-semibold">Aumentar fonte  </h2>
+          {acessibilidadeAberta && (
+            <div
+              id="menu-acessibilidade" role="region" aria-label="Acessibilidade" className="absolute flex-col flex gap-3 right-0 top-full z-20 mt-2 w-72 rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-2xl"
+            >
+              <div>
+                <h2 className="text-sm font-semibold">Aumentar fonte </h2>
                 <div className="mt-3 flex items-center justify-between gap-3">
                   <button
                     type="button"
@@ -89,7 +93,52 @@ function HeaderLogin() {
                   Ajuste o tamanho da página.
                 </p>
               </div>
-            )}
+              <div className="flex gap-18 flex-row items-center">
+                <h2 className="text-sm font-semibold">Tema</h2>
+                <button
+                  type="button"
+                  onClick={() => setModoEscuro((ativo) => !ativo)}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-amber-500 shadow-sm transition hover:scale-105 hover:bg-slate-50"
+                  aria-label={
+                    modoEscuro ? "Ativar modo claro" : "Ativar modo escuro"
+                  }
+                  title={modoEscuro ? "Modo escuro" : "Modo claro"}
+                >
+                  {modoEscuro ? (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-5 w-5"
+                    >
+                      <circle cx="12" cy="12" r="4" />
+                      <path
+                        strokeLinecap="round"
+                        d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="relative">
