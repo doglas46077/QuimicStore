@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from 'motion/react';
 import { CartLarge5 } from 'reicon-react';
 import { cesta } from './CestaCarrinho';
@@ -158,12 +158,14 @@ export default function CardCatalogo({ nome, descricao, preco, imagem, alt, cate
                 </div>
             </div>
             <div className="flex w-[90%] justify-between items-center mt-auto">
-                <h1 className={`text-2xl ${esgotado ? "text-red-600 line-through decoration-red-600" : ""}`}>R$ {precoFormatado}</h1>
-                {estoque !== undefined && (
-                    <span className={`text-xs font-medium ${esgotado ? "text-red-600" : "text-slate-500"}`}>
-                        {esgotado ? "Sem estoque" : `${estoque} em estoque`}
-                    </span>
-                )}
+                <div className="flex flex-col items-start">
+                    <h1 className={`text-2xl whitespace-nowrap ${esgotado ? "text-red-600 line-through decoration-red-600" : ""}`}>R$ {precoFormatado}</h1>
+                    {estoque !== undefined && (
+                        <span className={`text-xs font-medium ${esgotado ? "text-red-600" : "text-slate-500"}`}>
+                            {esgotado ? "Sem estoque" : `${estoque} em estoque`}
+                        </span>
+                    )}
+                </div>
                 <button
                     onClick={(event) => { event.stopPropagation(); adicionar() }}
                     disabled={esgotado || voando}
