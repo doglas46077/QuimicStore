@@ -13,15 +13,10 @@ const [email, setEmail] = useState("")
 const [enviandoRecuperacao, setEnviandoRecuperacao] = useState(false)
 const [mensagemRecuperacao, setMensagemRecuperacao] = useState("")
 const [erroRecuperacao, setErroRecuperacao] = useState("")
-const [modoEscuro, setModoEscuro] = useState(() => localStorage.getItem("modoEscuro") === "true")
 const [pedidos, setPedidos] = useState([])
 const [carregandoPedidos, setCarregandoPedidos] = useState(true)
 const [erroPedidos, setErroPedidos] = useState("")
 
-    useEffect(() => {
-      document.documentElement.classList.toggle("dark", modoEscuro)
-      localStorage.setItem("modoEscuro", String(modoEscuro))
-    }, [modoEscuro])
 
     useEffect (() => {
       const usuarioSalvo = JSON.parse(localStorage.getItem("usuario")|| "null")
@@ -125,24 +120,6 @@ const [erroPedidos, setErroPedidos] = useState("")
           </span>
           <h1 className="text-xl font-bold text-slate-900">Meu perfil</h1>
         </div>
-        <button
-          type="button"
-          onClick={() => setModoEscuro((ativo) => !ativo)}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-amber-500 shadow-sm transition hover:scale-105 hover:bg-slate-50"
-          aria-label={modoEscuro ? "Ativar modo claro" : "Ativar modo escuro"}
-          title={modoEscuro ? "Modo escuro" : "Modo claro"}
-        >
-          {modoEscuro ? (
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z" />
-            </svg>
-          ) : (
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
-              <circle cx="12" cy="12" r="4" />
-              <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" />
-            </svg>
-          )}
-        </button>
       </div>
  
       <div className="mx-auto max-w-2xl px-6 py-5">
