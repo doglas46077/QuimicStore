@@ -2,6 +2,8 @@ import LoginCard from "./components/LoginCard"
 import SectionCatalogo from "./components/SectionCatalogo";
 import SectionPedidoStatus from "./components/SectionPedidoStatus";
 import SectionCadastro from "./components/SectionCadastro";
+import SectionEsqueciSenha from "./components/SectionEsqueciSenha";
+import SectionRedefinirSenha from "./components/SectionRedefinirSenha";
 import { Routes, Route } from "react-router-dom";
 import SectionCarrinho from "./components/PrincipalCarrinho";
 import SectionPerfil from "./components/SectionPerfil";
@@ -9,13 +11,18 @@ import SectionPedidoDetalhes from "./components/SectionPedidoDetalhes";
 import ProtecaoRotas from "./components/ProtecaoRotas";
 import TelaAdm from "./components/TelaAdm";
 import ProductPage from "./components/ProductPage";
-import SectionResumoCompra from "./components/SectionResumo";
-import PagamentoPix from "./components/PaginaPagamento";
-import SectionStatus from "./components/PagamentoConfirmado";
+import SectionResumoCompra from "./components/SectionResumo"
+import PagamentoPix from "./components/PaginaPagamento"
+import SectionStatus from "./components/PagamentoConfirmado"
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useEffect } from "react";
 
 function App() {
+    useEffect(() => {
+      document.documentElement.classList.toggle("dark", localStorage.getItem("modoEscuro") === "true")
+    }, [])
+
     return (
         <>
         <ToastContainer position="top-right" autoClose={3000} />
@@ -23,6 +30,8 @@ function App() {
        <Routes>
       <Route path="/" element={<SectionCadastro />} />
       <Route path="/login" element={<LoginCard/>}/>
+      <Route path="/esqueci-senha" element={<SectionEsqueciSenha/>}/>
+      <Route path="/redefinir-senha" element={<SectionRedefinirSenha/>}/>
       <Route path="/catalogo" element={<ProtecaoRotas><SectionCatalogo/>  </ProtecaoRotas>}/>
       <Route path="/produto/:id" element={<ProtecaoRotas><ProductPage/></ProtecaoRotas>}/>
       <Route path="/carrinho" element={<ProtecaoRotas><SectionCarrinho/></ProtecaoRotas>}/>
@@ -34,9 +43,10 @@ function App() {
       <Route path="/resumo" element={<ProtecaoRotas><SectionResumoCompra/></ProtecaoRotas>}/>
       <Route path="/pagamento/:id" element={<ProtecaoRotas><PagamentoPix/></ProtecaoRotas>}/>
       <Route path="/pedido-realizado/:id" element={<ProtecaoRotas><SectionStatus/></ProtecaoRotas>}/>
-        </Routes>
       
-     </div>
+        </Routes>
+
+      </div>
     </>
   )
 }

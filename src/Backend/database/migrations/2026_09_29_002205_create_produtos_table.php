@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('estoque')->default(0);
             $table->integer('tempo_fabricacao')->nullable();
             $table->boolean('ativo')->default(true);
-            $table->string('imagem', 2048);
+            $table->json('imagens')->nullable();
             $table->timestamps();
         });
     }

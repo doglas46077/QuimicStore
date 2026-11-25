@@ -26,7 +26,7 @@ function CestaCarrinho({size = 32}) {
         <CartLarge5 size={size}/>
 
         {totalItens > 0 && (
-            <span className="absolute -right-2 -top-1.5 min-w-18px rounded-full bg-amber-400 px-1 text-center text-[11px] font-bold leading-18px text-emerald-950">
+            <span className="cart-count absolute -right-2 -top-1.5 min-w-18px rounded-full bg-amber-400 px-1 text-center text-[11px] font-bold leading-18px text-emerald-950">
                 {totalItens}
             </span>
         )}

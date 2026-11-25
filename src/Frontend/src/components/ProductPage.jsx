@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ShoppingCart, Star, Info, Minus, Plus, FlaskConical } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, ShoppingCart, Star, Info, Minus, Plus, X } from "lucide-react";
 import { arc, motion, useAnimate, useMotionValue, useReducedMotion } from "motion/react";
 import HeaderLogin from "./Header/HeaderLogin";
 import { useLocation, useNavigate } from "react-router-dom";
-import { resolverUrlImagem } from "./api";
+import { API_URL, resolverUrlImagem } from "./api";
 import FooterCatalogo from "./FooterCatalogo";
 import { listaDeImagens } from "./CardCatalogo";
 import { cesta } from "./CestaCarrinho";
@@ -23,6 +23,30 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(1);
   const [adicionando, setAdicionando] = useState(false);
   const [aviso, setAviso] = useState("");
+
+  const [avaliacoes, setAvaliacoes] = useState(null); // null = carregando
+  const [erroAvaliacoes, setErroAvaliacoes] = useState(false);
+  const [verTodas, setVerTodas] = useState(false);
+
+  // Avaliações do produto (rota pública do back), as mais recentes primeiro
+  useEffect(() => {
+    if (!produto?.id) return;
+
+    fetch(`${API_URL}/comentario/${produto.id}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(({ data }) => setAvaliacoes([...data].sort((a, b) => b.id - a.id)))
+      .catch(() => setErroAvaliacoes(true));
+  }, [produto?.id]);
+
+  const lista = avaliacoes ?? [];
+  const total = lista.length;
+  const media = total ? lista.reduce((soma, a) => soma + Number(a.nota), 0) / total : 0;
+
+  let mensagemAvaliacoes = "";
+  if (erroAvaliacoes) mensagemAvaliacoes = "Não foi possível carregar as avaliações.";
+  else if (produto?.id && avaliacoes === null) mensagemAvaliacoes = "Carregando avaliações...";
+  else if (total === 0) mensagemAvaliacoes = "Este produto ainda não tem avaliações.";
+
   const stock = Number(produto?.estoque ?? 0);
 
   const imagens = listaDeImagens(produto?.imagens);
@@ -166,12 +190,10 @@ export default function ProductPage() {
               <h1 className="mt-3 text-3xl font-bold text-gray-900">{produto?.nome || "Shampoo Neutro"}</h1>
 
               <div className="mt-2 flex items-center gap-2">
-                <div className="flex text-amber-400">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-current" />
-                  ))}
-                </div>
-                <span className="text-sm font-medium text-emerald-700">(14 avaliações)</span>
+                <EstrelasNota nota={Math.round(media)} tamanho="h-5 w-5" />
+                <span className="text-sm font-medium text-emerald-700">
+                  {total > 0 ? `${media.toFixed(1).replace(".", ",")} (${total} ${total === 1 ? "avaliação" : "avaliações"})` : "Sem avaliações"}
+                </span>
               </div>
 
               <p className="mt-4 text-gray-600">
@@ -244,28 +266,103 @@ export default function ProductPage() {
             <h2 className="text-lg font-bold text-gray-900">Avaliações Recentes</h2>
           </div>
 
-          <div className="mt-4 rounded-xl bg-gray-50 p-5">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 font-semibold text-gray-600">
-                A
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">ANA.P</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex text-amber-400">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-400">20/04/26</span>
-                </div>
-              </div>
-            </div>
-            <p className="mt-3 text-gray-700">"Ótimo produto! Deixou meu cabelo muito hidratado."</p>
+          {mensagemAvaliacoes && <p className="mt-4 text-sm text-gray-500">{mensagemAvaliacoes}</p>}
+
+          <div className="mt-4 flex flex-col gap-3">
+            {lista.slice(0, 3).map((a) => (
+              <AvaliacaoCard key={a.id} avaliacao={a} />
+            ))}
           </div>
+
+          {total > 3 && (
+            <button
+              onClick={() => setVerTodas(true)}
+              className="mt-4 w-full rounded-xl border border-emerald-200 bg-emerald-50 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+            >
+              Ver avaliações ({total})
+            </button>
+          )}
         </div>
       </main>
+      {verTodas && <ModalAvaliacoes avaliacoes={lista} onFechar={() => setVerTodas(false)} />}
+
       <FooterCatalogo />
+    </div>
+  );
+}
+
+function EstrelasNota({ nota, tamanho = "h-3.5 w-3.5" }) {
+  return (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star key={i} className={`${tamanho} fill-current ${i <= nota ? "text-amber-400" : "text-gray-200"}`} />
+      ))}
+    </div>
+  );
+}
+
+// "Ana Paula Souza" -> "Ana S." (não expõe o nome completo do cliente)
+function nomeCurto(nome) {
+  const partes = (nome || "").trim().split(/\s+/);
+  const inicialDoUltimo = partes.length > 1 ? ` ${partes.at(-1)[0].toUpperCase()}.` : "";
+  return (partes[0] || "Cliente") + inicialDoUltimo;
+}
+
+function AvaliacaoCard({ avaliacao }) {
+  const nome = nomeCurto(avaliacao.usuario?.nome);
+  const data = new Date(avaliacao.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+
+  return (
+    <div className="rounded-xl bg-gray-50 p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 font-semibold text-gray-600">
+          {nome[0].toUpperCase()}
+        </div>
+        <div>
+          <p className="font-semibold text-gray-900">{nome}</p>
+          <div className="flex items-center gap-2">
+            <EstrelasNota nota={Number(avaliacao.nota)} />
+            <span className="text-xs text-gray-400">{data}</span>
+          </div>
+        </div>
+      </div>
+      {avaliacao.comentario && <p className="mt-3 break-words text-gray-700">"{avaliacao.comentario}"</p>}
+    </div>
+  );
+}
+
+function ModalAvaliacoes({ avaliacoes, onFechar }) {
+  // fecha com Esc e trava a rolagem da página enquanto está aberto
+  useEffect(() => {
+    const fecharComEsc = (e) => e.key === "Escape" && onFechar();
+    document.addEventListener("keydown", fecharComEsc);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", fecharComEsc);
+      document.body.style.overflow = "";
+    };
+  }, [onFechar]);
+
+  return (
+    <div
+      className="fixed inset-0 z-40 flex items-center justify-center bg-emerald-950/50 px-3 py-4"
+      onClick={(e) => e.target === e.currentTarget && onFechar()}
+    >
+      <div role="dialog" aria-modal="true" className="flex max-h-[90vh] w-full max-w-xl flex-col rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-4">
+          <h2 className="text-xl font-bold text-gray-900">Avaliações ({avaliacoes.length})</h2>
+          <button onClick={onFechar} aria-label="Fechar" className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3 overflow-y-auto">
+          {avaliacoes.map((a) => (
+            <AvaliacaoCard key={a.id} avaliacao={a} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

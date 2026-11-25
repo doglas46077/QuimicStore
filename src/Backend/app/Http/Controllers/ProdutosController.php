@@ -4,17 +4,54 @@ namespace App\Http\Controllers;
 
 use App\Models\Produto;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ProdutosController extends Controller
 {
+    // ===================================================================================================
+    // AUXILIARES DE IMAGEM
+    // ===================================================================================================
+    private function salvarImagens(array $files): array
+    {
+        $caminhos = [];
+
+        foreach ($files as $file) {
+            $nomeimg = time() . '-' . uniqid() . '-' . $file->getClientOriginalName();
+
+            $file->move(public_path('img/produtosImgs'), $nomeimg);
+
+            $caminhos[] = 'img/produtosImgs/' . $nomeimg;
+        }
+
+        return $caminhos;
+    }
+
+    private function apagarImagens(array $caminhos): void
+    {
+        foreach ($caminhos as $caminho) {
+            if (is_string($caminho) && file_exists(public_path($caminho))) {
+                unlink(public_path($caminho));
+            }
+        }
+    }
+
+    // Sempre devolve um array, mesmo que o dado no banco esteja em formato antigo
+    private function imagensDoProduto(Produto $produto): array
+    {
+        $imagens = $produto->imagens;
+
+        if (is_string($imagens)) {
+            $dec = json_decode($imagens, true);
+            $imagens = is_array($dec) ? $dec : ($imagens !== '' ? [$imagens] : []);
+        }
+
+        return is_array($imagens) ? array_values($imagens) : [];
+    }
 
     // ===================================================================================================
     // CADASTRAR PRODUTO
     // ===================================================================================================
     public function store(Request $request)
     {
-
         $estagiario = $request->user()->nivel_acesso === 'estagiario';
         $professor = $request->user()->nivel_acesso === 'professor';
 
@@ -24,7 +61,6 @@ class ProdutosController extends Controller
             ], 403);
         }
 
-
         $productData = $request->validate([
             'categoria_id' => 'required|integer|exists:categorias,id',
             'nome' => 'required|string|unique:produtos,nome',
@@ -33,19 +69,15 @@ class ProdutosController extends Controller
             'estoque' => 'required|integer|min:0',
             'tempo_fabricacao' => 'nullable|integer|min:1|max:365',
             'ativo' => 'required|boolean',
-            'imagem' => 'image|mimes:jpeg,png,jpg,webp|max:2048'
+            'imagens' => 'nullable|array|max:5',
+            'imagens.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
-        if ($request->hasFile('imagem')) {
-            $file = $request->file('imagem');
+        unset($productData['imagens']);
 
-            $nomeimg = time() . '-' . $file->getClientOriginalName();
-
-            $file->move(public_path('img/produtosImgs'), $nomeimg);
-
-            $productData['imagem'] = 'img/produtosImgs/' . $nomeimg;
+        if ($request->hasFile('imagens')) {
+            $productData['imagens'] = $this->salvarImagens($request->file('imagens'));
         }
-
 
         $newProduct = Produto::create($productData);
 
@@ -113,31 +145,41 @@ class ProdutosController extends Controller
             'estoque' => 'integer|min:0',
             'tempo_fabricacao' => 'nullable|integer|min:1|max:365',
             'ativo' => 'boolean',
-            'imagem' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048'
+            'imagens' => 'nullable|array|max:5',
+            'imagens.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'remover_imagens' => 'nullable|array',
+            'remover_imagens.*' => 'string'
         ]);
 
-        if ($request->hasFile('imagem')) {
-            // 1. Apaga a imagem antiga se ela existir fisicamente na pasta public
-            if ($produto->imagem && file_exists(public_path($produto->imagem))) {
-                unlink(public_path($produto->imagem));
-            }
+        $atuais = $this->imagensDoProduto($produto);
 
-            // 2. Processa e move a nova imagem
-            $file = $request->file('imagem');
-            $nomeimg = time() . '-' . $file->getClientOriginalName();
-            $file->move(public_path('img/produtosImgs'), $nomeimg);
+        // só aceita remover caminhos que realmente pertencem ao produto
+        $remover = array_values(array_intersect((array) $request->input('remover_imagens', []), $atuais));
+        $mantidas = array_values(array_diff($atuais, $remover));
+        $novas = $request->hasFile('imagens') ? $request->file('imagens') : [];
 
-            // 3. Atualiza o caminho que irá para o banco de dados
-            $dataAtualizados['imagem'] = 'img/produtosImgs/' . $nomeimg;
+        if (count($mantidas) + count($novas) > 5) {
+            return response()->json([
+                "message" => "O produto pode ter no máximo 5 imagens"
+            ], 422);
         }
+
+        unset($dataAtualizados['remover_imagens'], $dataAtualizados['imagens']);
+
+        if (!empty($novas) || !empty($remover)) {
+            $dataAtualizados['imagens'] = array_merge($mantidas, $this->salvarImagens($novas));
+        }
+
         $produto->update($dataAtualizados);
+
+        // só apaga os arquivos depois do banco atualizado
+        $this->apagarImagens($remover);
 
         return response()->json([
             "message" => "Produto atualizado com sucesso",
             "data" => $produto
         ], 200);
     }
-
 
     // ===================================================================================================
     // DELETAR PRODUTO
@@ -156,9 +198,7 @@ class ProdutosController extends Controller
 
         $produto = Produto::findOrFail($id);
 
-        if ($produto->imagem && file_exists(public_path($produto->imagem))) {
-            unlink(public_path($produto->imagem));
-        }
+        $this->apagarImagens($this->imagensDoProduto($produto));
 
         $produto->delete();
 

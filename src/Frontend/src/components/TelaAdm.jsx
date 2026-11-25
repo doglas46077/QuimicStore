@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "./Header/HeaderLogin";
 import { API_URL, resolverUrlImagem } from "./api";
+import TelaVendas from "./vendas/TelaVenda";
 
 const FORM_VAZIO = {
   nome: "",
@@ -14,6 +15,11 @@ const FORM_VAZIO = {
   imagensRemovidas: [],
   ativo: true,
 };
+
+const OPCAO_STATUS_PEDIDO = [
+  { value: "aprovado", label: "Aprovado" },
+  { value: "cancelado", label: "Cancelado" },
+];
 
 function resolverImagem(imagem) {
   if (!imagem || typeof imagem !== "string") return "";
@@ -68,6 +74,53 @@ function mensagemDeErro(dados, padrao) {
   return dados?.message || dados?.mensagem || padrao;
 }
 
+function listaPedidosPossivel(dados) {
+  if (Array.isArray(dados)) return dados;
+  if (Array.isArray(dados?.data)) return dados.data;
+  if (Array.isArray(dados?.dados)) return dados.dados;
+  if (Array.isArray(dados?.pedidos)) return dados.pedidos;
+  return [];
+}
+
+function statusDoPedido(pedido) {
+  return String(pedido?.status ?? pedido?.status_pedido ?? "pendente").toLowerCase();
+}
+
+function nomeStatusPedido(status) {
+  const valor = statusDoPedido({ status });
+  const rotulos = {
+    pendente: "Aguardando",
+    aguardando: "Aguardando",
+    aprovado: "Aprovado",
+    cancelado: "Cancelado",
+    em_preparo: "Em preparo",
+    enviado: "Enviado",
+    entregue: "Entregue",
+    pronto_para_retirada: "Pronto pra Retirada",
+  };
+  return rotulos[valor] || valor;
+}
+
+function prepararPedidosStatus(pedidos) {
+  return pedidos.map((pedido) => {
+    const status = statusDoPedido(pedido);
+    const clienteNome =
+      pedido?.cliente_nome ||
+      pedido?.usuario?.nome ||
+      pedido?.cliente?.nome ||
+      pedido?.nome_cliente ||
+      "";
+
+    return { ...pedido, cliente_nome: clienteNome, status, status_pedido: status };
+  });
+}
+
+function dataParaInput(valor) {
+  if (!valor) return "";
+  const data = String(valor).slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(data) ? data : "";
+}
+
 export default function TelaAdm() {
   const navigate = useNavigate();
 
@@ -85,6 +138,7 @@ export default function TelaAdm() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [busca, setBusca] = useState("");
+  const [tela, setTela] = useState("produtos"); // "produtos" | "vendas"
 
   const [modalAberto, setModalAberto] = useState(false);
   const [idEditando, setIdEditando] = useState(null);
@@ -99,6 +153,20 @@ export default function TelaAdm() {
   const [ajustandoId, setAjustandoId] = useState(null);
 
   const [previas, setPrevias] = useState([]);
+  const [statusVendaAberto, setStatusVendaAberto] = useState(false);
+  const [pedidosStatus, setPedidosStatus] = useState([]);
+  const [carregandoStatus, setCarregandoStatus] = useState(false);
+  const [erroStatus, setErroStatus] = useState("");
+  const [atualizandoStatusId, setAtualizandoStatusId] = useState(null);
+
+  const [perfisAberto, setPerfisAberto] = useState(false);
+  const [usuarios, setUsuarios] = useState([]);
+  const [carregandoUsuarios, setCarregandoUsuarios] = useState(false);
+  const [erroUsuarios, setErroUsuarios] = useState("");
+  const [sucessoUsuario, setSucessoUsuario] = useState("");
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [formUsuario, setFormUsuario] = useState({ nome: "", email: "", nivel_acesso: "cliente" });
+  const [salvandoUsuario, setSalvandoUsuario] = useState(false);
 
   // Criar pré-visualização das imagens novas
   useEffect(() => {
@@ -107,6 +175,264 @@ export default function TelaAdm() {
 
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, [form.imagens]);
+
+  useEffect(() => {
+    if (!statusVendaAberto) return;
+
+    async function carregarPedidosStatus() {
+      setCarregandoStatus(true);
+      setErroStatus("");
+
+      try {
+        const rotas = [
+          `${API_URL}/mostrar-pedido`,
+          `${API_URL}/mostrar-pedidos`,
+          `${API_URL}/pedidos`,
+        ];
+
+        let pedidos = [];
+
+        for (const url of rotas) {
+          try {
+            const response = await fetch(url, {
+              headers: cabecalhos(),
+            });
+
+            if (response.status === 401) {
+              sessaoExpirada();
+              return;
+            }
+
+            if (response.ok) {
+              const dados = await response.json();
+              const lista = listaPedidosPossivel(dados);
+
+              if (lista.length > 0 || response.status === 200) {
+                setPedidosStatus(prepararPedidosStatus(lista));
+                return;
+              }
+
+              pedidos = lista;
+            }
+          } catch (e) {
+            // tenta a próxima rota
+          }
+        }
+
+        setPedidosStatus(prepararPedidosStatus(pedidos));
+      } catch (e) {
+        setErroStatus("Não foi possível carregar os pedidos para alterar o status.");
+      } finally {
+        setCarregandoStatus(false);
+      }
+    }
+
+    carregarPedidosStatus();
+  }, [statusVendaAberto]);
+
+  async function alterarStatusPedido(pedidoId, novoStatus) {
+    const pedidoAnterior = pedidosStatus.find((pedido) => Number(pedido.id) === Number(pedidoId));
+    const pagamentoId = pedidoAnterior?.pagamento?.id ?? pedidoAnterior?.pagamento_id;
+    const dataRetirada = pedidoAnterior?.data_retirada || "";
+
+    if (!pagamentoId) {
+      setErroStatus("Este pedido não possui pagamento associado para alterar o status.");
+      return;
+    }
+
+    const statusAnterior = statusDoPedido(pedidoAnterior);
+
+    setPedidosStatus((atual) =>
+      atual.map((pedido) =>
+        Number(pedido.id) === Number(pedidoId)
+          ? { ...pedido, status: novoStatus, status_pedido: novoStatus, status_atualizado_em: new Date().toISOString() }
+          : pedido
+      )
+    );
+    setAtualizandoStatusId(pedidoId);
+    setErroStatus("");
+
+    let ultimoErro = "Não foi possível alterar o status do pedido.";
+
+    try {
+      const response = await fetch(`${API_URL}/pagamentos/${pagamentoId}/status`, {
+        method: "PUT",
+        headers: cabecalhos(true),
+        body: JSON.stringify({ status: novoStatus, data_retirada: dataRetirada || null }),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        const statusAtualizado = dados?.dados?.pedido?.status ?? dados?.dados?.status ?? novoStatus;
+        const statusFinal = statusDoPedido({ status: statusAtualizado });
+
+        setPedidosStatus((atual) =>
+          atual.map((pedido) =>
+            Number(pedido.id) === Number(pedidoId)
+              ? { ...pedido, status: statusFinal, status_pedido: statusFinal, data_retirada: dados?.dados?.pedido?.data_retirada ?? dados?.dados?.data_retirada ?? dataRetirada, status_atualizado_em: dados?.dados?.pedido?.status_atualizado_em ?? dados?.dados?.pedido?.updated_at ?? dados?.dados?.status_atualizado_em ?? new Date().toISOString() }
+              : pedido
+          )
+        );
+        return;
+      }
+
+      ultimoErro = mensagemDeErro(dados, ultimoErro);
+    } catch {
+      ultimoErro = "Não foi possível conectar ao servidor.";
+    } finally {
+      setAtualizandoStatusId(null);
+    }
+
+    setPedidosStatus((atual) =>
+      atual.map((pedido) =>
+        Number(pedido.id) === Number(pedidoId)
+          ? { ...pedido, status: statusAnterior, status_pedido: statusAnterior }
+          : pedido
+      )
+    );
+    setErroStatus(ultimoErro);
+    setAtualizandoStatusId(null);
+  }
+
+  async function salvarDataRetirada(pedidoId) {
+    const pedido = pedidosStatus.find((item) => Number(item.id) === Number(pedidoId));
+    if (!pedido) return;
+
+    const pagamentoId = pedido.pagamento?.id ?? pedido.pagamento_id;
+    if (!pagamentoId) {
+      setErroStatus("Este pedido não possui pagamento associado para salvar a data de retirada.");
+      return;
+    }
+
+    setAtualizandoStatusId(pedidoId);
+    setErroStatus("");
+    try {
+      const response = await fetch(`${API_URL}/pagamentos/${pagamentoId}/status`, {
+        method: "PUT",
+        headers: cabecalhos(true),
+        body: JSON.stringify({
+          status: statusDoPedido(pedido),
+          data_retirada: pedido.data_retirada || null,
+        }),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErroStatus(mensagemDeErro(dados, "Não foi possível salvar a data de retirada."));
+      }
+    } catch {
+      setErroStatus("Não foi possível conectar ao servidor.");
+    } finally {
+      setAtualizandoStatusId(null);
+    }
+  }
+
+  async function abrirPerfisUsuarios() {
+    setPerfisAberto(true);
+    setCarregandoUsuarios(true);
+    setErroUsuarios("");
+    setSucessoUsuario("");
+    setUsuarioEditando(null);
+
+    try {
+      const response = await fetch(`${API_URL}/mostrar-usuarios`, {
+        headers: cabecalhos(),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErroUsuarios(mensagemDeErro(dados, "Não foi possível carregar os usuários."));
+        return;
+      }
+
+      setUsuarios(Array.isArray(dados?.usuarios) ? dados.usuarios : []);
+    } catch {
+      setErroUsuarios("Não foi possível conectar ao servidor.");
+    } finally {
+      setCarregandoUsuarios(false);
+    }
+  }
+
+  function editarUsuario(usuario) {
+    setUsuarioEditando(usuario);
+    setFormUsuario({ nome: usuario.nome || "", email: usuario.email || "", nivel_acesso: usuario.nivel_acesso || "cliente" });
+    setErroUsuarios("");
+    setSucessoUsuario("");
+  }
+
+  async function salvarPerfilUsuario(event) {
+    event.preventDefault();
+    if (!usuarioEditando || salvandoUsuario) return;
+
+    setSalvandoUsuario(true);
+    setErroUsuarios("");
+    setSucessoUsuario("");
+
+    const payload = {
+      nivel_acesso: formUsuario.nivel_acesso,
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/atualizar-informacoes/${usuarioEditando.id}/usuario`, {
+        method: "PUT",
+        headers: cabecalhos(true),
+        body: JSON.stringify(payload),
+      });
+
+      if (response.status === 401) {
+        sessaoExpirada();
+        return;
+      }
+
+      const dados = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setErroUsuarios(mensagemDeErro(dados, "Não foi possível atualizar o perfil."));
+        return;
+      }
+
+      const atualizado = dados?.dados || { ...usuarioEditando, ...payload };
+      if (atualizado.nivel_acesso !== payload.nivel_acesso) {
+        setErroUsuarios("O backend atual não permite alterar o acesso do usuário.");
+        return;
+      }
+      setUsuarios((lista) => lista.map((usuario) =>
+        Number(usuario.id) === Number(usuarioEditando.id)
+          ? { ...usuario, nivel_acesso: atualizado.nivel_acesso ?? payload.nivel_acesso }
+          : usuario
+      ));
+
+      const usuarioLogado = JSON.parse(localStorage.getItem("usuario") || "null");
+      if (Number(usuarioLogado?.id) === Number(usuarioEditando.id)) {
+        localStorage.setItem("usuario", JSON.stringify({
+          ...usuarioLogado,
+          nivel_acesso: atualizado.nivel_acesso ?? payload.nivel_acesso,
+        }));
+      }
+
+      setUsuarioEditando(null);
+      setSucessoUsuario("Perfil atualizado com sucesso.");
+    } catch {
+      setErroUsuarios("Não foi possível conectar ao servidor.");
+    } finally {
+      setSalvandoUsuario(false);
+    }
+  }
 
   function cabecalhos(comCorpo = false) {
     const token = localStorage.getItem("token");
@@ -415,198 +741,208 @@ export default function TelaAdm() {
       <HeaderLogin />
 
       <div className="min-h-screen bg-olive-50">
-        <main className="mx-auto max-w-6xl px-4 py-6">
-
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                Gerenciar produtos
-              </h1>
-
-              <p className="text-sm font-normal text-slate-500">
-                {produtos.length}{" "}
-                {produtos.length === 1
-                  ? "produto cadastrado"
-                  : "produtos cadastrados"}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <input
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                type="text"
-                placeholder="Buscar produto..."
-                className="w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700"
-              />
-
+        <div className="flex min-h-screen flex-col md:flex-row">
+          <aside className="mx-4 mt-4 h-fit w-[calc(100%-2rem)] shrink-0 self-start rounded-xl bg-emerald-950 px-4 py-5 text-white md:ml-4 md:mr-0 md:mt-4 md:w-64 md:px-5">
+            <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-widest text-emerald-200/70">Administração</p>
+            <nav aria-label="Navegação administrativa" className="flex flex-wrap gap-2 md:flex-col">
+              <button onClick={() => navigate("/catalogo")} className="min-w-0 flex-1 break-words rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 md:flex-none">Volta para catálogo</button>
+              <button onClick={() => { setTela("produtos"); abrirNovo(); }} disabled={categorias.length === 0} className="min-w-0 flex-1 break-words rounded-lg bg-amber-400 px-3 py-3 text-left text-sm font-semibold text-emerald-950 transition hover:bg-amber-300 disabled:opacity-50 md:flex-none">+ Novo produto</button>
+              <button onClick={() => setStatusVendaAberto(true)} className="min-w-0 flex-1 break-words rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 md:flex-none">Mudar status</button>
               <button
-                onClick={() => navigate("/catalogo")}
-                className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                onClick={() => setTela("vendas")}
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800 ${tela === "vendas" ? "bg-emerald-700" : "bg-emerald-900"}`}
               >
-                Ver catálogo
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+                </svg>
+                Vendas
               </button>
+              {ehProfessor && <button onClick={abrirPerfisUsuarios} className="shrink-0 rounded-lg bg-emerald-900 px-3 py-3 text-left text-sm font-semibold text-emerald-50 transition hover:bg-emerald-800">Perfil de usuário</button>}
+            </nav>
+          </aside>
+          <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            {tela === "vendas" ? (
+              <TelaVendas onVoltar={() => setTela("produtos")} onSessaoExpirada={sessaoExpirada} />
+            ) : (
+              <>
 
-              <button
-                onClick={abrirNovo}
-                disabled={categorias.length === 0}
-                className="rounded-lg bg-emerald-950 px-4 py-2 text-sm font-semibold text-white hover:scale-105 hover:transition hover:duration-300 disabled:opacity-50"
-              >
-                Novo produto
-              </button>
-            </div>
-          </div>
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h1 className="text-2xl font-bold text-slate-900">
+                      Gerenciar produtos
+                    </h1>
 
-          {erro && (
-            <p className="mb-4 text-sm text-red-600">
-              {erro}
-            </p>
-          )}
+                    <p className="text-sm font-normal text-slate-500">
+                      {produtos.length}{" "}
+                      {produtos.length === 1
+                        ? "produto cadastrado"
+                        : "produtos cadastrados"}
+                    </p>
+                  </div>
 
-          <div className="overflow-x-auto rounded-xl bg-white shadow">
-            <table className="w-full min-w-[700px] text-sm">
-              <thead className="bg-slate-50 text-left text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Produto</th>
-                  <th className="px-4 py-3 font-medium">Categoria</th>
-                  <th className="px-4 py-3 font-medium">Preço</th>
-                  <th className="px-4 py-3 font-medium">Estoque</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 text-right font-medium">Ações</th>
-                </tr>
-              </thead>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <input
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      type="text"
+                      placeholder="Buscar produto..."
+                      className="w-56 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-700"
+                    />
 
-              <tbody className="divide-y divide-slate-100 font-normal">
-                {produtosFiltrados.map((p) => {
-                  const src = resolverImagem(listaImagens(p)[0]);
+                  </div>
+                </div>
 
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-300">
-                            {src && (
-                              <img
-                                src={src}
-                                alt={p.nome}
-                                className="h-full w-full object-cover"
-                              />
-                            )}
-                          </div>
+                {erro && (
+                  <p className="mb-4 text-sm text-red-600">
+                    {erro}
+                  </p>
+                )}
 
-                          <div>
-                            <p className="font-semibold text-slate-800">
-                              {p.nome}
-                            </p>
+                <div className="overflow-x-auto rounded-xl bg-white shadow">
+                  <table className="w-full min-w-175 text-sm">
+                    <thead className="bg-slate-50 text-left text-slate-500">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Produto</th>
+                        <th className="px-4 py-3 font-medium">Categoria</th>
+                        <th className="px-4 py-3 font-medium">Preço</th>
+                        <th className="px-4 py-3 font-medium">Estoque</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 text-right font-medium">Ações</th>
+                      </tr>
+                    </thead>
 
-                            <p className="max-w-xs truncate text-xs text-slate-400">
-                              {p.descricao}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+                    <tbody className="divide-y divide-slate-100 font-normal">
+                      {produtosFiltrados.map((p) => {
+                        const src = resolverImagem(listaImagens(p)[0]);
 
-                      <td className="px-4 py-3 text-emerald-700">
-                        {nomeCategoria(p.categoria_id)}
-                      </td>
+                        return (
+                          <tr key={p.id} className="hover:bg-slate-50">
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-300">
+                                  {src && (
+                                    <img
+                                      src={src}
+                                      alt={p.nome}
+                                      className="h-full w-full object-cover"
+                                    />
+                                  )}
+                                </div>
 
-                      <td className="px-4 py-3 text-slate-700">
-                        {formatarPreco(p.preco)}
-                      </td>
+                                <div>
+                                  <p className="font-semibold text-slate-800">
+                                    {p.nome}
+                                  </p>
 
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => ajustarEstoque(p, -1)}
-                            disabled={ajustandoId === p.id}
-                            className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
-                          >
-                            −
-                          </button>
+                                  <p className="max-w-xs truncate text-xs text-slate-400">
+                                    {p.descricao}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
 
-                          <span
-                            className={`w-16 text-center ${
-                              p.estoque === 0
-                                ? "font-bold text-red-700"
-                                : p.estoque < 10
-                                ? "font-semibold text-amber-700"
-                                : "text-slate-700"
-                            }`}
-                          >
-                            {p.estoque === 0
-                              ? "Esgotado"
-                              : p.estoque}
-                          </span>
+                            <td className="px-4 py-3 text-emerald-700">
+                              {nomeCategoria(p.categoria_id)}
+                            </td>
 
-                          <button
-                            onClick={() => ajustarEstoque(p, 1)}
-                            disabled={ajustandoId === p.id}
-                            className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </td>
+                            <td className="px-4 py-3 text-slate-700">
+                              {formatarPreco(p.preco)}
+                            </td>
 
-                      <td className="px-4 py-3">
-                        <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs ${
-                            estaAtivo(p)
-                              ? "bg-emerald-50 text-emerald-700"
-                              : "bg-slate-100 text-slate-500"
-                          }`}
-                        >
-                          {estaAtivo(p) ? "Ativo" : "Inativo"}
-                        </span>
-                      </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => ajustarEstoque(p, -1)}
+                                  disabled={ajustandoId === p.id}
+                                  className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
+                                >
+                                  −
+                                </button>
 
-                      <td className="whitespace-nowrap px-4 py-3 text-right">
-                        <button
-                          onClick={() => abrirEdicao(p)}
-                          className="mr-3 text-sm text-emerald-700 hover:underline"
-                        >
-                          Editar
-                        </button>
+                                <span
+                                  className={`w-16 text-center ${p.estoque === 0
+                                    ? "font-bold text-red-700"
+                                    : p.estoque < 10
+                                      ? "font-semibold text-amber-700"
+                                      : "text-slate-700"
+                                    }`}
+                                >
+                                  {p.estoque === 0
+                                    ? "Esgotado"
+                                    : p.estoque}
+                                </span>
 
-                        {ehProfessor && (
-                          <button
-                            onClick={() => {
-                              setErroExcluir("");
-                              setProdutoParaExcluir(p);
-                            }}
-                            className="text-sm text-red-600 hover:underline"
-                          >
-                            Remover
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                                <button
+                                  onClick={() => ajustarEstoque(p, 1)}
+                                  disabled={ajustandoId === p.id}
+                                  className="h-6 w-6 rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </td>
 
-            {carregando && (
-              <p className="py-12 text-center text-sm font-normal text-slate-500">
-                Carregando produtos...
-              </p>
+                            <td className="px-4 py-3">
+                              <span
+                                className={`rounded-full px-2.5 py-0.5 text-xs ${estaAtivo(p)
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-slate-100 text-slate-500"
+                                  }`}
+                              >
+                                {estaAtivo(p) ? "Ativo" : "Inativo"}
+                              </span>
+                            </td>
+
+                            <td className="whitespace-nowrap px-4 py-3 text-right">
+                              <button
+                                onClick={() => abrirEdicao(p)}
+                                className="mr-3 text-sm text-emerald-700 hover:underline"
+                              >
+                                Editar
+                              </button>
+
+                              {ehProfessor && (
+                                <button
+                                  onClick={() => {
+                                    setErroExcluir("");
+                                    setProdutoParaExcluir(p);
+                                  }}
+                                  className="text-sm text-red-600 hover:underline"
+                                >
+                                  Remover
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  {carregando && (
+                    <p className="py-12 text-center text-sm font-normal text-slate-500">
+                      Carregando produtos...
+                    </p>
+                  )}
+
+                  {!carregando && produtos.length === 0 && !erro && (
+                    <p className="py-12 text-center text-sm font-normal text-slate-500">
+                      Nenhum produto cadastrado. Use "Novo produto" para adicionar o primeiro.
+                    </p>
+                  )}
+
+                  {!carregando &&
+                    produtos.length > 0 &&
+                    produtosFiltrados.length === 0 && (
+                      <p className="py-12 text-center text-sm font-normal text-slate-500">
+                        Nenhum produto encontrado para essa busca.
+                      </p>
+                    )}
+                </div>
+              </>
             )}
-
-            {!carregando && produtos.length === 0 && !erro && (
-              <p className="py-12 text-center text-sm font-normal text-slate-500">
-                Nenhum produto cadastrado. Use "Novo produto" para adicionar o primeiro.
-              </p>
-            )}
-
-            {!carregando &&
-              produtos.length > 0 &&
-              produtosFiltrados.length === 0 && (
-                <p className="py-12 text-center text-sm font-normal text-slate-500">
-                  Nenhum produto encontrado para essa busca.
-                </p>
-              )}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       {/* Modal de cadastro e edição */}
@@ -947,6 +1283,257 @@ export default function TelaAdm() {
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* Modal de perfis de usuário */}
+      {perfisAberto && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-emerald-950/40 px-4 py-4">
+          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white p-5 shadow-xl sm:p-6">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">
+                  {usuarioEditando ? "Editar perfil" : "Perfis de usuário"}
+                </h2>
+                {usuarioEditando && (
+                  <p className="mt-1 text-sm text-slate-500">Usuário #{usuarioEditando.id}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => !salvandoUsuario && setPerfisAberto(false)}
+                disabled={salvandoUsuario}
+                aria-label="Fechar perfis de usuário"
+                className="text-xl leading-none text-slate-400 hover:text-slate-700 disabled:opacity-50"
+              >
+                &times;
+              </button>
+            </div>
+
+            {erroUsuarios && <p className="mb-4 text-sm text-red-600">{erroUsuarios}</p>}
+            {sucessoUsuario && <p className="mb-4 text-sm text-emerald-700">{sucessoUsuario}</p>}
+
+            {carregandoUsuarios ? (
+              <p className="py-12 text-center text-sm text-slate-500">Carregando usuários...</p>
+            ) : usuarioEditando ? (
+              <form onSubmit={salvarPerfilUsuario} className="flex flex-col gap-4 overflow-y-auto">
+                <label className="text-sm font-medium text-slate-700">
+                  Nome
+                  <input type="text" value={formUsuario.nome} readOnly className="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-normal text-slate-600" />
+                </label>
+
+                <label className="text-sm font-medium text-slate-700">
+                  E-mail
+                  <input type="email" value={formUsuario.email} readOnly className="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-normal text-slate-600" />
+                </label>
+
+                <label className="text-sm font-medium text-slate-700">
+                  Acesso
+                  <select
+                    name="nivel_acesso"
+                    value={formUsuario.nivel_acesso}
+                    onChange={(e) => setFormUsuario((form) => ({ ...form, nivel_acesso: e.target.value }))}
+                    disabled={salvandoUsuario}
+                    className="mt-1.5 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-normal outline-none focus:border-emerald-700"
+                  >
+                    <option value="cliente">Cliente</option>
+                    <option value="estagiario">Estagiário</option>
+                  </select>
+                </label>
+
+                <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    disabled={salvandoUsuario}
+                    onClick={() => setUsuarioEditando(null)}
+                    className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    Voltar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={salvandoUsuario}
+                    className="rounded-lg bg-emerald-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-900 disabled:opacity-60"
+                  >
+                    {salvandoUsuario ? "Salvando..." : "Salvar alterações"}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="min-h-0 overflow-y-auto">
+                {usuarios.length === 0 ? (
+                  <p className="py-10 text-center text-sm text-slate-500">Nenhum usuário encontrado.</p>
+                ) : (
+                  <table className="w-full min-w-136 text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-3 py-3 font-medium">Usuário</th>
+                        <th className="px-3 py-3 font-medium">Acesso</th>
+                        <th className="px-3 py-3 text-right font-medium">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {usuarios.map((usuario) => (
+                        <tr key={usuario.id} className="hover:bg-slate-50">
+                          <td className="max-w-0 px-3 py-3">
+                            <p className="truncate font-semibold text-slate-800">{usuario.nome}</p>
+                            <p className="truncate text-xs text-slate-500">{usuario.email}</p>
+                          </td>
+                          <td className="px-3 py-3 text-slate-600">{usuario.nivel_acesso}</td>
+                          <td className="px-3 py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => editarUsuario(usuario)}
+                              className="rounded-md px-3 py-2 font-semibold text-emerald-800 hover:bg-emerald-50"
+                            >
+                              Editar
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+
+            {!usuarioEditando && (
+              <button
+                type="button"
+                onClick={() => setPerfisAberto(false)}
+                className="mt-4 w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:bg-emerald-900"
+              >
+                Fechar
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Modal de status de venda */}
+      {statusVendaAberto && (
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-emerald-950/40 px-4 py-4">
+          <div className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl bg-white p-5 shadow-xl sm:p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900">
+                Alterar status do pedido
+              </h2>
+
+              <button
+                onClick={() => setStatusVendaAberto(false)}
+                className="text-xl leading-none text-slate-400 hover:text-slate-700"
+              >
+                &times;
+              </button>
+            </div>
+
+            {erroStatus && (
+              <p className="mb-4 text-sm text-red-600">
+                {erroStatus}
+              </p>
+            )}
+
+            <div className="mb-4 min-h-0 overflow-y-auto">
+              {carregandoStatus ? (
+                <p className="py-12 text-center text-sm font-normal text-slate-500">
+                  Carregando pedidos...
+                </p>
+              ) : (
+                <table className="w-full table-fixed text-xs sm:text-sm">
+                  <colgroup>
+                    <col className="w-[10%]" />
+                    <col className="w-[22%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[20%]" />
+                    <col className="w-[32%]" />
+                  </colgroup>
+                  <thead className="bg-slate-50 text-left text-slate-500">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">Pedido</th>
+                      <th className="px-4 py-3 font-medium">Cliente</th>
+                      <th className="px-4 py-3 font-medium">Data</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Data de retirada / novo status</th>
+                    </tr>
+                  </thead>
+
+                  <tbody className="divide-y divide-slate-100 font-normal">
+                    {pedidosStatus.map((pedido) => (
+                      <tr key={pedido.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3">
+                          <span className="font-semibold text-slate-800">
+                            {pedido.id}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span className="wrap-break-word">{pedido.cliente_nome || "Cliente desconhecido"}</span>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          {new Date(pedido.created_at).toLocaleDateString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          })}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span
+                            className={`rounded-full px-2.5 py-0.5 text-xs ${["pendente", "aguardando"].includes(statusDoPedido(pedido))
+                              ? "bg-amber-50 text-amber-700"
+                              : statusDoPedido(pedido) === "aprovado"
+                                ? "bg-emerald-50 text-emerald-700"
+                                : statusDoPedido(pedido) === "cancelado"
+                                  ? "bg-red-50 text-red-700"
+                                  : "bg-slate-100 text-slate-500"
+                              }`}
+                          >
+                            {nomeStatusPedido(statusDoPedido(pedido))}
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-3 sm:px-4">
+                          <div className="flex flex-col gap-2">
+                            <input
+                              type="date"
+                              value={dataParaInput(pedido.data_retirada)}
+                              disabled={atualizandoStatusId === pedido.id}
+                              aria-label={`Data de retirada do pedido ${pedido.id}`}
+                              onChange={(e) => setPedidosStatus((atual) => atual.map((item) => Number(item.id) === Number(pedido.id) ? { ...item, data_retirada: e.target.value } : item))}
+                              onBlur={() => salvarDataRetirada(pedido.id)}
+                              className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:opacity-60"
+                            />
+                            <select
+                              value={OPCAO_STATUS_PEDIDO.some((opcao) => opcao.value === statusDoPedido(pedido)) ? statusDoPedido(pedido) : ""}
+                              disabled={atualizandoStatusId === pedido.id}
+                              aria-label={`Alterar status do pedido ${pedido.id}`}
+                              onChange={(e) => alterarStatusPedido(pedido.id, e.target.value)}
+                              className="w-full min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2 text-xs text-slate-700 outline-none focus:border-emerald-700 disabled:cursor-wait disabled:opacity-60 sm:text-sm"
+                            >
+                              <option value="" disabled>Selecionar status</option>
+                              {OPCAO_STATUS_PEDIDO.map((opcao) => (
+                                <option key={opcao.value} value={opcao.value}>
+                                  {opcao.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <button
+              onClick={() => setStatusVendaAberto(false)}
+              className="w-full rounded-lg bg-emerald-950 py-3 text-sm font-semibold text-white hover:scale-[1.02] hover:transition hover:duration-300"
+            >
+              Fechar
+            </button>
           </div>
         </div>
       )}
